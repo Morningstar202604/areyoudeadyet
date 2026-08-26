@@ -7,6 +7,7 @@
 **老人健康监测 · 生命风险预警 · 一键 SOS**
 **Offline-first Elderly Health Guardian on Android**
 
+[![CI](https://github.com/Morningstar202604/areyoudeadyet/actions/workflows/ci.yml/badge.svg)](https://github.com/Morningstar202604/areyoudeadyet/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Morningstar202604/areyoudeadyet?color=B71C1C&label=%E7%89%88%E6%9C%AC)](https://github.com/Morningstar202604/areyoudeadyet/releases)
 [![Platform](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
