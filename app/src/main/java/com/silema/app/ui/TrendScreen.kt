@@ -174,7 +174,9 @@ private val CHART_TYPES = listOf(
     VitalType.DIASTOLIC,
     VitalType.SPO2,
     VitalType.TEMPERATURE,
-    VitalType.STEPS
+    VitalType.STEPS,
+    VitalType.SLEEP,
+    VitalType.STRESS
 )
 
 private fun chartName(type: VitalType): String = when (type) {
@@ -184,6 +186,8 @@ private fun chartName(type: VitalType): String = when (type) {
     VitalType.SPO2 -> "血氧"
     VitalType.TEMPERATURE -> "体温"
     VitalType.STEPS -> "步数"
+    VitalType.SLEEP -> "睡眠"
+    VitalType.STRESS -> "压力"
 }
 
 private fun format(v: Double): String =

@@ -59,6 +59,8 @@ private fun validRange(type: VitalType): ClosedFloatingPointRange<Double> = when
     VitalType.SPO2 -> 30.0..100.0
     VitalType.TEMPERATURE -> 30.0..45.0
     VitalType.STEPS -> 0.0..200000.0
+    VitalType.SLEEP -> 0.0..24.0
+    VitalType.STRESS -> 0.0..100.0
 }
 
 private fun stepOf(type: VitalType): Double = when (type) {
@@ -297,4 +299,6 @@ private fun shortName(type: VitalType): String = when (type) {
     VitalType.SPO2 -> "血氧"
     VitalType.TEMPERATURE -> "体温"
     VitalType.STEPS -> "步数"
+    VitalType.SLEEP -> "睡眠"
+    VitalType.STRESS -> "压力"
 }

@@ -54,6 +54,20 @@ object Stats {
         val n = s.size
         return if (n % 2 == 1) s[n / 2] else (s[n / 2 - 1] + s[n / 2]) / 2.0
     }
+
+    /**
+     * Haversine 球面距离（米）—— 运动轨迹两点间距。
+     * 地球半径取 6371008.8m（IUGG 平均半径）。
+     */
+    fun haversineMeters(lat1: Double, lon1: Double, lat2: Double, lon2: Double): Double {
+        val r = 6371008.8
+        val dLat = Math.toRadians(lat2 - lat1)
+        val dLon = Math.toRadians(lon2 - lon1)
+        val a = kotlin.math.sin(dLat / 2) * kotlin.math.sin(dLat / 2) +
+            kotlin.math.cos(Math.toRadians(lat1)) * kotlin.math.cos(Math.toRadians(lat2)) *
+            kotlin.math.sin(dLon / 2) * kotlin.math.sin(dLon / 2)
+        return 2 * r * kotlin.math.asin(kotlin.math.min(1.0, kotlin.math.sqrt(a)))
+    }
 }
 
 /**

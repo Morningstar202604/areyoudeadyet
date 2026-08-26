@@ -22,8 +22,8 @@ android {
         applicationId = "com.silema.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 3
-        versionName = "0.3.0"
+        versionCode = 4
+        versionName = "0.4.0"
     }
 
     signingConfigs {
@@ -79,6 +79,9 @@ dependencies {
     implementation("androidx.compose.material:material-icons-core")
 
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
+
+    // WorkManager：测量/久坐提醒
+    implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 

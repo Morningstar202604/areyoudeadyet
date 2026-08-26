@@ -26,7 +26,7 @@ jobs:
           chmod +x gradlew
           ./gradlew :app:assembleDebug --no-daemon --console=plain
 
-      - name: Run algorithm tests (23 cases)
+      - name: Run algorithm tests (33 cases)
         run: |
           STDLIB=$(find ~/.gradle -name "kotlin-stdlib-2.0.21.jar" | grep -v sources | head -1)
           SERCORE=$(find ~/.gradle -name "kotlinx-serialization-core-jvm-1.7.3.jar" | grep -v sources | head -1)
@@ -34,6 +34,7 @@ jobs:
           CP="app/build/tmp/kotlin-classes/debug:$STDLIB:$SERCORE:$COROUTINES"
           java -cp "$CP" test/TestEngine.java
           java -cp "$CP" test/TestStats.java
+          java -cp "$CP" test/TestFeatures.java
 
       - name: Upload APK artifact
         uses: actions/upload-artifact@v4

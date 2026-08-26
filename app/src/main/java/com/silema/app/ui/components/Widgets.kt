@@ -223,7 +223,8 @@ fun BigButton(
     onClick: () -> Unit,
     container: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = Color.White,
-    enabled: Boolean = true
+    enabled: Boolean = true,
+    modifier: Modifier = Modifier
 ) {
     Button(
         onClick = onClick,
@@ -233,7 +234,7 @@ fun BigButton(
             containerColor = container,
             contentColor = contentColor
         ),
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .height(76.dp)
     ) {

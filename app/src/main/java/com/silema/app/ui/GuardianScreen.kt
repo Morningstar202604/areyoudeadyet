@@ -214,6 +214,94 @@ fun GuardianScreen(records: List<com.silema.app.data.VitalRecord>) {
             )
         }
 
+        // ---------- 健康提醒 ----------
+        SectionTitle("健康提醒")
+        var remMeasure by remember { mutableStateOf(AppRepository.measureReminderOn) }
+        var remHour by remember { mutableStateOf(AppRepository.measureReminderHour.toString()) }
+        var remMin by remember { mutableStateOf(AppRepository.measureReminderMinute.toString()) }
+        var remSed by remember { mutableStateOf(AppRepository.sedentaryReminderOn) }
+
+        val notifLauncher = rememberLauncherForActivityResult(
+            androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
+        ) { }
+
+        fun requestNotifIfNeeded(onOk: () -> Unit) {
+            if (android.os.Build.VERSION.SDK_INT >= 33 &&
+                context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+                android.content.pm.PackageManager.PERMISSION_GRANTED
+            ) {
+                onOk()
+                notifLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+            } else onOk()
+        }
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Text("每日测量提醒", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            androidx.compose.material3.Switch(
+                checked = remMeasure,
+                onCheckedChange = { on ->
+                    requestNotifIfNeeded {
+                        AppRepository.measureReminderOn = on
+                        remMeasure = on
+                        com.silema.app.work.Reminders.syncMeasurement(context)
+                        contactMsg = if (on) "测量提醒已开启（已测齐当天自动免打扰）" else "测量提醒已关闭"
+                    }
+                }
+            )
+        }
+        if (remMeasure) {
+            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                OutlinedTextField(
+                    value = remHour, onValueChange = { remHour = it.filter { c -> c.isDigit() }.take(2) },
+                    label = { Text("时") }, singleLine = true, modifier = Modifier.width(90.dp)
+                )
+                Text(":", style = MaterialTheme.typography.titleLarge)
+                OutlinedTextField(
+                    value = remMin, onValueChange = { remMin = it.filter { c -> c.isDigit() }.take(2) },
+                    label = { Text("分") }, singleLine = true, modifier = Modifier.width(90.dp)
+                )
+                Button(
+                    onClick = {
+                        val h = remHour.toIntOrNull()?.coerceIn(0, 23)
+                        val m = remMin.toIntOrNull()?.coerceIn(0, 59)
+                        if (h == null || m == null) { contactMsg = "时间格式不对" } else {
+                            AppRepository.measureReminderHour = h
+                            AppRepository.measureReminderMinute = m
+                            com.silema.app.work.Reminders.syncMeasurement(context)
+                            contactMsg = "提醒时间已设为 %02d:%02d".format(h, m)
+                        }
+                    },
+                    shape = RoundedCornerShape(12.dp),
+                    modifier = Modifier.height(52.dp)
+                ) { Text("保存时间") }
+            }
+        }
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
+        ) {
+            Text("久坐提醒（9:00-21:00 每小时）", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
+            androidx.compose.material3.Switch(
+                checked = remSed,
+                onCheckedChange = { on ->
+                    requestNotifIfNeeded {
+                        AppRepository.sedentaryReminderOn = on
+                        remSed = on
+                        com.silema.app.work.Reminders.syncSedentary(context)
+                    }
+                }
+            )
+        }
+        contactMsg?.let {
+            Spacer(Modifier.height(8.dp))
+            EmptyHint(text = it)
+        }
+
         // ---------- 规则透明化 ----------
         SectionTitle("本应用的预警标准（全部公开，不搞玄学）")
         val rules = listOf(

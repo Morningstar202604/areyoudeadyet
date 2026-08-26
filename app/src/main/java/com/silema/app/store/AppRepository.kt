@@ -17,6 +17,9 @@ private data class VitalsFile(val records: List<VitalRecord>)
 @Serializable
 private data class ContactsFile(val contacts: List<Contact>)
 
+@Serializable
+private data class WorkoutsFile(val workouts: List<com.silema.app.data.Workout>)
+
 /**
  * 离线优先的本地仓储：JSON 文件持久化 + StateFlow 供 UI 订阅。
  * 数据量级（老人一年的体征记录 < 数千条）远小于需要数据库的规模，
@@ -29,6 +32,7 @@ object AppRepository {
 
     private var vitalsFile: File? = null
     private var contactsFile: File? = null
+    private var workoutsFile: File? = null
     private var prefs: android.content.SharedPreferences? = null
 
     private val _records = MutableStateFlow<List<VitalRecord>>(emptyList())
@@ -37,10 +41,14 @@ object AppRepository {
     private val _contacts = MutableStateFlow<List<Contact>>(emptyList())
     val contacts: StateFlow<List<Contact>> = _contacts.asStateFlow()
 
+    private val _workouts = MutableStateFlow<List<com.silema.app.data.Workout>>(emptyList())
+    val workouts: StateFlow<List<com.silema.app.data.Workout>> = _workouts.asStateFlow()
+
     fun init(context: Context) {
         val dir = File(context.filesDir, "silema").apply { mkdirs() }
         vitalsFile = File(dir, "vitals.json")
         contactsFile = File(dir, "contacts.json")
+        workoutsFile = File(dir, "workouts.json")
         prefs = context.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
         synchronized(lock) {
             _records.value = readJson(vitalsFile)?.let {
@@ -48,6 +56,9 @@ object AppRepository {
             } ?: emptyList()
             _contacts.value = readJson(contactsFile)?.let {
                 runCatching { json.decodeFromString<ContactsFile>(it).contacts }.getOrDefault(emptyList())
+            } ?: emptyList()
+            _workouts.value = readJson(workoutsFile)?.let {
+                runCatching { json.decodeFromString<WorkoutsFile>(it).workouts }.getOrDefault(emptyList())
             } ?: emptyList()
         }
     }
@@ -125,6 +136,55 @@ object AppRepository {
 
     /** 加载演示数据，返回实际新增条数。 */
     fun loadDemoData(): Int = mergeHealthConnect(DemoData.generate())
+
+    // ---------- 运动记录 ----------
+
+    fun addWorkout(w: com.silema.app.data.Workout) = synchronized(lock) {
+        _workouts.value = (listOf(w) + _workouts.value).sortedByDescending { it.startMillis }
+        persistWorkouts()
+    }
+
+    fun removeWorkout(id: String) = synchronized(lock) {
+        _workouts.value = _workouts.value.filterNot { it.id == id }
+        persistWorkouts()
+    }
+
+    private fun persistWorkouts() {
+        io.execute {
+            val text = synchronized(lock) { json.encodeToString(WorkoutsFile(_workouts.value)) }
+            runCatching { workoutsFile?.writeText(text) }
+        }
+    }
+
+    // ---------- 目标与提醒设置 ----------
+
+    var stepsGoal: Int
+        get() = prefs?.getInt("steps_goal", 6000) ?: 6000
+        set(v) { prefs?.edit()?.putInt("steps_goal", v)?.apply() }
+
+    var sleepGoalHours: Int
+        get() = prefs?.getInt("sleep_goal_h", 7) ?: 7
+        set(v) { prefs?.edit()?.putInt("sleep_goal_h", v)?.apply() }
+
+    var weightKg: Int
+        get() = prefs?.getInt("weight_kg", 65) ?: 65
+        set(v) { prefs?.edit()?.putInt("weight_kg", v)?.apply() }
+
+    var measureReminderOn: Boolean
+        get() = prefs?.getBoolean("rem_measure", false) ?: false
+        set(v) { prefs?.edit()?.putBoolean("rem_measure", v)?.apply() }
+
+    var measureReminderHour: Int
+        get() = prefs?.getInt("rem_measure_h", 20) ?: 20
+        set(v) { prefs?.edit()?.putInt("rem_measure_h", v)?.apply() }
+
+    var measureReminderMinute: Int
+        get() = prefs?.getInt("rem_measure_m", 0) ?: 0
+        set(v) { prefs?.edit()?.putInt("rem_measure_m", v)?.apply() }
+
+    var sedentaryReminderOn: Boolean
+        get() = prefs?.getBoolean("rem_sedentary", false) ?: false
+        set(v) { prefs?.edit()?.putBoolean("rem_sedentary", v)?.apply() }
 
     /**
      * 持久化在单一后台线程串行执行：FIFO 保证最后一次写入对应最新状态，

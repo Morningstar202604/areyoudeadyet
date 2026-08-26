@@ -476,6 +476,8 @@ object RiskEngine {
         VitalType.SPO2 -> "血氧"
         VitalType.TEMPERATURE -> "体温"
         VitalType.STEPS -> "步数"
+        VitalType.SLEEP -> "睡眠"
+        VitalType.STRESS -> "压力"
     }
 
     /** 判断某次测量是否已越过"值得注意"的下限（用于 streak 判断）。 */
@@ -485,7 +487,7 @@ object RiskEngine {
         VitalType.HEART_RATE -> v >= 100 || v <= 50
         VitalType.SPO2 -> v <= 95
         VitalType.TEMPERATURE -> v >= 37.3 || v <= 36.0
-        VitalType.STEPS -> false
+        VitalType.STEPS, VitalType.SLEEP, VitalType.STRESS -> false
     }
 
     /** 今天还缺哪些核心指标（血压两项算一项）。 */
@@ -539,6 +541,8 @@ object RiskEngine {
             else -> RiskLevel.NORMAL
         }
         VitalType.STEPS -> RiskLevel.NORMAL
+        VitalType.SLEEP -> RiskLevel.NORMAL
+        VitalType.STRESS -> RiskLevel.NORMAL
     }
 
     fun relativeTime(timestampMillis: Long, nowMillis: Long): String {

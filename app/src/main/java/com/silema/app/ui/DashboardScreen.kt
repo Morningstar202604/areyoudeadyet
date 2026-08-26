@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
@@ -18,6 +19,7 @@ import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.PlayArrow
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -32,6 +34,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.silema.app.data.AlertItem
@@ -53,6 +57,7 @@ import kotlinx.coroutines.launch
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import kotlin.math.roundToInt
 
 private fun bannerHeadline(level: RiskLevel): String = when (level) {
     RiskLevel.NORMAL -> "活着，一切正常"
@@ -74,7 +79,9 @@ fun DashboardScreen(
     tts: com.silema.app.util.TtsController,
     onGoSos: () -> Unit,
     onGoEntry: () -> Unit,
-    onGoDevices: () -> Unit
+    onGoDevices: () -> Unit,
+    onGoWorkout: () -> Unit,
+    onGoGuardian: () -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
@@ -99,13 +106,26 @@ fun DashboardScreen(
             .padding(horizontal = 16.dp, vertical = 12.dp)
     ) {
         // ---- 头部：标题独立成列，避免长文案并排溢出 ----
-        Text(text = "死了吗？", style = MaterialTheme.typography.headlineSmall)
-        Text(
-            text = "健康监测 · 生命管理 · 今天是 ${todayText()}",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp)
-        )
+        Row(
+            horizontalArrangement = Arrangement.SpaceBetween,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column {
+                Text(text = "死了吗？", style = MaterialTheme.typography.headlineSmall)
+                Text(
+                    text = "健康监测 · 生命管理 · 今天是 ${todayText()}",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 2.dp)
+                )
+            }
+            androidx.compose.material3.IconButton(onClick = onGoGuardian) {
+                androidx.compose.material3.Icon(
+                    Icons.Filled.Settings,
+                    contentDescription = "守护与设置"
+                )
+            }
+        }
         Spacer(Modifier.height(14.dp))
 
         if (introVisible && records.isEmpty()) {
@@ -151,6 +171,7 @@ fun DashboardScreen(
 
         VitalGrid(records, assessment)
         TodayOverview(records, assessment)
+        GoalRings(records)
 
         SectionTitle("真实数据检测")
         BigButton(
@@ -163,6 +184,12 @@ fun DashboardScreen(
             text = "连接蓝牙心率带 / 血压计 / 血氧仪",
             container = MaterialTheme.colorScheme.secondary,
             onClick = onGoDevices
+        )
+        Spacer(Modifier.height(10.dp))
+        BigButton(
+            text = "开始运动记录（步行 / 跑步 GPS）",
+            container = MaterialTheme.colorScheme.secondary,
+            onClick = onGoWorkout
         )
 
         SectionTitle("当前问题清单（${assessment.alerts.size}）")
@@ -356,6 +383,62 @@ private fun LabeledLine(label: String, body: String, emphasized: Boolean = false
         color = if (emphasized) riskColor(RiskLevel.WARNING) else MaterialTheme.colorScheme.onSurface,
         modifier = Modifier.padding(top = 8.dp)
     )
+}
+
+/** 今日目标三环：步数 / 测量 / 睡眠（对标运动健康活动环）。 */
+@Composable
+private fun GoalRings(records: List<VitalRecord>) {
+    val zone = ZoneId.systemDefault()
+    val todayStart = LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
+
+    val steps = records
+        .filter { it.typeId == VitalType.STEPS.id && it.timestampMillis >= todayStart }
+        .maxOfOrNull { it.value } ?: 0.0
+    val stepsPct = (steps / AppRepository.stepsGoal).coerceIn(0.0, 1.0)
+
+    val measuredTypes = records
+        .filter { it.timestampMillis >= todayStart }
+        .mapNotNull { it.typeId }
+        .toSet()
+    val measured = listOf("heart_rate", "systolic", "spo2").count { it in measuredTypes } / 3.0
+
+    val sleepLast = records.filter { it.typeId == VitalType.SLEEP.id }
+        .maxByOrNull { it.timestampMillis }?.value ?: 0.0
+    val sleepPct = (sleepLast / AppRepository.sleepGoalHours).coerceIn(0.0, 1.0)
+
+    SectionTitle("今日目标")
+    Row(horizontalArrangement = Arrangement.SpaceEvenly, modifier = Modifier.fillMaxWidth()) {
+        GoalRing("步数", stepsPct, "${steps.toInt()}\n目标${AppRepository.stepsGoal}")
+        GoalRing("测量", measured, "${(measured * 3).roundToInt()}/3\n核心项")
+        GoalRing("睡眠", sleepPct, "${String.format("%.1f", sleepLast)}h\n目标${AppRepository.sleepGoalHours}h")
+    }
+}
+
+@Composable
+private fun GoalRing(label: String, pct: Double, centerText: String) {
+    val progressColor = if (pct >= 1.0) androidx.compose.ui.graphics.Color(0xFF2E7D32)
+    else androidx.compose.ui.graphics.Color(0xFFE65100)
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        androidx.compose.foundation.Canvas(modifier = Modifier.size(104.dp)) {
+            val stroke = 14f
+            drawArc(
+                color = androidx.compose.ui.graphics.Color(0x22888888),
+                startAngle = -90f, sweepAngle = 360f, useCenter = false,
+                style = Stroke(width = stroke, cap = StrokeCap.Round)
+            )
+            drawArc(
+                color = progressColor,
+                startAngle = -90f, sweepAngle = (360 * pct).toFloat(), useCenter = false,
+                style = Stroke(width = stroke, cap = StrokeCap.Round)
+            )
+        }
+        Text(
+            text = "$label $centerText",
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 6.dp)
+        )
+    }
 }
 
 @Composable

@@ -258,9 +258,14 @@ private fun stopAndEvaluate(analyzer: PpgAnalyzer, onDone: (String, String?) -> 
                     VitalSource.PPG_CAMERA
                 )
             )
+            // 压力指数：由同一信号的 HRV(RMSSD) 估算（0-100，越低越放松）
+            val stress = com.silema.app.engine.StressMath.fromRmssd(r.rmssdMs).toDouble()
+            AppRepository.addRecord(
+                VitalRecord.of(VitalType.STRESS, stress, System.currentTimeMillis(), VitalSource.PPG_CAMERA)
+            )
             onDone(
-                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · HRV(RMSSD) ${r.rmssdMs} ms",
-                "已自动保存到心率记录，首页风险评估随之更新"
+                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · HRV(RMSSD) ${r.rmssdMs} ms · 压力估算 ${stress.toInt()} 分（${com.silema.app.engine.StressMath.label(stress.toInt())}）",
+                "已自动保存到心率与压力记录，首页风险评估随之更新"
             )
         }
     }

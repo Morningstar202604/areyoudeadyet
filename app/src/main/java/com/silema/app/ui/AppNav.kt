@@ -6,7 +6,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.Person
+import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -31,10 +31,11 @@ import com.silema.app.util.TtsController
 object Routes {
     const val HOME = "home"
     const val ENTRY = "entry"
-    const val TREND = "trend"
+    const val REPORT = "report"
+    const val WORKOUT = "workout"
     const val GUARDIAN = "guardian"
-    const val SOS = "sos"
     const val DEVICES = "devices"
+    const val SOS = "sos"
 }
 
 private data class TabSpec(val route: String, val label: String, val icon: ImageVector)
@@ -48,8 +49,8 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
     val tabs = listOf(
         TabSpec(Routes.HOME, "首页", Icons.Filled.Home),
         TabSpec(Routes.ENTRY, "录入", Icons.Filled.AddCircle),
-        TabSpec(Routes.TREND, "趋势", Icons.Filled.DateRange),
-        TabSpec(Routes.GUARDIAN, "守护", Icons.Filled.Person)
+        TabSpec(Routes.REPORT, "健康", Icons.Filled.DateRange),
+        TabSpec(Routes.WORKOUT, "运动", Icons.Filled.PlayArrow)
     )
 
     Scaffold(
@@ -102,7 +103,9 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
                     tts = tts,
                     onGoSos = { navController.navigate(Routes.SOS) { launchSingleTop = true } },
                     onGoEntry = { navController.navigate(Routes.ENTRY) { launchSingleTop = true } },
-                    onGoDevices = { navController.navigate(Routes.DEVICES) { launchSingleTop = true } }
+                    onGoDevices = { navController.navigate(Routes.DEVICES) { launchSingleTop = true } },
+                    onGoWorkout = { navController.navigate(Routes.WORKOUT) { launchSingleTop = true } },
+                    onGoGuardian = { navController.navigate(Routes.GUARDIAN) { launchSingleTop = true } }
                 )
             }
             composable(Routes.ENTRY) {
@@ -113,7 +116,8 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
                     }
                 )
             }
-            composable(Routes.TREND) { TrendScreen(records = records) }
+            composable(Routes.REPORT) { ReportScreen(records = records) }
+            composable(Routes.WORKOUT) { WorkoutScreen() }
             composable(Routes.GUARDIAN) { GuardianScreen(records = records) }
             composable(Routes.SOS) {
                 SosScreen(records = records, contacts = contacts, onClose = { navController.popBackStack() })

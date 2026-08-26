@@ -12,7 +12,7 @@
 [![Platform](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=android&logoColor=white)](https://developer.android.com/jetpack/compose)
-[![Tests](https://img.shields.io/badge/%E7%AE%97%E6%B3%95%E6%B5%8B%E8%AF%95-23%20passing-2EA043)](test)
+[![Tests](https://img.shields.io/badge/%E7%AE%97%E6%B3%95%E6%B5%8B%E8%AF%95-33%20passing-2EA043)](test)
 [![License](https://img.shields.io/github/license/Morningstar202604/areyoudeadyet?color=blue)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/Morningstar202604/areyoudeadyet?style=social)](https://github.com/Morningstar202604/areyoudeadyet/stargazers)
 
@@ -39,9 +39,15 @@
 |------|------|
 | 🚨 **规则预警引擎** | 医学阈值四级判定（正常/注意/警告/危险），血压危象、休克代偿、缺氧+心动过速等**组合规则**单独识别——单看正常、合起来危险 |
 | 📈 **统计模型层** | 个人基线 z-score 异常检测、最小二乘趋势回归、平均动脉压 MAP、休克指数 SI、脉压差 PP——公式全部公开 |
+| 🏃 **GPS 运动记录** | 步行/跑步实时轨迹、距离、配速、卡路里（前台服务 + 通知栏控制，离线渲染轨迹图） |
+| 📊 **周健康报告** | 本周 vs 上周逐指标对比 + 一句话总结 + 一键分享给家人 |
+| 😴 **睡眠记录** | 手动记录入睡/起床，自动算时长，进入周报统计 |
+| 😮‍💨 **压力指数** | 基于 PPG 实测 HRV(RMSSD) 的对数线性估算（0-100） |
+| ⏰ **智能提醒** | WorkManager 测量提醒（当天已测齐自动免打扰）+ 久坐提醒（9-21 点每小时） |
 | ❤️ **摄像头实测心率** | PPG 光电容积波：指尖+闪光灯 30 秒实测心率与 HRV(RMSSD)，信号质量不足时拒绝出数 |
 | ⌚ **蓝牙设备直连** | 标准协议心率带 0x180D / 电子血压计 0x1810 / 血氧仪 0x1822，IEEE-11073 SFLOAT 解析 |
 | 📲 **穿戴数据同步** | Health Connect 接入华为/小米等运动健康数据 |
+| 🎯 **每日目标环** | 步数 / 测量 / 睡眠三环进度（对标运动健康活动环） |
 | 🆘 **一键 SOS** | 全屏呼救：拨打 120 / 家人电话 / 自动附体征摘要的求救短信 |
 | 🗣️ **适老化设计** | 大字号高对比、76dp+ 大按钮、危险级别自动语音播报 |
 | 🔒 **完全离线** | **无 INTERNET 权限**（可审计），数据仅存本地 |
