@@ -47,6 +47,8 @@ fun AiReportScreen(records: List<VitalRecord>) {
                 result.onFailure { e ->
                     error = "分析失败：${e.message ?: e.javaClass.simpleName}"
                 }
+            } catch (e: kotlinx.coroutines.CancellationException) {
+                throw e
             } catch (e: Exception) {
                 error = "分析失败：${e.message ?: e.javaClass.simpleName}"
             } finally {

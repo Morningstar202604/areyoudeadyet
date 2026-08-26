@@ -63,7 +63,7 @@ object PdfReportGenerator {
         sb.appendLine("   如有健康问题请及时就医。")
         sb.appendLine("───────────────────────────────────────")
         sb.appendLine("报告生成时间: ${formatDate(now)}")
-        sb.appendLine("导出方: 死了吗？健康监测系统")
+        sb.appendLine("导出工具: 家庭健康监测（数据仅供参考）")
         
         return sb.toString()
     }

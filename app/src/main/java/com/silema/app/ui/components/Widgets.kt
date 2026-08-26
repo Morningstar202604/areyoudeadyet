@@ -300,10 +300,11 @@ fun Sparkline(
             }
             drawPath(fillPath, fillColor.copy(alpha = 0.1f))
         }
-        drawPath(path, color, style = Stroke(width = 5f, cap = StrokeCap.Round, join = StrokeJoin.Round))
+        val strokePx = 2.5.dp.toPx()
+        drawPath(path, color, style = Stroke(width = strokePx, cap = StrokeCap.Round, join = StrokeJoin.Round))
         val lastX = (values.size - 1) * stepX
         val lastY = (padY + usableH * (1f - ((values.last() - minV) / span))).toFloat()
-        drawCircle(color, radius = 10f, center = Offset(lastX, lastY))
+        drawCircle(color, radius = strokePx * 1.8f, center = Offset(lastX, lastY))
     }
 }
 
@@ -317,7 +318,7 @@ fun ProgressRing(
     modifier: Modifier = Modifier
 ) {
     Canvas(modifier = modifier.size(sizeDp.dp)) {
-        val stroke = 10f
+        val stroke = 10.dp.toPx()
         val sweepAngle = 360f * progress.coerceIn(0f, 1f)
         drawArc(
             color = trackColor,

@@ -20,19 +20,21 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
 import androidx.compose.material.icons.filled.Phone
-import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Settings
+import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -47,13 +49,15 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalType
 import com.silema.app.engine.RiskEngine
+import com.silema.app.store.AppRepository
 import com.silema.app.ui.components.BigButton
 import com.silema.app.ui.components.GradientCard
-import com.silema.app.ui.components.Sparkline
 import com.silema.app.ui.components.SectionTitle
+import com.silema.app.ui.components.Sparkline
 import com.silema.app.ui.components.StatTile
 import com.silema.app.ui.components.StatusBanner
 import com.silema.app.ui.components.VitalCard
@@ -65,12 +69,10 @@ import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
 import com.silema.app.ui.theme.CardGradientOrange
 import com.silema.app.ui.theme.CardGradientRed
-import com.silema.app.ui.theme.LevelCritical
-import com.silema.app.ui.theme.LevelNormal
-import com.silema.app.ui.theme.LevelWatch
 import com.silema.app.ui.theme.riskColor
 import com.silema.app.util.TtsController
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -88,40 +90,41 @@ fun DashboardScreen(
     onGoMedical: () -> Unit = {}
 ) {
     val assessment = remember(records) { RiskEngine.evaluate(records) }
+    val showIntro by AppRepository.showIntroFlow.collectAsState()
     val latest = remember(records) {
         records.groupBy { it.typeId }.mapValues { (_, v) -> v.maxByOrNull { it.timestampMillis } }
     }
     val today = remember(records) {
-        val cal = java.util.Calendar.getInstance()
-        cal.set(java.util.Calendar.HOUR_OF_DAY, 0)
-        cal.set(java.util.Calendar.MINUTE, 0)
-        cal.set(java.util.Calendar.SECOND, 0)
-        cal.set(java.util.Calendar.MILLISECOND, 0)
+        val cal = Calendar.getInstance()
+        cal.set(Calendar.HOUR_OF_DAY, 0); cal.set(Calendar.MINUTE, 0)
+        cal.set(Calendar.SECOND, 0); cal.set(Calendar.MILLISECOND, 0)
         records.filter { it.timestampMillis >= cal.timeInMillis }
     }
 
+    // 危险级别自动语音播报（每次评估结果变化只播一次）
+    LaunchedEffect(assessment.level, assessment.alerts.size) {
+        if (assessment.level == RiskLevel.CRITICAL && assessment.alerts.isNotEmpty()) {
+            tts.speak("危险警告：" + assessment.alerts.take(2).joinToString("；") { "${it.metric}，${it.problem}，${it.action}" })
+        }
+    }
+
     val statusGradient = when (assessment.level) {
-        com.silema.app.data.RiskLevel.CRITICAL -> CardGradientRed
-        com.silema.app.data.RiskLevel.WARNING -> CardGradientOrange
-        com.silema.app.data.RiskLevel.WATCH -> CardGradientOrange
-        com.silema.app.data.RiskLevel.NORMAL -> CardGradientGreen
+        RiskLevel.CRITICAL -> CardGradientRed
+        RiskLevel.WARNING -> CardGradientOrange
+        RiskLevel.WATCH -> CardGradientOrange
+        RiskLevel.NORMAL -> CardGradientGreen
     }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
+        modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp),
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        // ── 问候语 + SOS ──
+        // ── 问候语 + 设置 + SOS ──
         item {
             Spacer(modifier = Modifier.height(16.dp))
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
-            ) {
+            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
                 Column(modifier = Modifier.weight(1f)) {
-                    val hour = java.util.Calendar.getInstance().get(java.util.Calendar.HOUR_OF_DAY)
+                    val hour = Calendar.getInstance().get(Calendar.HOUR_OF_DAY)
                     val greeting = when {
                         hour < 6 -> "夜深了"
                         hour < 11 -> "早上好"
@@ -129,25 +132,54 @@ fun DashboardScreen(
                         hour < 18 -> "下午好"
                         else -> "晚上好"
                     }
+                    Text("$greeting 👋", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                     Text(
-                        text = "$greeting 👋",
-                        style = MaterialTheme.typography.headlineMedium,
-                        color = MaterialTheme.colorScheme.onBackground
-                    )
-                    Text(
-                        text = SimpleDateFormat("yyyy年M月d日 EEEE", Locale.CHINESE).format(Date()),
+                        SimpleDateFormat("yyyy年M月d日 EEEE", Locale.CHINESE).format(Date()),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 IconButton(
+                    onClick = onGoGuardian,
+                    modifier = Modifier.size(48.dp).clip(CircleShape).background(MaterialTheme.colorScheme.surfaceVariant)
+                ) {
+                    Icon(Icons.Filled.Settings, contentDescription = "设置", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+                IconButton(
                     onClick = onGoSos,
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(BrandSoftRed)
+                    modifier = Modifier.size(52.dp).clip(CircleShape).background(BrandSoftRed)
                 ) {
                     Icon(Icons.Filled.Phone, contentDescription = "SOS", tint = Color.White, modifier = Modifier.size(26.dp))
+                }
+            }
+        }
+
+        // ── 首次使用：加载演示数据 ──
+        if (showIntro) {
+            item {
+                Card(
+                    shape = RoundedCornerShape(20.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
+                ) {
+                    Column(modifier = Modifier.padding(16.dp)) {
+                        Text("欢迎使用 死了吗？", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Text(
+                            "先加载 7 天演示数据体验全部功能（预警 / 趋势 / 报告），或直接开始录入真实数据。",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSecondaryContainer
+                        )
+                        Spacer(modifier = Modifier.height(10.dp))
+                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+                            OutlinedButton(onClick = {
+                                AppRepository.loadDemoData()
+                            }, modifier = Modifier.weight(1f)) { Text("加载演示数据") }
+                            OutlinedButton(onClick = {
+                                AppRepository.dismissIntro()
+                            }, modifier = Modifier.weight(1f)) { Text("开始记录") }
+                        }
+                    }
                 }
             }
         }
@@ -157,16 +189,32 @@ fun DashboardScreen(
             StatusBanner(
                 level = assessment.level,
                 headline = assessment.level.label,
-                subline = if (assessment.alerts.isNotEmpty()) "有 ${assessment.alerts.size} 条预警需要关注"
-                else "所有指标正常，继续保持",
+                subline = if (assessment.alerts.isNotEmpty()) "有 ${assessment.alerts.size} 条预警需要关注" else "所有指标正常，继续保持",
                 icon = when (assessment.level) {
-                    com.silema.app.data.RiskLevel.NORMAL -> Icons.Filled.Favorite
-                    com.silema.app.data.RiskLevel.WATCH -> Icons.Filled.Info
-                    com.silema.app.data.RiskLevel.WARNING -> Icons.Filled.Warning
-                    com.silema.app.data.RiskLevel.CRITICAL -> Icons.Filled.Warning
+                    RiskLevel.NORMAL -> Icons.Filled.Favorite
+                    RiskLevel.WATCH -> Icons.Filled.Info
+                    RiskLevel.WARNING -> Icons.Filled.Warning
+                    RiskLevel.CRITICAL -> Icons.Filled.Warning
                 },
                 gradientColors = statusGradient
             )
+        }
+
+        // ── 危险时朗读按钮 ──
+        if (assessment.alerts.isNotEmpty()) {
+            item {
+                OutlinedButton(
+                    onClick = {
+                        tts.speak(assessment.alerts.joinToString("。") { "${it.metric}，${it.problem}，${it.action}" })
+                    },
+                    shape = RoundedCornerShape(14.dp),
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(Icons.Filled.VolumeUp, contentDescription = null, modifier = Modifier.size(20.dp))
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("朗读全部预警")
+                }
+            }
         }
 
         // ── 体征卡片 2x2 ──
@@ -184,13 +232,12 @@ fun DashboardScreen(
                     VitalCard(
                         label = label,
                         valueText = record?.let { "%.0f".format(it.value) } ?: "--",
-                        timeText = record?.let {
-                            SimpleDateFormat("HH:mm", Locale.US).format(Date(it.timestampMillis))
-                        } ?: "待测量",
+                        timeText = record?.let { SimpleDateFormat("HH:mm", Locale.US).format(Date(it.timestampMillis)) } ?: "待测量",
                         noteText = null,
                         level = level,
                         icon = icon,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
+                        onClick = onGoEntry
                     )
                 }
             }
@@ -200,21 +247,18 @@ fun DashboardScreen(
         item {
             SectionTitle("今日概览")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                val coreTypes = listOf(VitalType.HEART_RATE, VitalType.SPO2, VitalType.SYSTOLIC, VitalType.DIASTOLIC)
-                val measured = today.count { it.typeId in coreTypes.map { t -> t.id } }
-                StatTile(label = "已测量", value = "$measured", valueColor = BrandBlue, icon = Icons.Filled.DateRange, modifier = Modifier.weight(1f))
-                StatTile(label = "预警数", value = "${assessment.alerts.size}", valueColor = if (assessment.alerts.isNotEmpty()) BrandSoftRed else BrandGreen, icon = Icons.Filled.Warning, modifier = Modifier.weight(1f))
-                StatTile(label = "步数", value = latest[VitalType.STEPS.id]?.let { "${it.value.toInt()}" } ?: "0", valueColor = BrandWarm, icon = Icons.Filled.Home, modifier = Modifier.weight(1f))
+                val coreIds = listOf(VitalType.HEART_RATE, VitalType.SPO2, VitalType.SYSTOLIC, VitalType.DIASTOLIC).map { it.id }
+                val measured = today.count { it.typeId in coreIds }
+                StatTile("已测量", "$measured", BrandBlue, Icons.Filled.DateRange, Modifier.weight(1f))
+                StatTile("预警数", "${assessment.alerts.size}", if (assessment.alerts.isNotEmpty()) BrandSoftRed else BrandGreen, Icons.Filled.Warning, Modifier.weight(1f))
+                StatTile("步数", latest[VitalType.STEPS.id]?.let { "${it.value.toInt()}" } ?: "0", BrandWarm, Icons.Filled.DirectionsWalk, Modifier.weight(1f))
             }
         }
 
         // ── 心率趋势迷你图 ──
         item {
             val hrRecords = remember(records) {
-                records.filter { it.typeId == VitalType.HEART_RATE.id }
-                    .sortedBy { it.timestampMillis }
-                    .takeLast(30)
-                    .map { it.value }
+                records.filter { it.typeId == VitalType.HEART_RATE.id }.sortedBy { it.timestampMillis }.takeLast(30).map { it.value }
             }
             if (hrRecords.size >= 2) {
                 GradientCard(gradientColors = CardGradientBlue) {
@@ -223,58 +267,36 @@ fun DashboardScreen(
                         Spacer(modifier = Modifier.height(8.dp))
                         Sparkline(values = hrRecords, color = Color.White, fillColor = Color.White)
                         Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            "最近 ${hrRecords.size} 次测量",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.8f)
-                        )
+                        Text("最近 ${hrRecords.size} 次测量", style = MaterialTheme.typography.bodySmall, color = Color.White.copy(alpha = 0.85f))
                     }
                 }
             }
         }
 
-        // ── 快捷操作 ──
+        // ── 快捷操作（4 宫格）──
         item {
             SectionTitle("快捷操作")
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                 QuickAction("录入", Icons.Filled.Add, BrandWarm, onGoEntry, Modifier.weight(1f))
                 QuickAction("设备", Icons.Filled.Build, BrandBlue, onGoDevices, Modifier.weight(1f))
-                QuickAction("家人", Icons.Filled.Phone, BrandGreen, onGoFamily, Modifier.weight(1f))
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+            Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
+                QuickAction("家人监护", Icons.Filled.Home, BrandGreen, onGoFamily, Modifier.weight(1f))
+                QuickAction("运动", Icons.Filled.DirectionsWalk, BrandWarm, onGoWorkout, Modifier.weight(1f))
             }
         }
 
-        // ── AI 分析入口 ──
+        // ── AI 分析入口（可点击）──
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                        .then(Modifier.padding(0.dp))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.primaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Filled.Info, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("AI 健康分析", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        Text("基于体征数据的智能分析与建议", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Icon(Icons.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+            EntryNavCard(
+                title = "AI 健康分析",
+                subtitle = "风险评分 · 智能发现 · 个性化建议",
+                icon = Icons.Filled.Info,
+                containerColor = MaterialTheme.colorScheme.primaryContainer,
+                iconTint = MaterialTheme.colorScheme.primary,
+                onClick = onGoAi
+            )
         }
 
         // ── 预警列表 ──
@@ -284,18 +306,11 @@ fun DashboardScreen(
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = RoundedCornerShape(16.dp),
-                    colors = CardDefaults.cardColors(
-                        containerColor = riskColor(alert.level).copy(alpha = 0.08f)
-                    )
+                    colors = CardDefaults.cardColors(containerColor = riskColor(alert.level).copy(alpha = 0.08f))
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(riskColor(alert.level))
-                            )
+                            Box(modifier = Modifier.size(8.dp).clip(CircleShape).background(riskColor(alert.level)))
                             Spacer(modifier = Modifier.width(8.dp))
                             Text(alert.metric, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
                             Spacer(modifier = Modifier.weight(1f))
@@ -310,40 +325,18 @@ fun DashboardScreen(
             }
         }
 
-        // ── 医疗对接入口 ──
+        // ── 医疗对接入口（可点击）──
         item {
-            Card(
-                modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
-                elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(MaterialTheme.colorScheme.tertiaryContainer),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(Icons.Filled.DateRange, contentDescription = null, tint = MaterialTheme.colorScheme.tertiary, modifier = Modifier.size(24.dp))
-                    }
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text("医疗对接", style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
-                        Text("FHIR 标准导出、健康报告分享", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                    }
-                    Icon(Icons.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-            }
+            EntryNavCard(
+                title = "医疗对接",
+                subtitle = "FHIR R4 标准导出 · 健康报告分享",
+                icon = Icons.Filled.DateRange,
+                containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                iconTint = MaterialTheme.colorScheme.tertiary,
+                onClick = onGoMedical
+            )
         }
 
-        // ── 底部留白 ──
         item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
@@ -351,27 +344,54 @@ fun DashboardScreen(
 @Composable
 private fun QuickAction(label: String, icon: ImageVector, color: Color, onClick: () -> Unit, modifier: Modifier = Modifier) {
     Card(
+        onClick = onClick,
         modifier = modifier,
         shape = RoundedCornerShape(16.dp),
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-        onClick = onClick
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 16.dp)
-        ) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(vertical = 16.dp)) {
             Box(
-                modifier = Modifier
-                    .size(44.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.12f)),
+                modifier = Modifier.size(44.dp).clip(CircleShape).background(color.copy(alpha = 0.12f)),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             }
             Spacer(modifier = Modifier.height(8.dp))
             Text(label, style = MaterialTheme.typography.bodyMedium, fontWeight = FontWeight.Medium)
+        }
+    }
+}
+
+@Composable
+private fun EntryNavCard(
+    title: String,
+    subtitle: String,
+    icon: ImageVector,
+    containerColor: Color,
+    iconTint: Color,
+    onClick: () -> Unit
+) {
+    Card(
+        onClick = onClick,
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(20.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth().padding(16.dp)) {
+            Box(
+                modifier = Modifier.size(44.dp).clip(RoundedCornerShape(12.dp)).background(containerColor),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(icon, contentDescription = null, tint = iconTint, modifier = Modifier.size(24.dp))
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(title, style = MaterialTheme.typography.titleSmall, fontWeight = FontWeight.SemiBold)
+                Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+            }
+            Icon(Icons.Filled.KeyboardArrowRight, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 }

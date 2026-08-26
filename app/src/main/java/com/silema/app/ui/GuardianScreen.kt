@@ -60,6 +60,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.health.connect.client.PermissionController
+import com.silema.app.BuildConfig
 import com.silema.app.data.Contact
 import com.silema.app.data.VitalRecord
 import com.silema.app.hc.HealthConnectManager
@@ -84,7 +85,7 @@ import com.silema.app.ui.theme.LevelNormal
 import kotlinx.coroutines.launch
 
 @Composable
-fun GuardianScreen(records: List<VitalRecord>) {
+fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
     val contacts by AppRepository.contacts.collectAsState()
@@ -143,16 +144,26 @@ fun GuardianScreen(records: List<VitalRecord>) {
         }
     }
 
+    var pendingNotifAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     val notifLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.RequestPermission()
-    ) { }
+    ) { granted ->
+        val action = pendingNotifAction
+        pendingNotifAction = null
+        if (granted) {
+            action?.invoke()
+        } else {
+            feedbackMsg = "未授予通知权限，到点后提醒可能不会显示"
+        }
+    }
 
     fun requestNotifIfNeeded(onOk: () -> Unit) {
         if (Build.VERSION.SDK_INT >= 33 &&
             context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
             android.content.pm.PackageManager.PERMISSION_GRANTED
         ) {
-            onOk()
+            pendingNotifAction = onOk
             notifLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
         } else onOk()
     }
@@ -463,9 +474,9 @@ fun GuardianScreen(records: List<VitalRecord>) {
         item {
             ListItemCard(
                 title = "导出健康数据",
-                subtitle = "将所有记录导出为 JSON 文件",
+                subtitle = "FHIR R4 JSON / 文本报告 / 周度总结（在「医疗对接」页）",
                 icon = Icons.Filled.DateRange,
-                onClick = { feedbackMsg = "导出功能开发中…" }
+                onClick = onGoMedical
             )
         }
         item {
@@ -520,7 +531,7 @@ fun GuardianScreen(records: List<VitalRecord>) {
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Text(
-                        text = "「死了吗？」v0.2.0",
+                        text = "死了吗？ v${BuildConfig.VERSION_NAME}",
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold
                     )
@@ -534,7 +545,7 @@ fun GuardianScreen(records: List<VitalRecord>) {
 
                     ListItemCard(
                         title = "隐私声明",
-                        subtitle = "所有数据只保存在手机本地，不联网上传",
+                        subtitle = "默认离线运行，数据仅存本机；仅当部署方配置远程同步后才会上传",
                         icon = Icons.Filled.Info
                     )
                     Spacer(modifier = Modifier.height(6.dp))

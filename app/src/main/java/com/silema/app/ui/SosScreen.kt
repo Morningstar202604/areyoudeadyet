@@ -1,5 +1,9 @@
 package com.silema.app.ui
 
+import android.Manifest
+import android.content.pm.PackageManager
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -16,6 +20,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Sms
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -35,12 +40,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.core.content.ContextCompat
 import com.silema.app.data.VitalRecord
 import com.silema.app.engine.RiskEngine
 import com.silema.app.sos.Emergency
-import com.silema.app.ui.theme.BrandSoftRed
 
 @Composable
 fun SosScreen(
@@ -51,14 +55,35 @@ fun SosScreen(
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val context = LocalContext.current
 
+    // 直接拨打需要 CALL_PHONE 运行时授权；拒绝/未授权时降级为拨号盘（无需权限，不会崩溃）
+    val callPermissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { granted ->
+        val phone = contacts.firstOrNull()?.phone ?: return@rememberLauncherForActivityResult
+        if (granted) {
+            runCatching { context.startActivity(Emergency.callIntent(phone)) }
+                .onFailure { context.startActivity(Emergency.dialIntent(phone)) }
+        } else {
+            context.startActivity(Emergency.dialIntent(phone))
+        }
+    }
+
+    fun callFamily() {
+        val phone = contacts.firstOrNull()?.phone ?: return
+        val granted = ContextCompat.checkSelfPermission(context, Manifest.permission.CALL_PHONE) ==
+            PackageManager.PERMISSION_GRANTED
+        if (granted) {
+            runCatching { context.startActivity(Emergency.callIntent(phone)) }
+                .onFailure { context.startActivity(Emergency.dialIntent(phone)) }
+        } else {
+            callPermissionLauncher.launch(Manifest.permission.CALL_PHONE)
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    colors = listOf(Color(0xFFD32F2F), Color(0xFF7F0000))
-                )
-            )
+            .background(Brush.verticalGradient(colors = listOf(Color(0xFFD32F2F), Color(0xFF7F0000))))
             .padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -67,26 +92,13 @@ fun SosScreen(
             verticalArrangement = Arrangement.spacedBy(20.dp)
         ) {
             Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)),
+                modifier = Modifier.size(80.dp).clip(CircleShape).background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center
             ) {
-                Icon(
-                    Icons.Filled.Warning,
-                    contentDescription = null,
-                    tint = Color.White,
-                    modifier = Modifier.size(44.dp)
-                )
+                Icon(Icons.Filled.Warning, contentDescription = null, tint = Color.White, modifier = Modifier.size(44.dp))
             }
 
-            Text(
-                text = "紧急呼救",
-                style = MaterialTheme.typography.headlineLarge,
-                color = Color.White,
-                fontWeight = FontWeight.Bold
-            )
+            Text("紧急呼救", style = MaterialTheme.typography.headlineLarge, color = Color.White, fontWeight = FontWeight.Bold)
 
             Card(
                 shape = RoundedCornerShape(16.dp),
@@ -96,14 +108,10 @@ fun SosScreen(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier.padding(horizontal = 24.dp, vertical = 12.dp)
                 ) {
-                    Text(
-                        text = "当前状态：${assessment.level.label}",
-                        style = MaterialTheme.typography.titleMedium,
-                        color = Color.White
-                    )
+                    Text("当前状态：${assessment.level.label}", style = MaterialTheme.typography.titleMedium, color = Color.White)
                     if (assessment.alerts.isNotEmpty()) {
                         Text(
-                            text = "有 ${assessment.alerts.size} 条预警",
+                            "有 ${assessment.alerts.size} 条预警",
                             style = MaterialTheme.typography.bodySmall,
                             color = Color.White.copy(alpha = 0.8f)
                         )
@@ -118,17 +126,20 @@ fun SosScreen(
             }
 
             if (contacts.isNotEmpty()) {
-                SosButton("呼叫家人", Icons.Filled.Phone) {
-                    context.startActivity(Emergency.callIntent(contacts.first().phone))
-                }
-                SosButton("发送体征摘要短信", Icons.Filled.Phone) {
-                    context.startActivity(
-                        Emergency.smsIntent(
-                            contacts.first().phone,
-                            Emergency.statusSummary(records)
+                SosButton("呼叫家人（${contacts.first().name}）", Icons.Filled.Phone) { callFamily() }
+                SosButton("发送体征摘要短信", Icons.Filled.Sms) {
+                    runCatching {
+                        context.startActivity(
+                            Emergency.smsIntent(contacts.first().phone, Emergency.statusSummary(records))
                         )
-                    )
+                    }
                 }
+            } else {
+                Text(
+                    "尚未添加紧急联系人：请到「设置」页添加家人电话",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.85f)
+                )
             }
 
             Spacer(modifier = Modifier.height(16.dp))
@@ -149,13 +160,8 @@ private fun SosButton(text: String, icon: ImageVector, onClick: () -> Unit) {
     Button(
         onClick = onClick,
         shape = RoundedCornerShape(18.dp),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = Color.White,
-            contentColor = Color(0xFFD32F2F)
-        ),
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(64.dp)
+        colors = ButtonDefaults.buttonColors(containerColor = Color.White, contentColor = Color(0xFFD32F2F)),
+        modifier = Modifier.fillMaxWidth().height(64.dp)
     ) {
         Icon(icon, contentDescription = null, modifier = Modifier.size(24.dp))
         Spacer(modifier = Modifier.width(12.dp))

@@ -125,14 +125,19 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
             }
             composable(Routes.REPORT) { ReportScreen(records = records) }
             composable(Routes.WORKOUT) { WorkoutScreen() }
-            composable(Routes.GUARDIAN) { GuardianScreen(records = records) }
+            composable(Routes.GUARDIAN) {
+                GuardianScreen(
+                    records = records,
+                    onGoMedical = { navController.navigate(Routes.MEDICAL) { launchSingleTop = true } }
+                )
+            }
             composable(Routes.SOS) {
                 SosScreen(records = records, contacts = contacts, onClose = { navController.popBackStack() })
             }
             composable(Routes.DEVICES) {
                 DevicesScreen(onClose = { navController.popBackStack() })
             }
-            composable(Routes.FAMILY) { FamilyScreen(records = records) }
+            composable(Routes.FAMILY) { FamilyScreen() }
             composable(Routes.AI_REPORT) { AiReportScreen(records = records) }
             composable(Routes.MEDICAL) { MedicalScreen(records = records) }
         }

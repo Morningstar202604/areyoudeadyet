@@ -33,5 +33,10 @@ data class RemoteConfig(
             cached = config
             return config
         }
+
+        /** 配置可能被外部替换（如调试/热更新）时清除缓存，下次 load 重新读取。 */
+        fun clearCache() {
+            cached = null
+        }
     }
 }

@@ -19,5 +19,8 @@ object RemoteSyncProvider {
     }
 
     /** Force reset (for testing or config change) */
-    fun reset() { instance = null }
+    fun reset() {
+        instance = null
+        RemoteConfig.clearCache()
+    }
 }

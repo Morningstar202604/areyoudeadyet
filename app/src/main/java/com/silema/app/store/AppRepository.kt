@@ -44,6 +44,10 @@ object AppRepository {
     private val _workouts = MutableStateFlow<List<com.silema.app.data.Workout>>(emptyList())
     val workouts: StateFlow<List<com.silema.app.data.Workout>> = _workouts.asStateFlow()
 
+    /** 首页引导卡可见性：未加载过演示数据且未点过「开始记录」时显示。 */
+    private val _showIntro = MutableStateFlow(false)
+    val showIntroFlow: StateFlow<Boolean> = _showIntro.asStateFlow()
+
     fun init(context: Context) {
         val dir = File(context.filesDir, "silema").apply { mkdirs() }
         vitalsFile = File(dir, "vitals.json")
@@ -60,7 +64,14 @@ object AppRepository {
             _workouts.value = readJson(workoutsFile)?.let {
                 runCatching { json.decodeFromString<WorkoutsFile>(it).workouts }.getOrDefault(emptyList())
             } ?: emptyList()
+            refreshShowIntro()
         }
+    }
+
+    private fun refreshShowIntro() {
+        val dismissed = prefs?.getBoolean("intro_dismissed", false) ?: false
+        val loaded = prefs?.getBoolean("demo_loaded", false) ?: false
+        _showIntro.value = !dismissed && !loaded
     }
 
     /** 新增手动记录；同类型同分钟内的旧记录会被覆盖，避免重复保存。 */
@@ -132,10 +143,24 @@ object AppRepository {
         get() = prefs?.getBoolean("demo_loaded", false) ?: false
         set(value) {
             prefs?.edit()?.putBoolean("demo_loaded", value)?.apply()
+            if (value) _showIntro.value = false
         }
 
+    /** 用户选择跳过演示、直接开始录入：隐藏首页引导卡。 */
+    fun dismissIntro() {
+        prefs?.edit()?.putBoolean("intro_dismissed", true)?.apply()
+        _showIntro.value = false
+    }
+
     /** 加载演示数据，返回实际新增条数。 */
-    fun loadDemoData(): Int = mergeHealthConnect(DemoData.generate())
+    fun loadDemoData(): Int {
+        val added = mergeHealthConnect(DemoData.generate())
+        if (added > 0) {
+            prefs?.edit()?.putBoolean("demo_loaded", true)?.apply()
+        }
+        _showIntro.value = false
+        return added
+    }
 
     // ---------- 运动记录 ----------
 
