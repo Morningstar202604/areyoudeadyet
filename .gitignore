@@ -15,6 +15,11 @@ captures/
 # 本机路径配置（含 SDK 路径，禁止入库）
 local.properties
 
+# 签名材料（绝对不能入库）
+keystore.properties
+*.keystore
+*.jks
+
 # 日志与临时文件
 *.log
 *.tmp
@@ -26,3 +31,7 @@ Thumbs.db
 # NDK 构建产物（如未来引入）
 .externalNativeBuild/
 .cxx/
+
+# 发布产物
+dist/
+
