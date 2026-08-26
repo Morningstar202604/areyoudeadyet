@@ -67,7 +67,13 @@ fun TrendScreen(records: List<VitalRecord>) {
 
         SectionTitle(chartName(selected) + " 近期走势（最多 60 次）")
         if (series.isEmpty()) {
-            EmptyHint(text = "该指标还没有数据。去「录入」页添加，或到「守护」页同步穿戴设备。")
+            Text(
+                text = "该指标还没有数据。去「录入」页添加，或到「守护」页同步穿戴设备。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp),
+                textAlign = androidx.compose.ui.text.style.TextAlign.Center
+            )
         } else {
             Sparkline(
                 values = series.map { it.value },
@@ -83,7 +89,12 @@ fun TrendScreen(records: List<VitalRecord>) {
         val weekly = records.filter { it.typeId == selected.id && it.timestampMillis >= weekAgo }
         SectionTitle("近 7 天小结")
         if (weekly.isEmpty()) {
-            EmptyHint(text = "最近 7 天没有${chartName(selected)}记录。")
+            Text(
+                text = "最近 7 天没有${chartName(selected)}记录。",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+            )
         } else {
             StatsRow(weekly)
             Spacer(Modifier.height(6.dp))
@@ -96,7 +107,12 @@ fun TrendScreen(records: List<VitalRecord>) {
 
         SectionTitle("历史记录（最近 30 条）")
         if (series.isEmpty()) {
-            EmptyHint(text = "暂无记录")
+            Text(
+                text = "暂无记录",
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp)
+            )
         } else {
             series.sortedByDescending { it.timestampMillis }.take(30).forEach { rec ->
                 HistoryRow(rec)

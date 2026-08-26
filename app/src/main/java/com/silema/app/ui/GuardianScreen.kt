@@ -1,6 +1,11 @@
 package com.silema.app.ui
 
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -8,70 +13,104 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.FavoriteBorder
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LocationOn
+import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Switch
+import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.health.connect.client.PermissionController
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.runtime.rememberCoroutineScope
 import com.silema.app.data.Contact
+import com.silema.app.data.VitalRecord
 import com.silema.app.hc.HealthConnectManager
 import com.silema.app.store.AppRepository
 import com.silema.app.ui.components.BigButton
+import com.silema.app.ui.components.EmptyState
+import com.silema.app.ui.components.GradientCard
+import com.silema.app.ui.components.InfoBar
+import com.silema.app.ui.components.ListItemCard
 import com.silema.app.ui.components.SectionTitle
+import com.silema.app.ui.theme.BrandBlue
+import com.silema.app.ui.theme.BrandGreen
+import com.silema.app.ui.theme.BrandSoftRed
+import com.silema.app.ui.theme.BrandWarm
+import com.silema.app.ui.theme.CardGradientBlue
+import com.silema.app.ui.theme.CardGradientGreen
+import com.silema.app.ui.theme.CardGradientOrange
+import com.silema.app.ui.theme.CardGradientPurple
+import com.silema.app.ui.theme.CardGradientRed
+import com.silema.app.ui.theme.LevelCritical
+import com.silema.app.ui.theme.LevelNormal
 import kotlinx.coroutines.launch
 
 @Composable
-fun GuardianScreen(records: List<com.silema.app.data.VitalRecord>) {
+fun GuardianScreen(records: List<VitalRecord>) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val contacts by AppRepository.contacts.collectAsState()
 
     var contactName by remember { mutableStateOf("") }
     var contactPhone by remember { mutableStateOf("") }
-    var contactMsg by remember { mutableStateOf<String?>(null) }
+    var feedbackMsg by remember { mutableStateOf<String?>(null) }
 
     var hcMessage by remember { mutableStateOf<String?>(null) }
     var hcBusy by remember { mutableStateOf(false) }
     var confirmClear by remember { mutableStateOf(false) }
 
     if (confirmClear) {
-        androidx.compose.material3.AlertDialog(
+        AlertDialog(
             onDismissRequest = { confirmClear = false },
             title = { Text("确认清空全部数据？") },
             text = { Text("将删除所有体征记录、紧急联系人和设置，无法恢复。演示数据也会一并清除。") },
             confirmButton = {
-                androidx.compose.material3.TextButton(onClick = {
+                TextButton(onClick = {
                     AppRepository.clearAll()
-                    contactMsg = "已清空全部数据"
+                    feedbackMsg = "已清空全部数据"
                     confirmClear = false
                 }) { Text("全部删除") }
             },
             dismissButton = {
-                androidx.compose.material3.TextButton(onClick = { confirmClear = false }) { Text("取消") }
+                TextButton(onClick = { confirmClear = false }) { Text("取消") }
             }
         )
     }
@@ -94,7 +133,6 @@ fun GuardianScreen(records: List<com.silema.app.data.VitalRecord>) {
         }
     }
 
-    // Health Connect 授权流程：先请求缺失权限，授权回调后再真正拉数据
     val permissionLauncher = rememberLauncherForActivityResult(
         PermissionController.createRequestPermissionResultContract()
     ) { granted ->
@@ -105,264 +143,456 @@ fun GuardianScreen(records: List<com.silema.app.data.VitalRecord>) {
         }
     }
 
-    Column(
+    val notifLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
+    fun requestNotifIfNeeded(onOk: () -> Unit) {
+        if (Build.VERSION.SDK_INT >= 33 &&
+            context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
+            android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            onOk()
+            notifLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
+        } else onOk()
+    }
+
+    LazyColumn(
         modifier = Modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp)
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        Text("守护与设置", style = MaterialTheme.typography.headlineSmall)
+        item {
+            Spacer(modifier = Modifier.height(16.dp))
+            Text("守护与设置", style = MaterialTheme.typography.headlineSmall)
+        }
 
-        // ---------- 紧急联系人 ----------
-        SectionTitle("紧急联系人（SOS 时拨打/发短信的对象）")
-        val contacts by AppRepository.contacts.collectAsState()
-        if (contacts.isEmpty()) {
-            EmptyHint(text = "还没有添加家人电话。强烈建议至少添加 1 个，SOS 才能一键联系家人。")
+        // ═══ Section 1: 远程同步 ═══
+        item {
+            SectionTitle("远程同步")
+        }
+        item {
+            GradientCard(gradientColors = CardGradientBlue) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(Color.White.copy(alpha = 0.25f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            Icons.Filled.Refresh, contentDescription = null,
+                            tint = Color.White, modifier = Modifier.size(24.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("数据同步", style = MaterialTheme.typography.titleSmall, color = Color.White, fontWeight = FontWeight.SemiBold)
+                        Text(
+                            "本地共 ${records.size} 条记录",
+                            style = MaterialTheme.typography.bodySmall,
+                            color = Color.White.copy(alpha = 0.85f)
+                        )
+                    }
+                }
+            }
+        }
+
+        // ═══ Section 2: 紧急联系人 ═══
+        item {
+            SectionTitle("紧急联系人（SOS 时拨打/发短信的对象）")
+        }
+        val contactsList = contacts // already collected at top of function
+        if (contactsList.isEmpty()) {
+            item {
+                InfoBar(
+                    text = "建议至少添加 1 位家人，SOS 时才能一键联系。",
+                    containerColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer
+                )
+            }
         } else {
-            contacts.forEach { c -> ContactRow(c) ; Spacer(Modifier.height(6.dp)) }
-        }
-        Spacer(Modifier.height(10.dp))
-        OutlinedTextField(
-            value = contactName,
-            onValueChange = { contactName = it },
-            label = { Text("称呼（如：大女儿）") },
-            singleLine = true,
-            textStyle = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(8.dp))
-        OutlinedTextField(
-            value = contactPhone,
-            onValueChange = { contactPhone = it.filter { ch -> ch.isDigit() || ch == '+' || ch == '-' } },
-            label = { Text("手机号") },
-            singleLine = true,
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
-            textStyle = MaterialTheme.typography.bodyLarge,
-            modifier = Modifier.fillMaxWidth()
-        )
-        Spacer(Modifier.height(10.dp))
-        Button(
-            onClick = {
-                val name = contactName.trim()
-                val phone = contactPhone.trim()
-                when {
-                    name.isEmpty() -> contactMsg = "请填写称呼"
-                    phone.length < 5 -> contactMsg = "手机号看起来不对，请检查"
-                    else -> {
-                        AppRepository.addContact(Contact(name, phone))
-                        contactName = ""
-                        contactPhone = ""
-                        contactMsg = "已添加 $name"
-                    }
-                }
-            },
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.secondary),
-            modifier = Modifier.fillMaxWidth().height(64.dp)
-        ) {
-            Text("添加联系人", style = MaterialTheme.typography.titleMedium)
-        }
-        contactMsg?.let {
-            Spacer(Modifier.height(8.dp))
-            EmptyHint(text = it)
-        }
-
-        // ---------- Health Connect ----------
-        SectionTitle("穿戴设备数据（Health Connect）")
-        val available = remember { HealthConnectManager.isAvailable(context) }
-        Text(
-            text = if (available) {
-                "状态：可用。支持读取华为运动健康、小米运动健康等写入的心率、血氧、血压、步数。"
-            } else {
-                "状态：${HealthConnectManager.unavailableReason(context)}。低版本安卓需先安装 Health Connect 应用。"
-            },
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-        Spacer(Modifier.height(10.dp))
-        BigButton(
-            text = if (hcBusy) "正在同步…" else "同步最近 24 小时数据",
-            container = if (available) MaterialTheme.colorScheme.primary
-            else MaterialTheme.colorScheme.surfaceVariant,
-            contentColor = if (available) MaterialTheme.colorScheme.onPrimary
-            else MaterialTheme.colorScheme.onSurfaceVariant,
-            enabled = available && !hcBusy,
-            onClick = {
-                scope.launch {
-                    val granted = runCatching { HealthConnectManager.grantedPermissions(context) }
-                        .getOrDefault(emptySet())
-                    val missing = HealthConnectManager.READ_PERMISSIONS - granted
-                    if (missing.isEmpty()) doSync() else permissionLauncher.launch(HealthConnectManager.READ_PERMISSIONS)
-                }
+            items(contactsList) { contact ->
+                ContactCard(contact)
             }
-        )
-        hcMessage?.let {
-            Spacer(Modifier.height(8.dp))
-            EmptyHint(text = it)
-        }
-        Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(
-                Icons.Filled.Refresh,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            Spacer(Modifier.padding(start = 4.dp))
-            Text(
-                text = "当前本地共 ${records.size} 条记录",
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
         }
 
-        // ---------- 健康提醒 ----------
-        SectionTitle("健康提醒")
-        var remMeasure by remember { mutableStateOf(AppRepository.measureReminderOn) }
-        var remHour by remember { mutableStateOf(AppRepository.measureReminderHour.toString()) }
-        var remMin by remember { mutableStateOf(AppRepository.measureReminderMinute.toString()) }
-        var remSed by remember { mutableStateOf(AppRepository.sedentaryReminderOn) }
-
-        val notifLauncher = rememberLauncherForActivityResult(
-            androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
-        ) { }
-
-        fun requestNotifIfNeeded(onOk: () -> Unit) {
-            if (android.os.Build.VERSION.SDK_INT >= 33 &&
-                context.checkSelfPermission(android.Manifest.permission.POST_NOTIFICATIONS) !=
-                android.content.pm.PackageManager.PERMISSION_GRANTED
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
-                onOk()
-                notifLauncher.launch(android.Manifest.permission.POST_NOTIFICATIONS)
-            } else onOk()
-        }
-
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            Text("每日测量提醒", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            androidx.compose.material3.Switch(
-                checked = remMeasure,
-                onCheckedChange = { on ->
-                    requestNotifIfNeeded {
-                        AppRepository.measureReminderOn = on
-                        remMeasure = on
-                        com.silema.app.work.Reminders.syncMeasurement(context)
-                        contactMsg = if (on) "测量提醒已开启（已测齐当天自动免打扰）" else "测量提醒已关闭"
-                    }
-                }
-            )
-        }
-        if (remMeasure) {
-            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(
-                    value = remHour, onValueChange = { remHour = it.filter { c -> c.isDigit() }.take(2) },
-                    label = { Text("时") }, singleLine = true, modifier = Modifier.width(90.dp)
-                )
-                Text(":", style = MaterialTheme.typography.titleLarge)
-                OutlinedTextField(
-                    value = remMin, onValueChange = { remMin = it.filter { c -> c.isDigit() }.take(2) },
-                    label = { Text("分") }, singleLine = true, modifier = Modifier.width(90.dp)
-                )
-                Button(
-                    onClick = {
-                        val h = remHour.toIntOrNull()?.coerceIn(0, 23)
-                        val m = remMin.toIntOrNull()?.coerceIn(0, 59)
-                        if (h == null || m == null) { contactMsg = "时间格式不对" } else {
-                            AppRepository.measureReminderHour = h
-                            AppRepository.measureReminderMinute = m
-                            com.silema.app.work.Reminders.syncMeasurement(context)
-                            contactMsg = "提醒时间已设为 %02d:%02d".format(h, m)
+                Column(modifier = Modifier.padding(16.dp)) {
+                    OutlinedTextField(
+                        value = contactName,
+                        onValueChange = { contactName = it },
+                        label = { Text("称呼（如：大女儿）") },
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    OutlinedTextField(
+                        value = contactPhone,
+                        onValueChange = { contactPhone = it.filter { ch -> ch.isDigit() || ch == '+' || ch == '-' } },
+                        label = { Text("手机号") },
+                        singleLine = true,
+                        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Phone),
+                        textStyle = MaterialTheme.typography.bodyLarge,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    BigButton(
+                        text = "添加联系人",
+                        container = BrandBlue,
+                        onClick = {
+                            val name = contactName.trim()
+                            val phone = contactPhone.trim()
+                            when {
+                                name.isEmpty() -> feedbackMsg = "请填写称呼"
+                                phone.length < 5 -> feedbackMsg = "手机号看起来不对，请检查"
+                                else -> {
+                                    AppRepository.addContact(Contact(name, phone))
+                                    contactName = ""
+                                    contactPhone = ""
+                                    feedbackMsg = "已添加 $name"
+                                }
+                            }
                         }
-                    },
-                    shape = RoundedCornerShape(12.dp),
-                    modifier = Modifier.height(52.dp)
-                ) { Text("保存时间") }
+                    )
+                }
             }
         }
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
-            modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
-        ) {
-            Text("久坐提醒（9:00-21:00 每小时）", style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-            androidx.compose.material3.Switch(
-                checked = remSed,
-                onCheckedChange = { on ->
-                    requestNotifIfNeeded {
-                        AppRepository.sedentaryReminderOn = on
-                        remSed = on
-                        com.silema.app.work.Reminders.syncSedentary(context)
+
+        feedbackMsg?.let { msg ->
+            item {
+                InfoBar(
+                    text = msg,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+
+        // ═══ Section 3: Health Connect ═══
+        item {
+            SectionTitle("穿戴设备数据（Health Connect）")
+        }
+        item {
+            val available = remember { HealthConnectManager.isAvailable(context) }
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(RoundedCornerShape(10.dp))
+                                .background(
+                                    if (available) LevelNormal.copy(alpha = 0.12f)
+                                    else MaterialTheme.colorScheme.surfaceVariant
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                if (available) Icons.Filled.Favorite else Icons.Filled.FavoriteBorder,
+                                contentDescription = null,
+                                tint = if (available) LevelNormal else MaterialTheme.colorScheme.onSurfaceVariant,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text(
+                            text = if (available) "状态：可用" else "状态：不可用",
+                            style = MaterialTheme.typography.bodyLarge,
+                            fontWeight = FontWeight.Medium
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Text(
+                        text = if (available) "支持读取华为运动健康、小米运动健康等写入的心率、血氧、血压、步数。"
+                        else "低版本安卓需先安装 Health Connect 应用。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+                    BigButton(
+                        text = if (hcBusy) "正在同步…" else "同步最近 24 小时数据",
+                        container = if (available) BrandWarm else MaterialTheme.colorScheme.surfaceVariant,
+                        contentColor = if (available) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                        enabled = available && !hcBusy,
+                        onClick = {
+                            scope.launch {
+                                val granted = runCatching { HealthConnectManager.grantedPermissions(context) }
+                                    .getOrDefault(emptySet())
+                                val missing = HealthConnectManager.READ_PERMISSIONS - granted
+                                if (missing.isEmpty()) doSync() else permissionLauncher.launch(HealthConnectManager.READ_PERMISSIONS)
+                            }
+                        }
+                    )
+                }
+            }
+        }
+
+        hcMessage?.let { msg ->
+            item {
+                InfoBar(
+                    text = msg,
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
+            }
+        }
+
+        // ═══ Section 4: 提醒设置 ═══
+        item {
+            SectionTitle("提醒设置")
+        }
+        item {
+            var remMeasure by remember { mutableStateOf(AppRepository.measureReminderOn) }
+            var remHour by remember { mutableStateOf(AppRepository.measureReminderHour.toString()) }
+            var remMin by remember { mutableStateOf(AppRepository.measureReminderMinute.toString()) }
+            var remSed by remember { mutableStateOf(AppRepository.sedentaryReminderOn) }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    ListItemCard(
+                        title = "每日测量提醒",
+                        subtitle = if (remMeasure) "已开启" else "已关闭",
+                        icon = Icons.Filled.DateRange,
+                        trailing = {
+                            Switch(
+                                checked = remMeasure,
+                                onCheckedChange = { on ->
+                                    requestNotifIfNeeded {
+                                        AppRepository.measureReminderOn = on
+                                        remMeasure = on
+                                        com.silema.app.work.Reminders.syncMeasurement(context)
+                                        feedbackMsg = if (on) "测量提醒已开启" else "测量提醒已关闭"
+                                    }
+                                }
+                            )
+                        }
+                    )
+
+                    if (remMeasure) {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                        ) {
+                            OutlinedTextField(
+                                value = remHour,
+                                onValueChange = { remHour = it.filter { c -> c.isDigit() }.take(2) },
+                                label = { Text("时") },
+                                singleLine = true,
+                                modifier = Modifier.width(90.dp)
+                            )
+                            Text(":", style = MaterialTheme.typography.titleLarge)
+                            OutlinedTextField(
+                                value = remMin,
+                                onValueChange = { remMin = it.filter { c -> c.isDigit() }.take(2) },
+                                label = { Text("分") },
+                                singleLine = true,
+                                modifier = Modifier.width(90.dp)
+                            )
+                            Spacer(modifier = Modifier.weight(1f))
+                            Button(
+                                onClick = {
+                                    val h = remHour.toIntOrNull()?.coerceIn(0, 23)
+                                    val m = remMin.toIntOrNull()?.coerceIn(0, 59)
+                                    if (h == null || m == null) feedbackMsg = "时间格式不对"
+                                    else {
+                                        AppRepository.measureReminderHour = h
+                                        AppRepository.measureReminderMinute = m
+                                        com.silema.app.work.Reminders.syncMeasurement(context)
+                                        feedbackMsg = "提醒时间已设为 %02d:%02d".format(h, m)
+                                    }
+                                },
+                                shape = RoundedCornerShape(12.dp),
+                                modifier = Modifier.height(52.dp)
+                            ) { Text("保存") }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ListItemCard(
+                        title = "久坐提醒",
+                        subtitle = "9:00-21:00 每小时提醒",
+                        icon = Icons.Filled.Warning,
+                        trailing = {
+                            Switch(
+                                checked = remSed,
+                                onCheckedChange = { on ->
+                                    requestNotifIfNeeded {
+                                        AppRepository.sedentaryReminderOn = on
+                                        remSed = on
+                                        com.silema.app.work.Reminders.syncSedentary(context)
+                                    }
+                                }
+                            )
+                        }
+                    )
+                }
+            }
+        }
+
+        // ═══ Section 5: 数据管理 ═══
+        item {
+            SectionTitle("数据管理")
+        }
+        item {
+            ListItemCard(
+                title = "导出健康数据",
+                subtitle = "将所有记录导出为 JSON 文件",
+                icon = Icons.Filled.DateRange,
+                onClick = { feedbackMsg = "导出功能开发中…" }
+            )
+        }
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = LevelCritical.copy(alpha = 0.06f)
+                ),
+                elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(16.dp)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(40.dp)
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(LevelCritical.copy(alpha = 0.12f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(Icons.Filled.Delete, contentDescription = null, tint = LevelCritical, modifier = Modifier.size(22.dp))
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                    Column(modifier = Modifier.weight(1f)) {
+                        Text("清空全部数据", style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium, color = LevelCritical)
+                        Text("重置应用，无法恢复", style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                    Button(
+                        onClick = { confirmClear = true },
+                        shape = RoundedCornerShape(12.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = LevelCritical),
+                        modifier = Modifier.height(48.dp)
+                    ) {
+                        Text("清空", color = Color.White)
                     }
                 }
-            )
-        }
-        contactMsg?.let {
-            Spacer(Modifier.height(8.dp))
-            EmptyHint(text = it)
+            }
         }
 
-        // ---------- 规则透明化 ----------
-        SectionTitle("本应用的预警标准（全部公开，不搞玄学）")
-        val rules = listOf(
-            "血压 ≥180 或低压 ≥110 → 危险（高血压危象，立即送医）；160-179 / 100-109 → 警告；140-159 / 90-99 → 注意；高压 <90 或低压 <55 → 危险（休克风险）",
-            "心率 ≥150 或 ≤45 → 危险；121-149 或 46-49 → 警告；100-120 → 注意",
-            "血氧 <90% → 危险（呼吸衰竭水平）；90-93% → 警告；94-95% → 注意",
-            "体温 ≥39.5℃ 或 ≤35℃ → 危险；38.5-39.4℃ → 警告；37.3-38.4℃ → 注意",
-            "组合规则：低压+心跳快=休克代偿、缺氧+心跳快=呼吸循环衰竭、发热+心跳过快=重症感染信号 —— 单看正常、合起来危险的情况单独升级处理",
-            "连续 3 次同方向超标自动升一级，防止\"再观察观察\"拖出大事"
-        )
-        rules.forEachIndexed { i, r ->
-            Text(
-                text = "${i + 1}. $r",
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(vertical = 4.dp)
-            )
+        // ═══ Section 6: 关于 ═══
+        item {
+            SectionTitle("关于")
+        }
+        item {
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = RoundedCornerShape(16.dp),
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Text(
+                        text = "「死了吗？」v0.2.0",
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "健康监测 · 生命管理",
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    ListItemCard(
+                        title = "隐私声明",
+                        subtitle = "所有数据只保存在手机本地，不联网上传",
+                        icon = Icons.Filled.Info
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    ListItemCard(
+                        title = "免责声明",
+                        subtitle = "不能替代医生诊断，遇到紧急情况请拨打 120",
+                        icon = Icons.Filled.Warning
+                    )
+                }
+            }
         }
 
-        SectionTitle("关于与免责声明")
-        Text(
-            text = "「死了吗？」v0.2.0 · 健康监测 · 生命管理\n" +
-                "本应用基于公开医学共识的阈值规则做风险提示，目的是\"宁可多提醒，绝不装没事\"。" +
-                "它不能替代医生的诊断，也不能替代正规医疗设备。遇到紧急情况永远优先拨打 120。\n" +
-                "所有数据只保存在手机本地，不联网上传。",
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        Spacer(Modifier.height(20.dp))
-        BigButton(
-            text = "清空全部数据（重置应用）",
-            container = com.silema.app.ui.theme.LevelCritical,
-            onClick = { confirmClear = true }
-        )
-        Spacer(Modifier.height(24.dp))
+        item { Spacer(modifier = Modifier.height(16.dp)) }
     }
 }
 
 @Composable
-private fun ContactRow(contact: Contact) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween,
-        modifier = Modifier.fillMaxWidth()
+private fun ContactCard(contact: Contact) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
-        Column(Modifier.weight(1f)) {
-            Text(contact.name, style = MaterialTheme.typography.bodyLarge)
-            Text(
-                contact.phone,
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-        FilledIconButton(
-            onClick = { AppRepository.removeContact(contact.phone) },
-            colors = IconButtonDefaults.filledIconButtonColors(
-                containerColor = MaterialTheme.colorScheme.surfaceVariant
-            ),
-            modifier = Modifier.height(48.dp).width(48.dp)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
         ) {
-            Icon(Icons.Filled.Delete, contentDescription = "删除联系人")
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(MaterialTheme.colorScheme.secondaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    Icons.Filled.Favorite, contentDescription = null,
+                    tint = BrandBlue, modifier = Modifier.size(22.dp)
+                )
+            }
+            Spacer(modifier = Modifier.width(12.dp))
+            Column(modifier = Modifier.weight(1f)) {
+                Text(contact.name, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
+                Text(
+                    contact.phone,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+            FilledIconButton(
+                onClick = { AppRepository.removeContact(contact.phone) },
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                ),
+                modifier = Modifier.size(40.dp)
+            ) {
+                Icon(Icons.Filled.Delete, contentDescription = "删除联系人", modifier = Modifier.size(20.dp))
+            }
         }
     }
 }

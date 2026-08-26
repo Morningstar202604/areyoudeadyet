@@ -7,8 +7,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
 }
 
-// 正式签名：从根目录 keystore.properties 读取（该文件不入 git）。
-// 文件不存在时（如 CI/他人 clone），release 构建退化为未签名，不影响 debug。
 val keystoreProps = Properties().apply {
     val f = rootProject.file("keystore.properties")
     if (f.exists()) f.inputStream().use { load(it) }
@@ -22,8 +20,8 @@ android {
         applicationId = "com.silema.app"
         minSdk = 26
         targetSdk = 34
-        versionCode = 4
-        versionName = "0.4.0"
+        versionCode = 5
+        versionName = "0.5.0"
     }
 
     signingConfigs {
@@ -77,10 +75,10 @@ dependencies {
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
+    implementation("androidx.compose.material:material-icons-extended")
 
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
 
-    // WorkManager：测量/久坐提醒
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")

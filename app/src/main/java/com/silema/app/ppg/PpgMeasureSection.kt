@@ -39,7 +39,7 @@ import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.store.AppRepository
-import com.silema.app.ui.EmptyHint
+import androidx.compose.foundation.layout.Box
 import com.silema.app.ui.components.BigButton
 
 private const val MEASURE_SECONDS = 30
@@ -229,7 +229,12 @@ fun PpgMeasureSection() {
         }
         resultText?.let {
             Spacer(Modifier.height(8.dp))
-            EmptyHint(text = it)
+            Text(
+                text = it,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+                modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
+            )
         }
         savedMsg?.let {
             Spacer(Modifier.height(6.dp))

@@ -6,8 +6,8 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
@@ -26,6 +26,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.silema.app.data.Contact
 import com.silema.app.data.VitalRecord
+import com.silema.app.ui.theme.BrandSoftRed
 import com.silema.app.util.TtsController
 
 object Routes {
@@ -36,6 +37,9 @@ object Routes {
     const val GUARDIAN = "guardian"
     const val DEVICES = "devices"
     const val SOS = "sos"
+    const val FAMILY = "family"
+    const val AI_REPORT = "ai_report"
+    const val MEDICAL = "medical"
 }
 
 private data class TabSpec(val route: String, val label: String, val icon: ImageVector)
@@ -50,7 +54,7 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
         TabSpec(Routes.HOME, "首页", Icons.Filled.Home),
         TabSpec(Routes.ENTRY, "录入", Icons.Filled.AddCircle),
         TabSpec(Routes.REPORT, "健康", Icons.Filled.DateRange),
-        TabSpec(Routes.WORKOUT, "运动", Icons.Filled.PlayArrow)
+        TabSpec(Routes.FAMILY, "家人", Icons.Filled.Star)
     )
 
     Scaffold(
@@ -74,20 +78,22 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
                             selectedTextColor = MaterialTheme.colorScheme.primary,
                             unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
                             unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = MaterialTheme.colorScheme.surfaceVariant
+                            indicatorColor = MaterialTheme.colorScheme.primaryContainer
                         )
                     )
                 }
-                // SOS 常驻底栏最右侧，红底白字，任何页面一键可达
                 NavigationBarItem(
                     selected = currentRoute == Routes.SOS,
                     onClick = { navController.navigate(Routes.SOS) { launchSingleTop = true } },
                     icon = { Icon(Icons.Filled.Phone, contentDescription = "SOS") },
                     label = { Text("SOS") },
                     colors = NavigationBarItemDefaults.colors(
-                        indicatorColor = Color.Transparent
-                    ),
-                    modifier = Modifier.background(Color(0xFFB71C1C).copy(alpha = 0.08f))
+                        selectedIconColor = BrandSoftRed,
+                        selectedTextColor = BrandSoftRed,
+                        unselectedIconColor = BrandSoftRed.copy(alpha = 0.6f),
+                        unselectedTextColor = BrandSoftRed.copy(alpha = 0.6f),
+                        indicatorColor = BrandSoftRed.copy(alpha = 0.1f)
+                    )
                 )
             }
         }
@@ -105,15 +111,16 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
                     onGoEntry = { navController.navigate(Routes.ENTRY) { launchSingleTop = true } },
                     onGoDevices = { navController.navigate(Routes.DEVICES) { launchSingleTop = true } },
                     onGoWorkout = { navController.navigate(Routes.WORKOUT) { launchSingleTop = true } },
-                    onGoGuardian = { navController.navigate(Routes.GUARDIAN) { launchSingleTop = true } }
+                    onGoGuardian = { navController.navigate(Routes.GUARDIAN) { launchSingleTop = true } },
+                    onGoFamily = { navController.navigate(Routes.FAMILY) { launchSingleTop = true } },
+                    onGoAi = { navController.navigate(Routes.AI_REPORT) { launchSingleTop = true } },
+                    onGoMedical = { navController.navigate(Routes.MEDICAL) { launchSingleTop = true } }
                 )
             }
             composable(Routes.ENTRY) {
                 EntryScreen(
                     records = records,
-                    onDone = {
-                        navController.navigate(Routes.HOME) { launchSingleTop = true }
-                    }
+                    onDone = { navController.navigate(Routes.HOME) { launchSingleTop = true } }
                 )
             }
             composable(Routes.REPORT) { ReportScreen(records = records) }
@@ -125,6 +132,9 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
             composable(Routes.DEVICES) {
                 DevicesScreen(onClose = { navController.popBackStack() })
             }
+            composable(Routes.FAMILY) { FamilyScreen(records = records) }
+            composable(Routes.AI_REPORT) { AiReportScreen(records = records) }
+            composable(Routes.MEDICAL) { MedicalScreen(records = records) }
         }
     }
 }

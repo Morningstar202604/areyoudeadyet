@@ -1,0 +1,14 @@
+{
+  "enabled": false,
+  "provider": "mock",
+  "baseUrl": "",
+  "apiKey": "",
+  "projectId": "",
+  "syncIntervalMinutes": 30,
+  "enableAiAnalysis": false,
+  "aiProvider": "custom",
+  "aiApiKey": "",
+  "aiBaseUrl": "",
+  "fhirEnabled": false,
+  "fhirVersion": "R4"
+}
