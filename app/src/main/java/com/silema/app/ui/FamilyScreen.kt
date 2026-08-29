@@ -31,6 +31,7 @@ import com.silema.app.ui.components.EmptyState
 import com.silema.app.ui.components.InfoBar
 import com.silema.app.ui.components.LevelBadge
 import com.silema.app.ui.components.SectionTitle
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.riskColor
 import java.text.SimpleDateFormat
 import java.util.Date
@@ -138,7 +139,7 @@ fun FamilyScreen() {
                 EmptyState(
                     icon = Icons.Filled.People,
                     title = "还没有可查看的家人",
-                    message = "请先在对方设备上完成账号绑定与数据授权"
+                    message = "本机构建为本地模式：可在「医疗对接」页把体征导出为 FHIR 健康档案分享给家人。\n远程实时监护需企业部署后端服务，未含于本地构建。"
                 )
             }
         } else {
@@ -166,7 +167,7 @@ private fun MemberCard(data: MemberCardData, onClick: () -> Unit) {
 
     Card(
         modifier = Modifier.fillMaxWidth().clickable { onClick() },
-        shape = RoundedCornerShape(20.dp),
+        shape = AppShapes.card,
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -234,7 +235,7 @@ private fun MemberCard(data: MemberCardData, onClick: () -> Unit) {
 private fun MiniVitalChip(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
+        shape = AppShapes.chip,
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
         Column(

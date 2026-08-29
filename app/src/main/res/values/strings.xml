@@ -1,3 +1,133 @@
 <resources>
-    <string name="app_name">死了吗？</string>
+    <!-- App Name -->
+    <string name="app_name">Are You Dead Yet?</string>
+
+    <!-- Navigation -->
+    <string name="nav_monitoring">Monitoring</string>
+    <string name="nav_devices">Devices</string>
+    <string name="nav_reports">Reports</string>
+    <string name="nav_family">Family</string>
+    <string name="nav_more">More</string>
+
+    <!-- Dashboard Screen -->
+    <string name="dashboard_title">Health Guardian</string>
+    <string name="dashboard_status_normal">All Clear</string>
+    <string name="dashboard_status_attention">Attention Needed</string>
+    <string name="dashboard_status_warning">Warning</string>
+    <string name="dashboard_status_danger">Danger</string>
+    <string name="dashboard_no_data">No measurement data yet</string>
+    <string name="dashboard_alerts_count">%d alerts need attention</string>
+    <string name="dashboard_all_normal">All indicators normal, keep it up</string>
+    <string name="dashboard_vitals">Vital Signs</string>
+    <string name="dashboard_trends">Trends</string>
+    <string name="dashboard_quick_actions">Quick Actions</string>
+    <string name="dashboard_load_demo">Load 7-Day Demo Data</string>
+    <string name="dashboard_clear_data">Clear All Data</string>
+
+    <!-- Vital Types -->
+    <string name="vital_heart_rate">Heart Rate</string>
+    <string name="vital_blood_pressure">Blood Pressure</string>
+    <string name="vital_oxygen">Blood Oxygen</string>
+    <string name="vital_temperature">Temperature</string>
+    <string name="vital_steps">Steps</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_fahrenheit">°F</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">Enter Vitals</string>
+    <string name="entry_select_type">Select Type</string>
+    <string name="entry_value">Value</string>
+    <string name="entry_save">Save</string>
+    <string name="entry_history">History</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">Health Report</string>
+    <string name="report_weekly">Weekly Report</string>
+    <string name="report_sleep">Sleep Record</string>
+    <string name="report_trends_tab">Trends</string>
+    <string name="report_this_week">This Week</string>
+    <string name="report_last_week">Last Week</string>
+    <string name="report_summary">Summary</string>
+
+    <!-- Family Screen -->
+    <string name="family_title">Remote Monitoring</string>
+    <string name="family_empty">No family members added</string>
+    <string name="family_add_member">Add Family Member</string>
+    <string name="family_sync_required">Real-time monitoring requires backend setup</string>
+
+    <!-- Devices Screen -->
+    <string name="devices_title">Device Center</string>
+    <string name="devices_ppg">Camera PPG</string>
+    <string name="devices_ble">Bluetooth LE</string>
+    <string name="devices_iot">IoT Devices</string>
+    <string name="devices_connect_watch">Connect Watch</string>
+
+    <!-- AI Report Screen -->
+    <string name="ai_title">AI Health Analysis</string>
+    <string name="ai_risk_score">Risk Score</string>
+    <string name="ai_findings">Findings</string>
+    <string name="ai_recommendations">Recommendations</string>
+    <string name="ai_running_on_device">Running on-device, no cloud required</string>
+
+    <!-- Medical Screen -->
+    <string name="medical_title">Medical Records</string>
+    <string name="medical_export_fhir">Export FHIR R4</string>
+    <string name="medical_share_report">Share Health Report</string>
+    <string name="medical_compatible">Compatible with hospital HIS/EHR systems</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">Activity Tracking</string>
+    <string name="workout_start">Start</string>
+    <string name="workout_stop">Stop</string>
+    <string name="workout_distance">Distance</string>
+    <string name="workout_pace">Pace</string>
+    <string name="workout_calories">Calories</string>
+    <string name="workout_gps_tracking">GPS tracking active</string>
+
+    <!-- Guardian Screen (Settings) -->
+    <string name="guardian_title">Settings</string>
+    <string name="guardian_remote_sync">Remote Sync</string>
+    <string name="guardian_contacts">Emergency Contacts</string>
+    <string name="guardian_reminders">Reminders</string>
+    <string name="guardian_data_management">Data Management</string>
+    <string name="guardian_measurement_reminder">Measurement Reminder</string>
+    <string name="guardian_sedentary_reminder">Sedentary Reminder</string>
+
+    <!-- More Screen -->
+    <string name="more_title">Function Center</string>
+    <string name="more_detection">Detection</string>
+    <string name="more_exercise">Exercise</string>
+    <string name="more_ai_analysis">AI Analysis</string>
+    <string name="more_medical">Medical</string>
+    <string name="more_settings">Settings</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">Emergency SOS</string>
+    <string name="sos_call_120">Call 120</string>
+    <string name="sos_call_family">Call Family</string>
+    <string name="sos_send_sms">Send SMS with Vitals</string>
+    <string name="sos_confirm">I\'m OK</string>
+    <string name="sos_notifying">Notifying family...</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_normal">Normal</string>
+    <string name="risk_attention">Attention</string>
+    <string name="risk_warning">Warning</string>
+    <string name="risk_danger">Danger</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_delete">Delete</string>
+    <string name="common_edit">Edit</string>
+    <string name="common_save">Save</string>
+    <string name="common_loading">Loading...</string>
+    <string name="common_error">Error</string>
+    <string name="common_success">Success</string>
+    <string name="common_retry">Retry</string>
 </resources>

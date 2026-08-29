@@ -41,10 +41,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.silema.app.data.RiskLevel
-import com.silema.app.ui.theme.BrandBlue
+import com.silema.app.ui.theme.AppShapes
+import com.silema.app.ui.theme.AppSize
+import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.riskColor
 
-// ── 圆形徽章 ────────────────────────────────────────
+// ── 圆形风险徽章（深饱和底色 + 白字，对比度达标）──
 @Composable
 fun LevelBadge(level: RiskLevel, modifier: Modifier = Modifier) {
     val bg = riskColor(level)
@@ -52,7 +54,7 @@ fun LevelBadge(level: RiskLevel, modifier: Modifier = Modifier) {
         modifier = modifier
             .clip(CircleShape)
             .background(bg)
-            .padding(horizontal = 12.dp, vertical = 4.dp),
+            .padding(horizontal = AppSpacing.md, vertical = AppSpacing.xs),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -64,7 +66,7 @@ fun LevelBadge(level: RiskLevel, modifier: Modifier = Modifier) {
     }
 }
 
-// ── 渐变状态横幅（卡片式） ─────────────────────────
+// ── 渐变状态横幅（卡片式）──
 @Composable
 fun StatusBanner(
     level: RiskLevel,
@@ -76,14 +78,14 @@ fun StatusBanner(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(24.dp),
+        shape = AppShapes.banner,
         elevation = CardDefaults.cardElevation(defaultElevation = 6.dp)
     ) {
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Brush.linearGradient(gradientColors))
-                .padding(24.dp)
+                .padding(AppSpacing.xxl)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Box(
@@ -100,7 +102,7 @@ fun StatusBanner(
                         modifier = Modifier.size(32.dp)
                     )
                 }
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(AppSpacing.lg))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = headline,
@@ -108,7 +110,7 @@ fun StatusBanner(
                         color = Color.White,
                         fontWeight = FontWeight.Bold
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(AppSpacing.xs))
                     Text(
                         text = subline,
                         style = MaterialTheme.typography.bodyMedium,
@@ -120,7 +122,7 @@ fun StatusBanner(
     }
 }
 
-// ── 专业体征卡片 ────────────────────────────────────
+// ── 专业体征卡片 ──
 @Composable
 fun VitalCard(
     label: String,
@@ -132,16 +134,16 @@ fun VitalCard(
     modifier: Modifier = Modifier,
     onClick: (() -> Unit)? = null
 ) {
-    val accent = level?.let { riskColor(it) } ?: Color(0xFFBDB5AF)
+    val accent = level?.let { riskColor(it) } ?: MaterialTheme.colorScheme.outline
     Card(
         modifier = modifier
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier)
             .fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = AppShapes.card,
         elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        Column(modifier = Modifier.padding(AppSpacing.lg)) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
@@ -150,13 +152,13 @@ fun VitalCard(
                     Box(
                         modifier = Modifier
                             .size(36.dp)
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(AppShapes.small)
                             .background(accent.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(icon, contentDescription = null, tint = accent, modifier = Modifier.size(20.dp))
                     }
-                    Spacer(modifier = Modifier.width(10.dp))
+                    Spacer(modifier = Modifier.width(AppSpacing.sm))
                 }
                 Text(
                     text = label,
@@ -166,7 +168,7 @@ fun VitalCard(
                 )
                 if (level != null) LevelBadge(level)
             }
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.md))
             Row(verticalAlignment = Alignment.Bottom) {
                 Text(
                     text = valueText,
@@ -176,7 +178,7 @@ fun VitalCard(
                     maxLines = 1
                 )
             }
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.xs))
             Text(
                 text = timeText,
                 style = MaterialTheme.typography.bodySmall,
@@ -184,7 +186,7 @@ fun VitalCard(
                 maxLines = 1
             )
             if (noteText != null) {
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.xs))
                 Text(
                     text = noteText,
                     style = MaterialTheme.typography.bodySmall,
@@ -197,7 +199,7 @@ fun VitalCard(
     }
 }
 
-// ── 统计磁贴（带图标+大数字） ──────────────────────
+// ── 统计磁贴（带图标+大数字）──
 @Composable
 fun StatTile(
     label: String,
@@ -208,13 +210,13 @@ fun StatTile(
 ) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = AppShapes.chip,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 14.dp, horizontal = 8.dp)
+            modifier = Modifier.padding(vertical = AppSpacing.lg, horizontal = AppSpacing.sm)
         ) {
             if (icon != null) {
                 Icon(
@@ -222,7 +224,7 @@ fun StatTile(
                     tint = valueColor.copy(alpha = 0.7f),
                     modifier = Modifier.size(22.dp)
                 )
-                Spacer(modifier = Modifier.height(6.dp))
+                Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
             Text(
                 text = value,
@@ -230,7 +232,7 @@ fun StatTile(
                 color = valueColor,
                 maxLines = 1
             )
-            Spacer(modifier = Modifier.height(2.dp))
+            Spacer(modifier = Modifier.height(AppSpacing.xs))
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
@@ -241,7 +243,7 @@ fun StatTile(
     }
 }
 
-// ── 渐变卡片（首页特殊区域用） ────────────────────
+// ── 渐变卡片（首页特殊区域用）──
 @Composable
 fun GradientCard(
     gradientColors: List<Color>,
@@ -250,7 +252,7 @@ fun GradientCard(
 ) {
     Card(
         modifier = modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(20.dp),
+        shape = AppShapes.card,
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Box(
@@ -263,7 +265,7 @@ fun GradientCard(
     }
 }
 
-// ── 简易折线趋势图 ────────────────────────────────
+// ── 简易折线趋势图 ──
 @Composable
 fun Sparkline(
     values: List<Double>,
@@ -308,7 +310,7 @@ fun Sparkline(
     }
 }
 
-// ── 进度环（圆弧进度） ────────────────────────────
+// ── 进度环（圆弧进度）──
 @Composable
 fun ProgressRing(
     progress: Float,
@@ -337,7 +339,7 @@ fun ProgressRing(
     }
 }
 
-// ── 全宽大按钮 ────────────────────────────────────
+// ── 全宽大按钮（适老化 76dp）──
 @Composable
 fun BigButton(
     text: String,
@@ -351,24 +353,24 @@ fun BigButton(
     Button(
         onClick = onClick,
         enabled = enabled,
-        shape = RoundedCornerShape(18.dp),
+        shape = AppShapes.button,
         colors = ButtonDefaults.buttonColors(
             containerColor = container,
             contentColor = contentColor
         ),
         modifier = modifier
             .fillMaxWidth()
-            .height(60.dp)
+            .height(AppSize.bigButtonHeight)
     ) {
         if (icon != null) {
             Icon(icon, contentDescription = null, modifier = Modifier.size(22.dp))
-            Spacer(modifier = Modifier.width(8.dp))
+            Spacer(modifier = Modifier.width(AppSpacing.sm))
         }
         Text(text = text, style = MaterialTheme.typography.titleMedium)
     }
 }
 
-// ── 段落标题 ────────────────────────────────────────
+// ── 段落标题 ──
 @Composable
 fun SectionTitle(text: String, modifier: Modifier = Modifier) {
     Text(
@@ -376,11 +378,11 @@ fun SectionTitle(text: String, modifier: Modifier = Modifier) {
         style = MaterialTheme.typography.titleMedium,
         color = MaterialTheme.colorScheme.onBackground,
         fontWeight = FontWeight.SemiBold,
-        modifier = modifier.padding(top = 16.dp, bottom = 8.dp)
+        modifier = modifier.padding(top = AppSpacing.lg, bottom = AppSpacing.sm)
     )
 }
 
-// ── 列表项卡片 ────────────────────────────────────
+// ── 列表项卡片 ──
 @Composable
 fun ListItemCard(
     title: String,
@@ -394,25 +396,25 @@ fun ListItemCard(
         modifier = modifier
             .fillMaxWidth()
             .then(if (onClick != null) Modifier.clickable { onClick() } else Modifier),
-        shape = RoundedCornerShape(16.dp),
+        shape = AppShapes.chip,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
+            modifier = Modifier.padding(horizontal = AppSpacing.lg, vertical = AppSpacing.md)
         ) {
             if (icon != null) {
                 Box(
                     modifier = Modifier
                         .size(40.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(AppShapes.chip)
                         .background(MaterialTheme.colorScheme.primaryContainer),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(icon, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(22.dp))
                 }
-                Spacer(modifier = Modifier.width(12.dp))
+                Spacer(modifier = Modifier.width(AppSpacing.md))
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(text = title, style = MaterialTheme.typography.bodyLarge, fontWeight = FontWeight.Medium)
@@ -423,7 +425,7 @@ fun ListItemCard(
     }
 }
 
-// ── 信息条 ────────────────────────────────────────
+// ── 信息条 ──
 @Composable
 fun InfoBar(
     text: String,
@@ -435,9 +437,9 @@ fun InfoBar(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
+            .clip(AppShapes.chip)
             .background(containerColor)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
+            .padding(horizontal = AppSpacing.lg, vertical = AppSpacing.sm)
     ) {
         Text(
             text = text,
@@ -447,7 +449,7 @@ fun InfoBar(
     }
 }
 
-// ── 空状态占位 ────────────────────────────────────
+// ── 空状态占位 ──
 @Composable
 fun EmptyState(
     icon: ImageVector,
@@ -466,9 +468,9 @@ fun EmptyState(
             tint = MaterialTheme.colorScheme.outline,
             modifier = Modifier.size(56.dp)
         )
-        Spacer(modifier = Modifier.height(12.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.sm))
         Text(text = title, style = MaterialTheme.typography.titleMedium, color = MaterialTheme.colorScheme.onSurface)
-        Spacer(modifier = Modifier.height(4.dp))
+        Spacer(modifier = Modifier.height(AppSpacing.xs))
         Text(text = message, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
 }

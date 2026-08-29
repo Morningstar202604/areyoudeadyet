@@ -17,15 +17,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.VolumeUp
 import androidx.compose.material.icons.filled.Warning
@@ -69,6 +66,7 @@ import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
 import com.silema.app.ui.theme.CardGradientOrange
 import com.silema.app.ui.theme.CardGradientRed
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.riskColor
 import com.silema.app.util.TtsController
 import java.text.SimpleDateFormat
@@ -90,7 +88,6 @@ fun DashboardScreen(
     onGoMedical: () -> Unit = {}
 ) {
     val assessment = remember(records) { RiskEngine.evaluate(records) }
-    val showIntro by AppRepository.showIntroFlow.collectAsState()
     val latest = remember(records) {
         records.groupBy { it.typeId }.mapValues { (_, v) -> v.maxByOrNull { it.timestampMillis } }
     }
@@ -132,7 +129,7 @@ fun DashboardScreen(
                         hour < 18 -> "下午好"
                         else -> "晚上好"
                     }
-                    Text("$greeting 👋", style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
+                    Text(greeting, style = MaterialTheme.typography.headlineMedium, color = MaterialTheme.colorScheme.onBackground)
                     Text(
                         SimpleDateFormat("yyyy年M月d日 EEEE", Locale.CHINESE).format(Date()),
                         style = MaterialTheme.typography.bodyMedium,
@@ -145,59 +142,33 @@ fun DashboardScreen(
                 ) {
                     Icon(Icons.Filled.Settings, contentDescription = "设置", tint = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.size(24.dp))
                 }
-                Spacer(modifier = Modifier.width(8.dp))
-                IconButton(
-                    onClick = onGoSos,
-                    modifier = Modifier.size(52.dp).clip(CircleShape).background(BrandSoftRed)
-                ) {
-                    Icon(Icons.Filled.Phone, contentDescription = "SOS", tint = Color.White, modifier = Modifier.size(26.dp))
-                }
             }
         }
 
-        // ── 首次使用：加载演示数据 ──
-        if (showIntro) {
-            item {
-                Card(
-                    shape = RoundedCornerShape(20.dp),
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)
-                ) {
-                    Column(modifier = Modifier.padding(16.dp)) {
-                        Text("欢迎使用 死了吗？", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            "先加载 7 天演示数据体验全部功能（预警 / 趋势 / 报告），或直接开始录入真实数据。",
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                        Spacer(modifier = Modifier.height(10.dp))
-                        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
-                            OutlinedButton(onClick = {
-                                AppRepository.loadDemoData()
-                            }, modifier = Modifier.weight(1f)) { Text("加载演示数据") }
-                            OutlinedButton(onClick = {
-                                AppRepository.dismissIntro()
-                            }, modifier = Modifier.weight(1f)) { Text("开始记录") }
-                        }
-                    }
-                }
-            }
-        }
-
-        // ── 状态横幅 ──
+        // ── 状态横幅（空数据真实空态）──
         item {
-            StatusBanner(
-                level = assessment.level,
-                headline = assessment.level.label,
-                subline = if (assessment.alerts.isNotEmpty()) "有 ${assessment.alerts.size} 条预警需要关注" else "所有指标正常，继续保持",
-                icon = when (assessment.level) {
-                    RiskLevel.NORMAL -> Icons.Filled.Favorite
-                    RiskLevel.WATCH -> Icons.Filled.Info
-                    RiskLevel.WARNING -> Icons.Filled.Warning
-                    RiskLevel.CRITICAL -> Icons.Filled.Warning
-                },
-                gradientColors = statusGradient
-            )
+            if (records.isEmpty()) {
+                StatusBanner(
+                    level = RiskLevel.NORMAL,
+                    headline = "还没有测量数据",
+                    subline = "开始录入体征，这里会显示你的健康评估与预警",
+                    icon = Icons.Filled.Info,
+                    gradientColors = CardGradientBlue
+                )
+            } else {
+                StatusBanner(
+                    level = assessment.level,
+                    headline = assessment.level.label,
+                    subline = if (assessment.alerts.isNotEmpty()) "有 ${assessment.alerts.size} 条预警需要关注" else "所有指标正常，继续保持",
+                    icon = when (assessment.level) {
+                        RiskLevel.NORMAL -> Icons.Filled.Favorite
+                        RiskLevel.WATCH -> Icons.Filled.Info
+                        RiskLevel.WARNING -> Icons.Filled.Warning
+                        RiskLevel.CRITICAL -> Icons.Filled.Warning
+                    },
+                    gradientColors = statusGradient
+                )
+            }
         }
 
         // ── 危险时朗读按钮 ──
@@ -207,7 +178,7 @@ fun DashboardScreen(
                     onClick = {
                         tts.speak(assessment.alerts.joinToString("。") { "${it.metric}，${it.problem}，${it.action}" })
                     },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = AppShapes.chip,
                     modifier = Modifier.fillMaxWidth()
                 ) {
                     Icon(Icons.Filled.VolumeUp, contentDescription = null, modifier = Modifier.size(20.dp))
@@ -224,21 +195,21 @@ fun DashboardScreen(
             Triple("收缩压", VitalType.SYSTOLIC, Icons.Filled.Favorite),
             Triple("舒张压", VitalType.DIASTOLIC, Icons.Filled.Favorite)
         )
-        items(vitalCards.chunked(2)) { row ->
+        items(vitalCards.chunked(2), key = { it.joinToString("_") { t -> t.first } }) { row ->
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
                 row.forEach { (label, type, icon) ->
                     val record = latest[type.id]
                     val level = record?.let { RiskEngine.evaluate(listOf(it)).level }
-                    VitalCard(
-                        label = label,
-                        valueText = record?.let { "%.0f".format(it.value) } ?: "--",
-                        timeText = record?.let { SimpleDateFormat("HH:mm", Locale.US).format(Date(it.timestampMillis)) } ?: "待测量",
-                        noteText = null,
-                        level = level,
-                        icon = icon,
-                        modifier = Modifier.weight(1f),
-                        onClick = onGoEntry
-                    )
+                        VitalCard(
+                            label = label,
+                            valueText = record?.let { "%.0f".format(it.value) } ?: "--",
+                            timeText = record?.let { SimpleDateFormat("HH:mm", Locale.US).format(Date(it.timestampMillis)) } ?: "待测量",
+                            noteText = null,
+                            level = level,
+                            icon = icon,
+                            modifier = Modifier.weight(1f),
+                            onClick = {}
+                        )
                 }
             }
         }
@@ -277,13 +248,13 @@ fun DashboardScreen(
         item {
             SectionTitle("快捷操作")
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                QuickAction("录入", Icons.Filled.Add, BrandWarm, onGoEntry, Modifier.weight(1f))
                 QuickAction("设备", Icons.Filled.Build, BrandBlue, onGoDevices, Modifier.weight(1f))
+                QuickAction("AI 分析", Icons.Filled.Info, BrandGreen, onGoAi, Modifier.weight(1f))
             }
             Spacer(modifier = Modifier.height(10.dp))
             Row(horizontalArrangement = Arrangement.spacedBy(10.dp), modifier = Modifier.fillMaxWidth()) {
-                QuickAction("家人监护", Icons.Filled.Home, BrandGreen, onGoFamily, Modifier.weight(1f))
-                QuickAction("运动", Icons.Filled.DirectionsWalk, BrandWarm, onGoWorkout, Modifier.weight(1f))
+                QuickAction("医疗对接", Icons.Filled.DateRange, BrandWarm, onGoMedical, Modifier.weight(1f))
+                QuickAction("家人监护", Icons.Filled.Favorite, BrandBlue, onGoFamily, Modifier.weight(1f))
             }
         }
 
@@ -305,7 +276,7 @@ fun DashboardScreen(
             items(assessment.alerts) { alert ->
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = AppShapes.card,
                     colors = CardDefaults.cardColors(containerColor = riskColor(alert.level).copy(alpha = 0.08f))
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {

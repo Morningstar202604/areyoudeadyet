@@ -45,7 +45,20 @@ fun AiReportScreen(records: List<VitalRecord>) {
                     lastGeneratedAt = healthInsight.generatedAt
                 }
                 result.onFailure { e ->
-                    error = "分析失败：${e.message ?: e.javaClass.simpleName}"
+                    // 如果是 API Key 未配置或网络错误，自动降级到本地模式
+                    if (e.message?.contains("API Key") == true || e is java.net.UnknownHostException || e is java.net.SocketTimeoutException) {
+                        val localAnalyzer = com.silema.app.ai.LocalAiAnalyzer()
+                        val fallback = localAnalyzer.analyze(records, com.silema.app.ai.AnalysisContext())
+                        fallback.onSuccess { 
+                            insight = it
+                            error = "云端 API 不可用，已使用本地规则引擎"
+                        }
+                        fallback.onFailure { fallbackError ->
+                            error = "分析失败：${fallbackError.message ?: fallbackError.javaClass.simpleName}"
+                        }
+                    } else {
+                        error = "分析失败：${e.message ?: e.javaClass.simpleName}"
+                    }
                 }
             } catch (e: kotlinx.coroutines.CancellationException) {
                 throw e
@@ -216,7 +229,7 @@ fun AiReportScreen(records: List<VitalRecord>) {
                 item {
                     SectionTitle("检查发现")
                 }
-                items(data.findings) { finding ->
+                items(data.findings, key = { "${it.category}_${it.detail}" }) { finding ->
                     FindingCard(finding)
                 }
             }
@@ -226,7 +239,7 @@ fun AiReportScreen(records: List<VitalRecord>) {
                 item {
                     SectionTitle("健康建议")
                 }
-                items(data.recommendations) { recommendation ->
+                items(data.recommendations, key = { it }) { recommendation ->
                     Card(
                         modifier = Modifier.fillMaxWidth(),
                         shape = RoundedCornerShape(14.dp),
@@ -301,9 +314,6 @@ private fun FindingCard(finding: Finding) {
             Box(
                 modifier = Modifier
                     .size(8.dp)
-                    .let { mod ->
-                        mod.then(Modifier)
-                    }
                     .background(color, shape = CircleShape)
             )
             Spacer(modifier = Modifier.width(12.dp))

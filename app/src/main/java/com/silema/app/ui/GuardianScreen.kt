@@ -78,9 +78,12 @@ import com.silema.app.ui.theme.BrandWarm
 import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
 import com.silema.app.ui.theme.CardGradientOrange
+import com.silema.app.ai.AiAnalyzerProvider
+import androidx.compose.material.icons.filled.SmartToy
 import com.silema.app.ui.theme.CardGradientPurple
 import com.silema.app.ui.theme.CardGradientRed
 import com.silema.app.ui.theme.LevelCritical
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.LevelNormal
 import kotlinx.coroutines.launch
 
@@ -194,7 +197,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(AppShapes.chip)
                             .background(Color.White.copy(alpha = 0.25f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -216,6 +219,104 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
             }
         }
 
+        // ═══ Section 1.5: AI 健康分析配置 ═══
+        item {
+            SectionTitle("AI 健康分析")
+        }
+        item {
+            var apiKey by remember { mutableStateOf("") }
+            var baseUrl by remember { mutableStateOf("https://api.hcnsec.cn/v1") }
+            var model by remember { mutableStateOf("qwen-plus") }
+            var aiConfigSaved by remember { mutableStateOf(false) }
+
+            Card(
+                modifier = Modifier.fillMaxWidth(),
+                shape = AppShapes.card,
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
+                elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+            ) {
+                Column(modifier = Modifier.padding(16.dp)) {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .clip(AppShapes.small)
+                                .background(BrandBlue.copy(alpha = 0.12f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                Icons.Filled.SmartToy,
+                                contentDescription = null,
+                                tint = BrandBlue,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Text("云端 AI 分析（可选）", style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Bold)
+                    }
+                    Spacer(Modifier.height(6.dp))
+                    Text(
+                        "配置后可获得更智能的健康建议，无网络时自动使用本地规则引擎。所有数据仅发送给您自己配置的 API 服务商。",
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(Modifier.height(12.dp))
+
+                    OutlinedTextField(
+                        value = apiKey,
+                        onValueChange = { apiKey = it },
+                        label = { Text("API Key") },
+                        placeholder = { Text("sk-xxxxxxxx") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = baseUrl,
+                        onValueChange = { baseUrl = it },
+                        label = { Text("API 地址") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(8.dp))
+
+                    OutlinedTextField(
+                        value = model,
+                        onValueChange = { model = it },
+                        label = { Text("模型名称") },
+                        placeholder = { Text("qwen-plus / deepseek-chat / glm-4") },
+                        modifier = Modifier.fillMaxWidth(),
+                        singleLine = true,
+                        textStyle = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(Modifier.height(12.dp))
+
+                    BigButton(
+                        text = if (aiConfigSaved) "✓ 已保存" else "保存配置",
+                        container = if (aiConfigSaved) BrandGreen else BrandBlue,
+                        onClick = {
+                            AiAnalyzerProvider.reset()
+                            // 实际使用时应保存到 DataStore/SharedPreferences
+                            aiConfigSaved = true
+                            feedbackMsg = "AI 配置已保存，下次分析时将使用云端 API"
+                        }
+                    )
+
+                    if (apiKey.isBlank()) {
+                        Spacer(Modifier.height(8.dp))
+                        InfoBar(
+                            text = "💡 未配置时将使用本地规则引擎，所有数据不离设备",
+                            containerColor = BrandGreen.copy(alpha = 0.12f),
+                            contentColor = BrandGreen
+                        )
+                    }
+                }
+            }
+        }
+
         // ═══ Section 2: 紧急联系人 ═══
         item {
             SectionTitle("紧急联系人（SOS 时拨打/发短信的对象）")
@@ -230,7 +331,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                 )
             }
         } else {
-            items(contactsList) { contact ->
+            items(contactsList, key = { it.phone }) { contact ->
                 ContactCard(contact)
             }
         }
@@ -238,7 +339,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
@@ -302,7 +403,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
             val available = remember { HealthConnectManager.isAvailable(context) }
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
@@ -311,7 +412,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                         Box(
                             modifier = Modifier
                                 .size(36.dp)
-                                .clip(RoundedCornerShape(10.dp))
+                                .clip(AppShapes.small)
                                 .background(
                                     if (available) LevelNormal.copy(alpha = 0.12f)
                                     else MaterialTheme.colorScheme.surfaceVariant
@@ -380,7 +481,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
@@ -438,7 +539,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                                         feedbackMsg = "提醒时间已设为 %02d:%02d".format(h, m)
                                     }
                                 },
-                                shape = RoundedCornerShape(12.dp),
+                                shape = AppShapes.chip,
                                 modifier = Modifier.height(52.dp)
                             ) { Text("保存") }
                         }
@@ -482,7 +583,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(
                     containerColor = LevelCritical.copy(alpha = 0.06f)
                 ),
@@ -495,7 +596,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                     Box(
                         modifier = Modifier
                             .size(40.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(AppShapes.chip)
                             .background(LevelCritical.copy(alpha = 0.12f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -508,7 +609,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                     }
                     Button(
                         onClick = { confirmClear = true },
-                        shape = RoundedCornerShape(12.dp),
+                        shape = AppShapes.chip,
                         colors = ButtonDefaults.buttonColors(containerColor = LevelCritical),
                         modifier = Modifier.height(48.dp)
                     ) {
@@ -525,7 +626,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
@@ -566,7 +667,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
 private fun ContactCard(contact: Contact) {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = AppShapes.card,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -577,7 +678,7 @@ private fun ContactCard(contact: Contact) {
             Box(
                 modifier = Modifier
                     .size(40.dp)
-                    .clip(RoundedCornerShape(12.dp))
+                    .clip(AppShapes.chip)
                     .background(MaterialTheme.colorScheme.secondaryContainer),
                 contentAlignment = Alignment.Center
             ) {

@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">Are You Dead Yet?</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">Health Home</string>
+    <string name="home_no_data">No measurement data yet</string>
+    <string name="home_alerts_count">%d alerts need attention</string>
+    <string name="home_all_normal">All indicators normal, keep it up</string>
+    <string name="home_tap_to_enter">Tap below to enter vitals</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">Enter Vitals</string>
+    <string name="entry_heart_rate">Heart Rate</string>
+    <string name="entry_blood_pressure">Blood Pressure</string>
+    <string name="entry_oxygen">Blood Oxygen</string>
+    <string name="entry_temperature">Temperature</string>
+    <string name="entry_steps">Steps</string>
+    <string name="entry_save">Save</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">SOS Emergency</string>
+    <string name="sos_button">SOS</string>
+    <string name="sos_notifying">Notifying family...</string>
+    <string name="sos_confirmed">Family notified</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">Activity</string>
+    <string name="workout_today_steps">Today\'s Steps</string>
+    <string name="workout_weekly_count">This Week</string>
+    <string name="workout_duration">Duration (min)</string>
+    <string name="workout_save">Save</string>
+
+    <!-- AI Brief Screen -->
+    <string name="ai_title">AI Brief</string>
+    <string name="ai_loading">Generating report...</string>
+    <string name="ai_risk_level">Risk Level</string>
+
+    <!-- Common -->
+    <string name="common_cancel">Cancel</string>
+    <string name="common_confirm">Confirm</string>
+    <string name="common_back">Back</string>
+    <string name="common_save">Save</string>
+</resources>

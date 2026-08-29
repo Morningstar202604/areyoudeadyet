@@ -28,6 +28,7 @@ import com.silema.app.ui.components.InfoBar
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.LevelNormal
 import java.io.File
 
@@ -99,14 +100,14 @@ fun MedicalScreen(records: List<VitalRecord>) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.size(44.dp).background(BrandBlue.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                            modifier = Modifier.size(44.dp).background(BrandBlue.copy(alpha = 0.12f), AppShapes.chip),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Filled.DataObject, contentDescription = null, tint = BrandBlue, modifier = Modifier.size(24.dp))
@@ -145,14 +146,14 @@ fun MedicalScreen(records: List<VitalRecord>) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.size(44.dp).background(BrandGreen.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                            modifier = Modifier.size(44.dp).background(BrandGreen.copy(alpha = 0.12f), AppShapes.chip),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Filled.Description, contentDescription = null, tint = BrandGreen, modifier = Modifier.size(24.dp))
@@ -186,14 +187,14 @@ fun MedicalScreen(records: List<VitalRecord>) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Box(
-                            modifier = Modifier.size(44.dp).background(BrandPurple.copy(alpha = 0.12f), RoundedCornerShape(12.dp)),
+                            modifier = Modifier.size(44.dp).background(BrandPurple.copy(alpha = 0.12f), AppShapes.chip),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(Icons.Filled.DateRange, contentDescription = null, tint = BrandPurple, modifier = Modifier.size(24.dp))
@@ -228,7 +229,7 @@ fun MedicalScreen(records: List<VitalRecord>) {
                 val tint = if (messageOk) LevelNormal else MaterialTheme.colorScheme.error
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AppShapes.chip,
                     colors = CardDefaults.cardColors(containerColor = tint.copy(alpha = 0.08f))
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(14.dp)) {

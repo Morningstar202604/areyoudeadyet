@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">死んだ？</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">健康ホーム</string>
+    <string name="home_no_data">測定データがありません</string>
+    <string name="home_alerts_count">%d 件のアラートに注意が必要です</string>
+    <string name="home_all_normal">すべての指標が正常です。この調子で続けてください</string>
+    <string name="home_tap_to_enter">下をタップしてバイタルを入力</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">バイタル入力</string>
+    <string name="entry_heart_rate">心拍数</string>
+    <string name="entry_blood_pressure">血圧</string>
+    <string name="entry_oxygen">血中酸素</string>
+    <string name="entry_temperature">体温</string>
+    <string name="entry_steps">歩数</string>
+    <string name="entry_save">保存</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">SOS 緊急</string>
+    <string name="sos_button">SOS</string>
+    <string name="sos_notifying">家族に通知中...</string>
+    <string name="sos_confirmed">家族に通知済み</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">アクティビティ</string>
+    <string name="workout_today_steps">今日の歩数</string>
+    <string name="workout_weekly_count">今週</string>
+    <string name="workout_duration">時間（分）</string>
+    <string name="workout_save">保存</string>
+
+    <!-- AI Brief Screen -->
+    <string name="ai_title">AI ブリーフ</string>
+    <string name="ai_loading">レポート生成中...</string>
+    <string name="ai_risk_level">リスクレベル</string>
+
+    <!-- Common -->
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_confirm">確認</string>
+    <string name="common_back">戻る</string>
+    <string name="common_save">保存</string>
+</resources>

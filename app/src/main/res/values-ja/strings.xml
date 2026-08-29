@@ -1,0 +1,133 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">死んだ？</string>
+
+    <!-- Navigation -->
+    <string name="nav_monitoring">モニタリング</string>
+    <string name="nav_devices">デバイス</string>
+    <string name="nav_reports">レポート</string>
+    <string name="nav_family">家族</string>
+    <string name="nav_more">その他</string>
+
+    <!-- Dashboard Screen -->
+    <string name="dashboard_title">健康ガード</string>
+    <string name="dashboard_status_normal">正常</string>
+    <string name="dashboard_status_attention">注意必要</string>
+    <string name="dashboard_status_warning">警告</string>
+    <string name="dashboard_status_danger">危険</string>
+    <string name="dashboard_no_data">測定データがありません</string>
+    <string name="dashboard_alerts_count">%d 件のアラートに注意が必要です</string>
+    <string name="dashboard_all_normal">すべての指標が正常です。この調子で続けてください</string>
+    <string name="dashboard_vitals">バイタルサイン</string>
+    <string name="dashboard_trends">トレンド分析</string>
+    <string name="dashboard_quick_actions">クイックアクション</string>
+    <string name="dashboard_load_demo">7日間のデモデータを読み込む</string>
+    <string name="dashboard_clear_data">すべてのデータを消去</string>
+
+    <!-- Vital Types -->
+    <string name="vital_heart_rate">心拍数</string>
+    <string name="vital_blood_pressure">血圧</string>
+    <string name="vital_oxygen">血中酸素</string>
+    <string name="vital_temperature">体温</string>
+    <string name="vital_steps">歩数</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_fahrenheit">°F</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">バイタル入力</string>
+    <string name="entry_select_type">タイプを選択</string>
+    <string name="entry_value">値</string>
+    <string name="entry_save">保存</string>
+    <string name="entry_history">履歴</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">健康レポート</string>
+    <string name="report_weekly">週間レポート</string>
+    <string name="report_sleep">睡眠記録</string>
+    <string name="report_trends_tab">トレンド</string>
+    <string name="report_this_week">今週</string>
+    <string name="report_last_week">先週</string>
+    <string name="report_summary">概要</string>
+
+    <!-- Family Screen -->
+    <string name="family_title">リモートモニタリング</string>
+    <string name="family_empty">家族メンバーが追加されていません</string>
+    <string name="family_add_member">家族を追加</string>
+    <string name="family_sync_required">リアルタイムモニタリングにはバックエンド設定が必要です</string>
+
+    <!-- Devices Screen -->
+    <string name="devices_title">デバイスセンター</string>
+    <string name="devices_ppg">カメラ PPG</string>
+    <string name="devices_ble">Bluetooth LE</string>
+    <string name="devices_iot">IoT デバイス</string>
+    <string name="devices_connect_watch">ウォッチを接続</string>
+
+    <!-- AI Report Screen -->
+    <string name="ai_title">AI 健康分析</string>
+    <string name="ai_risk_score">リスクスコア</string>
+    <string name="ai_findings">所見</string>
+    <string name="ai_recommendations">推奨事項</string>
+    <string name="ai_running_on_device">端末で実行、クラウド不要</string>
+
+    <!-- Medical Screen -->
+    <string name="medical_title">医療記録</string>
+    <string name="medical_export_fhir">FHIR R4 エクスポート</string>
+    <string name="medical_share_report">健康レポートを共有</string>
+    <string name="medical_compatible">病院の HIS/EHR システムと互換性あり</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">アクティビティ追跡</string>
+    <string name="workout_start">開始</string>
+    <string name="workout_stop">停止</string>
+    <string name="workout_distance">距離</string>
+    <string name="workout_pace">ペース</string>
+    <string name="workout_calories">カロリー</string>
+    <string name="workout_gps_tracking">GPS 追跡中</string>
+
+    <!-- Guardian Screen (Settings) -->
+    <string name="guardian_title">設定</string>
+    <string name="guardian_remote_sync">リモート同期</string>
+    <string name="guardian_contacts">緊急連絡先</string>
+    <string name="guardian_reminders">リマインダー</string>
+    <string name="guardian_data_management">データ管理</string>
+    <string name="guardian_measurement_reminder">測定リマインダー</string>
+    <string name="guardian_sedentary_reminder">座りすぎ注意</string>
+
+    <!-- More Screen -->
+    <string name="more_title">機能センター</string>
+    <string name="more_detection">検出</string>
+    <string name="more_exercise">運動</string>
+    <string name="more_ai_analysis">AI 分析</string>
+    <string name="more_medical">医療</string>
+    <string name="more_settings">設定</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">緊急 SOS</string>
+    <string name="sos_call_120">119番通報</string>
+    <string name="sos_call_family">家族に連絡</string>
+    <string name="sos_send_sms">バイタル付き SMS 送信</string>
+    <string name="sos_confirm">大丈夫です</string>
+    <string name="sos_notifying">家族に通知中...</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_normal">正常</string>
+    <string name="risk_attention">注意</string>
+    <string name="risk_warning">警告</string>
+    <string name="risk_danger">危険</string>
+
+    <!-- Common -->
+    <string name="common_cancel">キャンセル</string>
+    <string name="common_confirm">確認</string>
+    <string name="common_delete">削除</string>
+    <string name="common_edit">編集</string>
+    <string name="common_save">保存</string>
+    <string name="common_loading">読み込み中...</string>
+    <string name="common_error">エラー</string>
+    <string name="common_success">成功</string>
+    <string name="common_retry">再試行</string>
+</resources>

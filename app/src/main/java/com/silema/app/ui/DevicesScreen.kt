@@ -60,7 +60,9 @@ import com.silema.app.ppg.PpgMeasureSection
 import com.silema.app.store.AppRepository
 import com.silema.app.ui.components.GradientCard
 import com.silema.app.ui.components.ListItemCard
+import com.silema.app.ui.components.InfoBar
 import com.silema.app.ui.components.SectionTitle
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
@@ -73,6 +75,7 @@ import com.silema.app.ui.theme.LevelNormal
 
 @Composable
 fun DevicesScreen(onClose: () -> Unit) {
+    val records by AppRepository.records.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()
@@ -107,7 +110,7 @@ fun DevicesScreen(onClose: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(AppShapes.chip)
                             .background(Color.White.copy(alpha = 0.25f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -155,7 +158,7 @@ fun DevicesScreen(onClose: () -> Unit) {
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(AppShapes.chip)
                             .background(Color.White.copy(alpha = 0.25f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -179,7 +182,7 @@ fun DevicesScreen(onClose: () -> Unit) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.chip,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
             ) {
@@ -190,7 +193,7 @@ fun DevicesScreen(onClose: () -> Unit) {
                     )
                     Spacer(modifier = Modifier.height(6.dp))
                     Text(
-                        text = "共 ${AppRepository.records.value.size} 条本地记录",
+                        text = "共 ${records.size} 条本地记录",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
@@ -233,7 +236,7 @@ fun DevicesScreen(onClose: () -> Unit) {
 private fun DeviceTypeCard(item: DeviceTypeItem, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(16.dp),
+        shape = AppShapes.chip,
         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
     ) {
@@ -304,7 +307,7 @@ private fun BleSection() {
 
     Card(
         modifier = Modifier.fillMaxWidth(),
-        shape = RoundedCornerShape(16.dp),
+        shape = AppShapes.chip,
         colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
         elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
     ) {
@@ -317,13 +320,10 @@ private fun BleSection() {
                         pendingScan = true
                         permissionLauncher.launch(neededPermissions)
                     } else {
-                        val msg = BleVitals.startScan(context)
-                        if (msg != "扫描中… 请让设备进入配对/广播模式") {
-                            BleVitals.stopScan(context)
-                        }
+                        BleVitals.startScan(context)
                     }
                 },
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.chip,
                 colors = ButtonDefaults.buttonColors(
                     containerColor = if (scanning) MaterialTheme.colorScheme.error else BrandBlue
                 ),
@@ -362,7 +362,7 @@ private fun BleSection() {
             found.forEach { device ->
                 Spacer(modifier = Modifier.height(6.dp))
                 Card(
-                    shape = RoundedCornerShape(12.dp),
+                    shape = AppShapes.chip,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant)
                 ) {
                     Row(
@@ -379,7 +379,7 @@ private fun BleSection() {
                         }
                         Button(
                             onClick = { BleVitals.connect(context, device.address) },
-                            shape = RoundedCornerShape(12.dp),
+                            shape = AppShapes.chip,
                             enabled = !scanning,
                             contentPadding = ButtonDefaults.TextButtonContentPadding,
                             modifier = Modifier.height(44.dp)
@@ -410,7 +410,7 @@ private fun BleSection() {
                 Spacer(modifier = Modifier.height(10.dp))
                 Button(
                     onClick = { BleVitals.disconnect() },
-                    shape = RoundedCornerShape(14.dp),
+                    shape = AppShapes.chip,
                     colors = ButtonDefaults.buttonColors(
                         containerColor = MaterialTheme.colorScheme.surfaceVariant,
                         contentColor = MaterialTheme.colorScheme.onSurfaceVariant
@@ -426,24 +426,6 @@ private fun BleSection() {
     }
 
     Spacer(modifier = Modifier.height(6.dp))
-}
-
-@Composable
-private fun InfoBar(
-    text: String,
-    containerColor: Color = MaterialTheme.colorScheme.secondaryContainer,
-    contentColor: Color = MaterialTheme.colorScheme.onSecondaryContainer
-) {
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(containerColor)
-            .padding(horizontal = 14.dp, vertical = 10.dp)
-    ) {
-        Text(text = text, style = MaterialTheme.typography.bodySmall, color = contentColor)
-    }
 }
 
 private fun formatLive(v: Double): String =

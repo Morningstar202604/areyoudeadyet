@@ -1,0 +1,133 @@
+<resources>
+    <!-- App Name -->
+    <string name="app_name">死了吗？</string>
+
+    <!-- Navigation -->
+    <string name="nav_monitoring">监护</string>
+    <string name="nav_devices">设备</string>
+    <string name="nav_reports">报告</string>
+    <string name="nav_family">家人</string>
+    <string name="nav_more">更多</string>
+
+    <!-- Dashboard Screen -->
+    <string name="dashboard_title">健康守护</string>
+    <string name="dashboard_status_normal">一切正常</string>
+    <string name="dashboard_status_attention">需要注意</string>
+    <string name="dashboard_status_warning">警告</string>
+    <string name="dashboard_status_danger">危险</string>
+    <string name="dashboard_no_data">还没有测量数据</string>
+    <string name="dashboard_alerts_count">有 %d 条预警需关注</string>
+    <string name="dashboard_all_normal">所有指标正常，继续保持</string>
+    <string name="dashboard_vitals">体征数据</string>
+    <string name="dashboard_trends">趋势分析</string>
+    <string name="dashboard_quick_actions">快捷操作</string>
+    <string name="dashboard_load_demo">加载 7 天演示数据</string>
+    <string name="dashboard_clear_data">清空所有数据</string>
+
+    <!-- Vital Types -->
+    <string name="vital_heart_rate">心率</string>
+    <string name="vital_blood_pressure">血压</string>
+    <string name="vital_oxygen">血氧</string>
+    <string name="vital_temperature">体温</string>
+    <string name="vital_steps">步数</string>
+
+    <!-- Units -->
+    <string name="unit_bpm">次/分</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_celsius">°C</string>
+    <string name="unit_fahrenheit">°F</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">录入体征</string>
+    <string name="entry_select_type">选择类型</string>
+    <string name="entry_value">数值</string>
+    <string name="entry_save">保存</string>
+    <string name="entry_history">历史记录</string>
+
+    <!-- Report Screen -->
+    <string name="report_title">健康报告</string>
+    <string name="report_weekly">周报</string>
+    <string name="report_sleep">睡眠记录</string>
+    <string name="report_trends_tab">趋势</string>
+    <string name="report_this_week">本周</string>
+    <string name="report_last_week">上周</string>
+    <string name="report_summary">总结</string>
+
+    <!-- Family Screen -->
+    <string name="family_title">远程监护</string>
+    <string name="family_empty">还未添加家人</string>
+    <string name="family_add_member">添加家人</string>
+    <string name="family_sync_required">实时监护需要配置后端</string>
+
+    <!-- Devices Screen -->
+    <string name="devices_title">设备中心</string>
+    <string name="devices_ppg">摄像头 PPG</string>
+    <string name="devices_ble">蓝牙设备</string>
+    <string name="devices_iot">IoT 设备</string>
+    <string name="devices_connect_watch">连接手表</string>
+
+    <!-- AI Report Screen -->
+    <string name="ai_title">AI 健康分析</string>
+    <string name="ai_risk_score">风险评分</string>
+    <string name="ai_findings">发现</string>
+    <string name="ai_recommendations">建议</string>
+    <string name="ai_running_on_device">端侧运行，无需云端</string>
+
+    <!-- Medical Screen -->
+    <string name="medical_title">医疗记录</string>
+    <string name="medical_export_fhir">导出 FHIR R4</string>
+    <string name="medical_share_report">分享健康报告</string>
+    <string name="medical_compatible">兼容医院 HIS/EHR 系统</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">运动追踪</string>
+    <string name="workout_start">开始</string>
+    <string name="workout_stop">停止</string>
+    <string name="workout_distance">距离</string>
+    <string name="workout_pace">配速</string>
+    <string name="workout_calories">卡路里</string>
+    <string name="workout_gps_tracking">GPS 追踪中</string>
+
+    <!-- Guardian Screen (Settings) -->
+    <string name="guardian_title">设置</string>
+    <string name="guardian_remote_sync">远程同步</string>
+    <string name="guardian_contacts">紧急联系人</string>
+    <string name="guardian_reminders">提醒设置</string>
+    <string name="guardian_data_management">数据管理</string>
+    <string name="guardian_measurement_reminder">测量提醒</string>
+    <string name="guardian_sedentary_reminder">久坐提醒</string>
+
+    <!-- More Screen -->
+    <string name="more_title">功能中心</string>
+    <string name="more_detection">检测</string>
+    <string name="more_exercise">运动</string>
+    <string name="more_ai_analysis">AI 分析</string>
+    <string name="more_medical">医疗</string>
+    <string name="more_settings">设置</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">紧急呼救</string>
+    <string name="sos_call_120">拨打 120</string>
+    <string name="sos_call_family">联系家人</string>
+    <string name="sos_send_sms">发送体征短信</string>
+    <string name="sos_confirm">我没事</string>
+    <string name="sos_notifying">正在通知家人...</string>
+
+    <!-- Risk Levels -->
+    <string name="risk_normal">正常</string>
+    <string name="risk_attention">注意</string>
+    <string name="risk_warning">警告</string>
+    <string name="risk_danger">危险</string>
+
+    <!-- Common -->
+    <string name="common_cancel">取消</string>
+    <string name="common_confirm">确认</string>
+    <string name="common_delete">删除</string>
+    <string name="common_edit">编辑</string>
+    <string name="common_save">保存</string>
+    <string name="common_loading">加载中...</string>
+    <string name="common_error">错误</string>
+    <string name="common_success">成功</string>
+    <string name="common_retry">重试</string>
+</resources>

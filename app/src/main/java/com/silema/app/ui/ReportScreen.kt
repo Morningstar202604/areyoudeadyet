@@ -141,7 +141,7 @@ private fun TrendTab(records: List<VitalRecord>) {
             SectionTitle("${chartName(selected)} 走势")
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
@@ -194,7 +194,7 @@ private fun TrendTab(records: List<VitalRecord>) {
             SectionTitle("近 7 天小结")
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
@@ -231,7 +231,7 @@ private fun TrendTab(records: List<VitalRecord>) {
                 )
             }
         } else {
-            items(history) { rec ->
+            items(history, key = { "${it.typeId}_${it.timestampMillis}" }) { rec ->
                 val t = rec.type ?: return@items
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -292,7 +292,7 @@ private fun WeeklyTab(records: List<VitalRecord>) {
             SectionTitle("一句话总结")
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(16.dp),
+                shape = AppShapes.card,
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
@@ -321,7 +321,7 @@ private fun WeeklyTab(records: List<VitalRecord>) {
             item {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(16.dp),
+                    shape = AppShapes.card,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
@@ -357,17 +357,18 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                                     modifier = Modifier.weight(1f),
                                     textAlign = androidx.compose.ui.text.style.TextAlign.End
                                 )
+                                val delta = m.deltaPct
                                 Text(
                                     when {
-                                        m.deltaPct == null -> "—"
-                                        kotlin.math.abs(m.deltaPct) < 2 -> "持平"
-                                        else -> "${if (m.deltaPct > 0) "↑" else "↓"} ${fmt(kotlin.math.abs(m.deltaPct))}%"
+                                        delta == null -> "—"
+                                        kotlin.math.abs(delta) < 2 -> "持平"
+                                        else -> "${if (delta > 0) "↑" else "↓"} ${fmt(kotlin.math.abs(delta))}%"
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = when {
-                                        m.deltaPct == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        m.deltaPct > 2 -> MaterialTheme.colorScheme.error
-                                        m.deltaPct < -2 -> LevelNormal
+                                        delta == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        delta > 2 -> MaterialTheme.colorScheme.error
+                                        delta < -2 -> LevelNormal
                                         else -> MaterialTheme.colorScheme.onSurfaceVariant
                                     },
                                     modifier = Modifier.weight(1f),
@@ -452,7 +453,7 @@ private fun SleepTab(records: List<VitalRecord>) {
         item {
             Card(
                 modifier = Modifier.fillMaxWidth(),
-                shape = RoundedCornerShape(20.dp),
+                shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
                 colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
             ) {
@@ -513,7 +514,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                         Spacer(modifier = Modifier.height(10.dp))
                         Card(
                             modifier = Modifier.fillMaxWidth(),
-                            shape = RoundedCornerShape(12.dp),
+                            shape = AppShapes.chip,
                             colors = CardDefaults.cardColors(
                                 containerColor = if (m.startsWith("已")) LevelNormal.copy(alpha = 0.08f)
                                 else LevelWarning.copy(alpha = 0.08f)
@@ -551,7 +552,7 @@ private fun SleepTab(records: List<VitalRecord>) {
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
-                    shape = RoundedCornerShape(14.dp),
+                    shape = AppShapes.chip,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                     elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
                 ) {
@@ -562,7 +563,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                         Box(
                             modifier = Modifier
                                 .size(40.dp)
-                                .background(qualityColor.copy(alpha = 0.12f), RoundedCornerShape(10.dp)),
+                                .background(qualityColor.copy(alpha = 0.12f), AppShapes.small),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -612,7 +613,7 @@ private fun TrendChip(label: String, selected: Boolean, onClick: () -> Unit, mod
 
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(10.dp),
+        shape = AppShapes.small,
         colors = CardDefaults.cardColors(containerColor = bgColor),
         onClick = onClick
     ) {
@@ -636,7 +637,7 @@ private fun TrendChip(label: String, selected: Boolean, onClick: () -> Unit, mod
 private fun StatMiniTile(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
     Card(
         modifier = modifier,
-        shape = RoundedCornerShape(12.dp),
+        shape = AppShapes.chip,
         colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
     ) {
         Column(

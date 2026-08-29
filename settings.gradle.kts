@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "silema"
-include(":app")
+include(":app", ":core", ":wear")

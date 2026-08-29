@@ -7,13 +7,9 @@ object RemoteSyncProvider {
 
     fun get(context: Context): RemoteSync {
         instance?.let { return it }
-        val config = RemoteConfig.load(context)
-        val impl: RemoteSync = when {
-            !config.enabled -> MockRemoteSync()
-            config.provider == "mock" -> MockRemoteSync()
-            else -> MockRemoteSync() // Companies replace this branch with their implementation
-        }
-        impl.init(config)
+        // 真实本地能力：FHIR 导出到本机文件 + 系统分享；非云端实时监护。
+        val impl: RemoteSync = LocalExportSync(context)
+        impl.init(RemoteConfig())
         instance = impl
         return impl
     }

@@ -1,0 +1,43 @@
+<resources>
+    <string name="app_name">死了吗？</string>
+
+    <!-- Home Screen -->
+    <string name="home_title">健康首页</string>
+    <string name="home_no_data">还没有测量数据</string>
+    <string name="home_alerts_count">有 %d 条预警需关注</string>
+    <string name="home_all_normal">所有指标正常，继续保持</string>
+    <string name="home_tap_to_enter">点下方录入体征</string>
+
+    <!-- Entry Screen -->
+    <string name="entry_title">录入体征</string>
+    <string name="entry_heart_rate">心率</string>
+    <string name="entry_blood_pressure">血压</string>
+    <string name="entry_oxygen">血氧</string>
+    <string name="entry_temperature">体温</string>
+    <string name="entry_steps">步数</string>
+    <string name="entry_save">保存</string>
+
+    <!-- SOS Screen -->
+    <string name="sos_title">SOS 求救</string>
+    <string name="sos_button">SOS</string>
+    <string name="sos_notifying">正在通知家人...</string>
+    <string name="sos_confirmed">已通知家人</string>
+
+    <!-- Workout Screen -->
+    <string name="workout_title">运动</string>
+    <string name="workout_today_steps">今日步数</string>
+    <string name="workout_weekly_count">本周次数</string>
+    <string name="workout_duration">时长（分钟）</string>
+    <string name="workout_save">保存</string>
+
+    <!-- AI Brief Screen -->
+    <string name="ai_title">AI 简报</string>
+    <string name="ai_loading">生成报告中...</string>
+    <string name="ai_risk_level">风险等级</string>
+
+    <!-- Common -->
+    <string name="common_cancel">取消</string>
+    <string name="common_confirm">确认</string>
+    <string name="common_back">返回</string>
+    <string name="common_save">保存</string>
+</resources>
