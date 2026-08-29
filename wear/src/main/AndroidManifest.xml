@@ -3,6 +3,16 @@
     package="com.silema.app.wear">
 
     <uses-feature android:name="android.hardware.type.watch" />
+    
+    <!-- BLE permissions -->
+    <uses-permission android:name="android.permission.BLUETOOTH" />
+    <uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_SCAN" />
+    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
+    
+    <!-- Health Connect permissions -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+    <uses-permission android:name="android.permission.health.READ_STEPS" />
 
     <application>
         <activity
@@ -15,6 +25,11 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+        
+        <!-- Health Connect capability declaration -->
+        <meta-data
+            android:name="androidx.health.connect.client.capabilities"
+            android:resource="@xml/health_connect_capabilities" />
     </application>
 
 </manifest>
