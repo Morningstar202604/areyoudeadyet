@@ -40,4 +40,10 @@
     <string name="common_confirm">Confirm</string>
     <string name="common_back">Back</string>
     <string name="common_save">Save</string>
+    
+    <!-- Units -->
+    <string name="unit_bpm">bpm</string>
+    <string name="unit_mmhg">mmHg</string>
+    <string name="unit_percent">%</string>
+    <string name="unit_celsius">°C</string>
 </resources>

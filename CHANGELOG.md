@@ -7,10 +7,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 ## [Unreleased]
 
 ### Added
+- **Wear OS BLE device support**: Auto-scan and connect heart rate belts (0x180D), blood pressure monitors (0x1810), pulse oximeters (0x1822)
+- **Health Connect sync infrastructure**: Ready for phone/wearable data synchronization
+- **PPG analyzer in core module**: Shared heart rate algorithm for both phone and watch
 - Multi-language support: English, 简体中文, 日本語
 - Wear OS main product with 5 screens (Home, Entry, SOS, Workout, AI Brief)
 - Phone guardian app modernized (removed elderly self-use screens)
-- Three-platform deployment: GitHub, Gitee, GitLab
+- Three-platform deployment: GitHub, Gitee, GitCode
 - CONTRIBUTING.md with detailed guidelines
 - ISSUE_TEMPLATE for bugs and features
 - PULL_REQUEST_TEMPLATE
@@ -20,10 +23,13 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - README.md completely rewritten with professional branding
 - All UI strings externalized to resources files
 - Enhanced SEO keywords in README
+- MainActivity now auto-starts BLE scanning on Wear OS
 
 ### Fixed
 - Hardcoded Chinese text replaced with string resources
 - Inconsistent naming across modules
+- VitalType display names now properly localized on Wear OS
+- BLE permissions handling for Android 12+ (API 31+)
 
 ## [v0.5.0] - 2026-08-29
 
