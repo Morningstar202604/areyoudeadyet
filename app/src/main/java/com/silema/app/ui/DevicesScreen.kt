@@ -56,8 +56,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.silema.app.ble.BleVitals
-import com.silema.app.ppg.PpgMeasureSection
 import com.silema.app.store.AppRepository
+import com.silema.app.ui.ppg.PpgMeasureSection
 import com.silema.app.ui.components.GradientCard
 import com.silema.app.ui.components.ListItemCard
 import com.silema.app.ui.components.InfoBar

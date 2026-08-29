@@ -1,4 +1,4 @@
-package com.silema.app.ppg
+package com.silema.app.ui.ppg
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -25,6 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -38,17 +39,14 @@ import androidx.compose.ui.unit.dp
 import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
+import com.silema.app.engine.StressMath
+import com.silema.app.ppg.PpgAnalyzer
 import com.silema.app.store.AppRepository
-import androidx.compose.foundation.layout.Box
 import com.silema.app.ui.components.BigButton
+import kotlinx.coroutines.delay
 
 private const val MEASURE_SECONDS = 30
 
-/**
- * 相机 PPG 实测（纯 camera2 实现，无第三方相机库）：
- * 后置摄像头 + 常亮闪光灯，手指按压镜头，
- * 逐帧估计红色通道均值 → PpgAnalyzer → 心率 / HRV。
- */
 @Composable
 fun PpgMeasureSection() {
     val context = LocalContext.current
@@ -61,7 +59,6 @@ fun PpgMeasureSection() {
 
     val analyzer = remember { PpgAnalyzer() }
 
-    // CAMERA 是危险权限，必须运行时申请后才能 openCamera
     val cameraPermissionLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
         androidx.activity.result.contract.ActivityResultContracts.RequestPermission()
     ) { granted ->
@@ -73,7 +70,6 @@ fun PpgMeasureSection() {
         }
     }
 
-    // 会话资源（在 DisposableEffect 中创建与销毁）
     DisposableEffect(measuring) {
         var thread: HandlerThread? = null
         var device: CameraDevice? = null
@@ -151,11 +147,10 @@ fun PpgMeasureSection() {
         }
     }
 
-    // 倒计时与结束判定
     if (measuring) {
-        androidx.compose.runtime.LaunchedEffect(Unit) {
+        LaunchedEffect(Unit) {
             while (elapsedSec < MEASURE_SECONDS) {
-                kotlinx.coroutines.delay(1000)
+                delay(1000)
                 elapsedSec++
             }
             measuring = false
@@ -263,23 +258,18 @@ private fun stopAndEvaluate(analyzer: PpgAnalyzer, onDone: (String, String?) -> 
                     VitalSource.PPG_CAMERA
                 )
             )
-            // 压力指数：由同一信号的 HRV(RMSSD) 估算（0-100，越低越放松）
-            val stress = com.silema.app.engine.StressMath.fromRmssd(r.rmssdMs).toDouble()
+            val stress = StressMath.fromRmssd(r.rmssdMs).toDouble()
             AppRepository.addRecord(
                 VitalRecord.of(VitalType.STRESS, stress, System.currentTimeMillis(), VitalSource.PPG_CAMERA)
             )
             onDone(
-                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · HRV(RMSSD) ${r.rmssdMs} ms · 压力估算 ${stress.toInt()} 分（${com.silema.app.engine.StressMath.label(stress.toInt())}）",
+                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · HRV(RMSSD) ${r.rmssdMs} ms · 压力估算 ${stress.toInt()} 分（${StressMath.label(stress.toInt())}）",
                 "已自动保存到心率与压力记录，首页风险评估随之更新"
             )
         }
     }
 }
 
-/**
- * YUV_420_888 → 红色通道均值估计：R ≈ 1.164(Y-16) + 1.596(V-128)。
- * 只采样画面中心 1/2 区域，Y 平面隔行隔列取样，V 平面按其像素步长取对应点。
- */
 private fun estimateRedAverage(image: Image): Double = runCatching {
     val yPlane = image.planes[0]
     val vPlane = image.planes[2]
