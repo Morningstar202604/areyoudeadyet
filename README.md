@@ -265,7 +265,7 @@ This app provides health-management reference based on publicly available medica
 
 <div align="center">
 
-**Made with ❤️ for elderly care** · [GitHub](https://github.com/Morningstar202604/areyoudeadyet) · [Issues](https://github.com/Morningstar202604/areyoudeadyet/issues) · [Releases](https://github.com/Morningstar202604/areyoudeadyet/releases)
+**Made with ❤️ for elderly care** · [GitHub](https://github.com/Morningstar202604/areyoudeadyet) · [Gitee](https://gitee.com/Morningstar202604/areyoudeadyet) · [GitCode](https://gitcode.com/Morningstar202604/areyoudeadyet) · [Issues](https://github.com/Morningstar202604/areyoudeadyet/issues) · [Releases](https://github.com/Morningstar202604/areyoudeadyet/releases)
 
 **Keywords:** elderly health monitor, senior care app, wearable health tracker, blood pressure warning, heart rate monitoring, SOS emergency button, FHIR R4 export, Bluetooth medical devices, PPG heart rate, Health Connect sync, offline health app, pluggable backend, Android Wear OS, Jetpack Compose, Kotlin multiplatform, medical alert system, caregiver dashboard, vital signs tracker, health risk assessment, senior safety app, Chinese health app, 老人健康监测, 血压预警, 心率监测, SOS求救, FHIR导出, 蓝牙医疗设备, 可穿戴健康, 离线健康应用
 
