@@ -68,7 +68,7 @@ dependencies {
     implementation("androidx.wear.compose:compose-material:1.3.1")
     implementation("androidx.wear.compose:compose-foundation:1.3.1")
     implementation("androidx.activity:activity-compose:1.9.2")
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
     
     // 共享真实领域层：RiskEngine / Stats / HealthReport / FHIR 导出 / 数据模型
     implementation(project(":core"))
