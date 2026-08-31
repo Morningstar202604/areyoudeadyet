@@ -47,3 +47,7 @@ coverage/
 # 交付文件（不入库）
 engineering-improvements.patch
 PR_DESCRIPTION.md
+---
+# 交付补丁文件（不入库）
+engineering-improvements*.patch
+PR_DESCRIPTION.md
