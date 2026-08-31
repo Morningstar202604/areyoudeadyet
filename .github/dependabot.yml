@@ -13,4 +13,9 @@ updates:
 
     ignore:
       - dependency-name: "androidx.health.connect:connect-client"
-
+      - dependency-name: "androidx.navigation:navigation-compose"
+        versions: [">=2.10.0"]
+      - dependency-name: "androidx.lifecycle:lifecycle-runtime-compose"
+        versions: [">=2.10.0"]
+      - dependency-name: "androidx.lifecycle:lifecycle-viewmodel-compose"
+        versions: [">=2.10.0"]
