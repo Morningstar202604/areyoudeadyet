@@ -1,0 +1,2579 @@
+diff --git a/.editorconfig b/.editorconfig
+new file mode 100644
+index 0000000..57e8686
+--- /dev/null
++++ b/.editorconfig
+@@ -0,0 +1,29 @@
++# EditorConfig is awesome: https://EditorConfig.org
++
++# top-most EditorConfig file
++root = true
++
++[*]
++charset = utf-8
++end_of_line = lf
++indent_style = space
++indent_size = 4
++insert_final_newline = true
++trim_trailing_whitespace = true
++
++[*.{kt,kts}]
++max_line_length = 120
++ktlint_standard = enabled
++ktlint_experimental = enabled
++# 禁用部分规则以适配项目现状
++ktlint_standard_no-wildcard-imports = disabled
++ktlint_standard_filename = disabled
++ktlint_standard_package-name = disabled
++ktlint_standard_function-naming = disabled
++ktlint_standard_property-naming = disabled
++
++[*.{xml,gradle,properties,json,yml,yaml,md}]
++indent_size = 2
++
++[*.md]
++trim_trailing_whitespace = false
+diff --git a/.github/workflows/ci.yml b/.github/workflows/ci.yml
+index d076fab..df2bf62 100644
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -9,6 +9,7 @@ on:
+ jobs:
+   build-and-test:
+     runs-on: ubuntu-latest
++
+     steps:
+       - uses: actions/checkout@v7
+ 
+@@ -21,24 +22,45 @@ jobs:
+       - name: Set up Android SDK
+         uses: android-actions/setup-android@v4
+ 
+-      - name: Build debug APK
+-        run: |
+-          chmod +x gradlew
+-          ./gradlew :app:assembleDebug --no-daemon --console=plain
++      - name: Grant execute permission for gradlew
++        run: chmod +x gradlew
+ 
+-      - name: Run algorithm tests (34 cases)
+-        run: |
+-          chmod +x gradlew
+-          ./gradlew runAlgoTests --no-daemon --console=plain
++      - name: Run unit tests (app)
++        run: ./gradlew :app:testDebugUnitTest --no-daemon --console=plain
++
++      - name: Run unit tests (wear)
++        run: ./gradlew :wear:testDebugUnitTest --no-daemon --console=plain
++
++      - name: Build debug APK (app)
++        run: ./gradlew :app:assembleDebug --no-daemon --console=plain
++
++      - name: Build debug APK (wear)
++        run: ./gradlew :wear:assembleDebug --no-daemon --console=plain
+ 
+-      - name: Build Wear OS debug APK
++      - name: Build release APK (verify ProGuard rules)
+         run: |
+-          ./gradlew :wear:assembleDebug --no-daemon --console=plain
++          ./gradlew :app:assembleRelease --no-daemon --console=plain
++          ./gradlew :wear:assembleRelease --no-daemon --console=plain
++
++      - name: Lint check
++        run: ./gradlew :app:lint --no-daemon --console=plain
++        continue-on-error: true
+ 
+       - name: Upload APK artifacts
+         uses: actions/upload-artifact@v7
+         with:
+-          name: app-debug-apks
++          name: apks
+           path: |
+             app/build/outputs/apk/debug/app-debug.apk
++            app/build/outputs/apk/release/app-release-unsigned.apk
+             wear/build/outputs/apk/debug/wear-debug.apk
++            wear/build/outputs/apk/release/wear-release-unsigned.apk
++
++      - name: Upload test reports
++        uses: actions/upload-artifact@v7
++        if: always()
++        with:
++          name: test-reports
++          path: |
++            app/build/reports/tests/testDebugUnitTest/
++            wear/build/reports/tests/testDebugUnitTest/
+diff --git a/.gitignore b/.gitignore
+index 2fac9ad..ccd1209 100644
+--- a/.gitignore
++++ b/.gitignore
+@@ -2,6 +2,8 @@
+ .gradle/
+ build/
+ app/build/
++wear/build/
++core/build/
+ 
+ # Kotlin / AGP 缓存
+ .kotlin/
+@@ -35,3 +37,13 @@ Thumbs.db
+ # 发布产物
+ dist/
+ 
++# ktlint 输出
++.ktlint/
++
++# 测试覆盖率报告
++coverage/
++*.exec
++---
++# 交付文件（不入库）
++engineering-improvements.patch
++PR_DESCRIPTION.md
+diff --git a/app/build.gradle.kts b/app/build.gradle.kts
+index df8ef7e..615c845 100644
+--- a/app/build.gradle.kts
++++ b/app/build.gradle.kts
+@@ -5,6 +5,9 @@ plugins {
+     id("org.jetbrains.kotlin.android")
+     id("org.jetbrains.kotlin.plugin.compose")
+     id("org.jetbrains.kotlin.plugin.serialization")
++    id("com.google.devtools.ksp")
++    id("com.google.dagger.hilt.android")
++    id("org.jlleitschuh.gradle.ktlint")
+ }
+ 
+ val keystoreProps = Properties().apply {
+@@ -37,7 +40,8 @@ android {
+ 
+     buildTypes {
+         release {
+-            isMinifyEnabled = false
++            isMinifyEnabled = true
++            isShrinkResources = true
+             proguardFiles(
+                 getDefaultProguardFile("proguard-android-optimize.txt"),
+                 "proguard-rules.pro"
+@@ -46,6 +50,9 @@ android {
+                 signingConfig = signingConfigs.getByName("release")
+             }
+         }
++        debug {
++            isMinifyEnabled = false
++        }
+     }
+ 
+     compileOptions {
+@@ -63,41 +70,11 @@ android {
+         compose = true
+         buildConfig = true
+     }
++}
+ 
+-    // 算法测试位于项目根 test/，默认不在 Android 单元测试源集内，Gradle 不会执行。
+-    // 注册为 unit-test 源集，使其在发布门禁中可被实际运行。
+-    sourceSets {
+-        getByName("test") {
+-            // 算法测试位于项目根 test/，AGP 的 srcDir 相对 module 目录，需用 rootDir 指回项目根
+-            java.srcDir(rootDir.resolve("test"))
+-        }
+-    }
+-
+-    // 用 Gradle 管理的 runtime classpath 实际跑 3 个算法测试程序（main 程序，非 JUnit）。
+-    // 任一程序校验失败会以非零退出，使门禁失败。
+-    // 根 test/ 的算法程序是带 main 的独立 Java 程序。显式编译 test 源集并以
+-    // 「test 编译产物 + 主代码 runtime classpath（含 kotlin-stdlib + android.jar）」作为运行时 classpath 实际运行。
+-    afterEvaluate {
+-        val testJavaClasses = "build/intermediates/javac/debugUnitTest/compileDebugUnitTestJavaWithJavac/classes"
+-        val testKotlinClasses = "build/tmp/kotlin-classes/debugUnitTest"
+-        val compileTest = tasks.named("compileDebugUnitTestJavaWithJavac")
+-        listOf("TestEngine", "TestStats", "TestFeatures").forEach { main ->
+-            tasks.register("runAlgo${main.removePrefix("Test")}", JavaExec::class) {
+-                dependsOn(compileTest)
+-                classpath = files(
+-                    testJavaClasses,
+-                    testKotlinClasses,
+-                    "build/tmp/kotlin-classes/debug",
+-                    "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
+-                ) + configurations.getByName("debugRuntimeClasspath")
+-                mainClass.set(main)
+-            }
+-        }
+-        tasks.register("runAlgoTests") {
+-            group = "verification"
+-            dependsOn("runAlgoEngine", "runAlgoStats", "runAlgoFeatures")
+-        }
+-    }
++// KSP 编译器参数（Room schema 导出等），必须在 android 块外配置
++ksp {
++    arg("room.schemaLocation", "$projectDir/schemas")
+ }
+ 
+ dependencies {
+@@ -107,23 +84,56 @@ dependencies {
+     // 共享领域层（算法/模型/FHIR 导出），手机端与手表端共用，避免规则引擎重复实现
+     implementation(project(":core"))
+ 
++    // ---------- AndroidX 基础 ----------
+     implementation("androidx.core:core-ktx:1.13.1")
+     implementation("androidx.activity:activity-compose:1.9.2")
+     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
++    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
+     implementation("androidx.navigation:navigation-compose:2.8.1")
+ 
++    // ---------- Compose ----------
+     implementation("androidx.compose.ui:ui")
+     implementation("androidx.compose.ui:ui-tooling-preview")
+     implementation("androidx.compose.material3:material3")
+     implementation("androidx.compose.material:material-icons-core")
+     implementation("androidx.compose.material:material-icons-extended")
+ 
++    // ---------- Health Connect ----------
+     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
+ 
++    // ---------- WorkManager ----------
+     implementation("androidx.work:work-runtime-ktx:2.9.1")
+ 
++    // ---------- 序列化 ----------
+     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+ 
++    // ---------- Room 数据库 ----------
++    implementation("androidx.room:room-runtime:2.6.1")
++    implementation("androidx.room:room-ktx:2.6.1")
++    ksp("androidx.room:room-compiler:2.6.1")
++
++    // ---------- Hilt 依赖注入 ----------
++    implementation("com.google.dagger:hilt-android:2.52")
++    ksp("com.google.dagger:hilt-android-compiler:2.52")
++    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
++    implementation("androidx.hilt:hilt-work:1.2.0")
++    ksp("androidx.hilt:hilt-compiler:1.2.0")
++
++    // ---------- Timber 日志 ----------
++    implementation("com.jakewharton.timber:timber:5.0.1")
++
++    // ---------- 调试 ----------
+     debugImplementation("androidx.compose.ui:ui-tooling")
++
++    // ---------- 单元测试 ----------
+     testImplementation("junit:junit:4.13.2")
++    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
++    testImplementation("androidx.room:room-testing:2.6.1")
++    testImplementation("com.google.truth:truth:1.4.4")
++    testImplementation("org.robolectric:robolectric:4.13")
++    testImplementation("androidx.test:core:1.6.1")
++
++    // ---------- 仪器化测试 ----------
++    androidTestImplementation("androidx.test.ext:junit:1.2.1")
++    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
+ }
+diff --git a/app/proguard-rules.pro b/app/proguard-rules.pro
+index 89eb14c..a96e84b 100644
+--- a/app/proguard-rules.pro
++++ b/app/proguard-rules.pro
+@@ -1,3 +1,58 @@
+-# Add project specific ProGuard rules here.
+-# Minification is disabled for this build; rules reserved for future use.
+--keep class com.silema.app.** { *; }
++# ============================================================
++# Silema App - ProGuard / R8 Rules
++# ============================================================
++
++# ---------- 数据模型（kotlinx-serialization） ----------
++# 序列化类需要保留无参构造和字段名
++-keepattributes *Annotation*, InnerClasses
++-dontnote kotlinx.serialization.AnnotationsKt
++
++# kotlinx-serialization 核心
++-keepclassmembers class kotlinx.serialization.json.** {
++    *** Companion;
++}
++-keepclasseswithmembers class kotlinx.serialization.json.** {
++    kotlinx.serialization.KSerializer serializer(...);
++}
++
++# 项目数据模型
++-keep @kotlinx.serialization.Serializable class com.silema.app.** { *; }
++-keepclassmembers class com.silema.app.data.** {
++    kotlinx.serialization.KSerializer serializer(...);
++}
++
++# ---------- Room 数据库 ----------
++# Room 实体和 DAO
++-keep class * extends androidx.room.RoomDatabase
++-keep @androidx.room.Entity class *
++-dontwarn androidx.room.paging.**
++
++# ---------- Health Connect ----------
++-dontwarn androidx.health.connect.client.**
++
++# ---------- Compose ----------
++# Compose 相关规则（Compose BOM 自带，这里兜底）
++-dontwarn androidx.compose.**
++
++# ---------- 蓝牙 / BLE ----------
++-dontwarn android.bluetooth.**
++
++# ---------- 通用：保留枚举 ----------
++-keepclassmembers enum * {
++    public static **[] values();
++    public static ** valueOf(java.lang.String);
++}
++
++# ---------- 通用：保留 Parcelable ----------
++-keepclassmembers class * implements android.os.Parcelable {
++    public static final ** CREATOR;
++}
++
++# ---------- 通用：保留 JS 接口（如有 WebView） ----------
++-keepclassmembers class * {
++    @android.webkit.JavascriptInterface <methods>;
++}
++
++# ---------- 调试信息（release 保留行号便于崩溃定位） ----------
++-keepattributes SourceFile,LineNumberTable
++-renamesourcefileattribute SourceFile
+diff --git a/app/src/main/java/com/silema/app/MainActivity.kt b/app/src/main/java/com/silema/app/MainActivity.kt
+index a2e86ca..b40a403 100644
+--- a/app/src/main/java/com/silema/app/MainActivity.kt
++++ b/app/src/main/java/com/silema/app/MainActivity.kt
+@@ -12,7 +12,16 @@ import com.silema.app.store.AppRepository
+ import com.silema.app.ui.AppRoot
+ import com.silema.app.ui.theme.SilemaTheme
+ import com.silema.app.util.TtsController
++import dagger.hilt.android.AndroidEntryPoint
+ 
++/**
++ * 主 Activity。
++ *
++ * [AndroidEntryPoint] 使 Hilt 可以向此 Activity 及其子 Composable 注入依赖。
++ * 当前 AppRepository 仍以 object 单例形式访问（渐进式迁移），
++ * 后续可改为通过 hiltViewModel() 注入 ViewModel 再间接访问 Repository。
++ */
++@AndroidEntryPoint
+ class MainActivity : ComponentActivity() {
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+diff --git a/app/src/main/java/com/silema/app/SilemaApp.kt b/app/src/main/java/com/silema/app/SilemaApp.kt
+index 2594e4d..f2eff02 100644
+--- a/app/src/main/java/com/silema/app/SilemaApp.kt
++++ b/app/src/main/java/com/silema/app/SilemaApp.kt
+@@ -3,11 +3,33 @@ package com.silema.app
+ import android.app.Application
+ import com.silema.app.store.AppRepository
+ import com.silema.app.work.Reminders
++import dagger.hilt.android.HiltAndroidApp
++import timber.log.Timber
+ 
++/**
++ * 应用入口。
++ *
++ * v0.5.0 起接入 Hilt 依赖注入与 Timber 日志。
++ * - [HiltAndroidApp] 触发 Hilt 代码生成，全局依赖容器由此开始
++ * - Debug 构建安装 [Timber.DebugTree]，Release 可按需安装 CrashlyticsTree 等
++ */
++@HiltAndroidApp
+ class SilemaApp : Application() {
++
+     override fun onCreate() {
+         super.onCreate()
++
++        // 初始化日志（Debug 输出到 Logcat；Release 可扩展为崩溃上报）
++        if (BuildConfig.DEBUG) {
++            Timber.plant(Timber.DebugTree())
++        }
++
++        // 初始化本地仓储（Room + 旧版 JSON 迁移）
+         AppRepository.init(this)
++
++        // 创建通知渠道（测量提醒、久坐提醒）
+         Reminders.ensureChannel(this)
++
++        Timber.i("SilemaApp initialized: version=${BuildConfig.VERSION_NAME}")
+     }
+ }
+diff --git a/app/src/main/java/com/silema/app/db/Converters.kt b/app/src/main/java/com/silema/app/db/Converters.kt
+new file mode 100644
+index 0000000..d577a41
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/Converters.kt
+@@ -0,0 +1,23 @@
++package com.silema.app.db
++
++import androidx.room.TypeConverter
++import kotlinx.serialization.encodeToString
++import kotlinx.serialization.json.Json
++
++/**
++ * Room 类型转换器：复杂类型 ↔ 可存储的基础类型。
++ *
++ * 当前仅处理运动轨迹 [List]<[List]<[Double]>> → JSON 字符串。
++ */
++class Converters {
++
++    private val json = Json { ignoreUnknownKeys = true }
++
++    @TypeConverter
++    fun fromTrack(track: List<List<Double>>): String = json.encodeToString(track)
++
++    @TypeConverter
++    fun toTrack(value: String): List<List<Double>> =
++        runCatching { json.decodeFromString<List<List<Double>>>(value) }
++            .getOrDefault(emptyList())
++}
+diff --git a/app/src/main/java/com/silema/app/db/DbMappers.kt b/app/src/main/java/com/silema/app/db/DbMappers.kt
+new file mode 100644
+index 0000000..83d2a00
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/DbMappers.kt
+@@ -0,0 +1,63 @@
++package com.silema.app.db
++
++import com.silema.app.data.Contact
++import com.silema.app.data.VitalRecord
++import com.silema.app.data.Workout
++import com.silema.app.db.entity.ContactEntity
++import com.silema.app.db.entity.VitalRecordEntity
++import com.silema.app.db.entity.WorkoutEntity
++
++/**
++ * Room Entity ↔ 领域模型 双向映射。
++ *
++ * 单独放一个文件，避免 Repository 里散落转换逻辑。
++ */
++
++// ---------- VitalRecord ----------
++
++fun VitalRecordEntity.toDomain(): VitalRecord = VitalRecord(
++    typeId = typeId,
++    value = value,
++    timestampMillis = timestampMillis,
++    source = source
++)
++
++fun VitalRecord.toEntity(): VitalRecordEntity = VitalRecordEntity(
++    typeId = typeId,
++    value = value,
++    timestampMillis = timestampMillis,
++    source = source
++)
++
++fun List<VitalRecordEntity>.toDomain(): List<VitalRecord> = map { it.toDomain() }
++fun List<VitalRecord>.toEntity(): List<VitalRecordEntity> = map { it.toEntity() }
++
++// ---------- Contact ----------
++
++fun ContactEntity.toDomain(): Contact = Contact(name = name, phone = phone)
++fun Contact.toEntity(): ContactEntity = ContactEntity(phone = phone, name = name)
++fun List<ContactEntity>.toDomain(): List<Contact> = map { it.toDomain() }
++
++// ---------- Workout ----------
++
++fun WorkoutEntity.toDomain(): Workout = Workout(
++    id = id,
++    type = type,
++    startMillis = startMillis,
++    durationMillis = durationMillis,
++    distanceMeters = distanceMeters,
++    caloriesKcal = caloriesKcal,
++    track = Converters().toTrack(track)
++)
++
++fun Workout.toEntity(): WorkoutEntity = WorkoutEntity(
++    id = id,
++    type = type,
++    startMillis = startMillis,
++    durationMillis = durationMillis,
++    distanceMeters = distanceMeters,
++    caloriesKcal = caloriesKcal,
++    track = Converters().fromTrack(track)
++)
++
++fun List<WorkoutEntity>.toDomain(): List<Workout> = map { it.toDomain() }
+diff --git a/app/src/main/java/com/silema/app/db/SilemaDatabase.kt b/app/src/main/java/com/silema/app/db/SilemaDatabase.kt
+new file mode 100644
+index 0000000..799bb6d
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/SilemaDatabase.kt
+@@ -0,0 +1,42 @@
++package com.silema.app.db
++
++import androidx.room.Database
++import androidx.room.RoomDatabase
++import androidx.room.TypeConverters
++import com.silema.app.db.dao.ContactDao
++import com.silema.app.db.dao.VitalRecordDao
++import com.silema.app.db.dao.WorkoutDao
++import com.silema.app.db.entity.ContactEntity
++import com.silema.app.db.entity.VitalRecordEntity
++import com.silema.app.db.entity.WorkoutEntity
++
++/**
++ * Silema 应用数据库。
++ *
++ * 三张表：
++ * - vital_records：体征记录（心率/血压/血氧/体温/步数/睡眠/压力）
++ * - contacts：紧急联系人
++ * - workouts：运动记录（含轨迹）
++ *
++ * 版本号从 1 开始；后续结构变更需升级 version 并提供 Migration。
++ */
++@Database(
++    entities = [
++        VitalRecordEntity::class,
++        ContactEntity::class,
++        WorkoutEntity::class
++    ],
++    version = 1,
++    exportSchema = true
++)
++@TypeConverters(Converters::class)
++abstract class SilemaDatabase : RoomDatabase() {
++
++    abstract fun vitalRecordDao(): VitalRecordDao
++    abstract fun contactDao(): ContactDao
++    abstract fun workoutDao(): WorkoutDao
++
++    companion object {
++        const val DB_NAME = "silema.db"
++    }
++}
+diff --git a/app/src/main/java/com/silema/app/db/dao/ContactDao.kt b/app/src/main/java/com/silema/app/db/dao/ContactDao.kt
+new file mode 100644
+index 0000000..2ee38bb
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/dao/ContactDao.kt
+@@ -0,0 +1,28 @@
++package com.silema.app.db.dao
++
++import androidx.room.Dao
++import androidx.room.Delete
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import com.silema.app.db.entity.ContactEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface ContactDao {
++
++    @Query("SELECT * FROM contacts ORDER BY name ASC")
++    fun observeAll(): Flow<List<ContactEntity>>
++
++    @Query("SELECT * FROM contacts ORDER BY name ASC")
++    suspend fun getAll(): List<ContactEntity>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insert(contact: ContactEntity)
++
++    @Query("DELETE FROM contacts WHERE phone = :phone")
++    suspend fun deleteByPhone(phone: String): Int
++
++    @Query("DELETE FROM contacts")
++    suspend fun clearAll()
++}
+diff --git a/app/src/main/java/com/silema/app/db/dao/VitalRecordDao.kt b/app/src/main/java/com/silema/app/db/dao/VitalRecordDao.kt
+new file mode 100644
+index 0000000..b781fc8
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/dao/VitalRecordDao.kt
+@@ -0,0 +1,54 @@
++package com.silema.app.db.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import com.silema.app.db.entity.VitalRecordEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface VitalRecordDao {
++
++    @Query("SELECT * FROM vital_records ORDER BY timestampMillis DESC")
++    fun observeAll(): Flow<List<VitalRecordEntity>>
++
++    @Query("SELECT * FROM vital_records ORDER BY timestampMillis DESC")
++    suspend fun getAll(): List<VitalRecordEntity>
++
++    @Query("SELECT * FROM vital_records WHERE typeId = :typeId ORDER BY timestampMillis DESC")
++    suspend fun getByType(typeId: String): List<VitalRecordEntity>
++
++    @Query("SELECT * FROM vital_records WHERE timestampMillis >= :sinceMillis ORDER BY timestampMillis DESC")
++    suspend fun getSince(sinceMillis: Long): List<VitalRecordEntity>
++
++    /**
++     * 查询指定类型、指定时间范围内是否存在记录（用于去重判断）。
++     */
++    @Query("SELECT COUNT(*) FROM vital_records WHERE typeId = :typeId AND timestampMillis BETWEEN :fromMillis AND :toMillis")
++    suspend fun countInRange(typeId: String, fromMillis: Long, toMillis: Long): Int
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insert(record: VitalRecordEntity): Long
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insertAll(records: List<VitalRecordEntity>)
++
++    /**
++     * 删除指定类型、指定时间戳的记录。
++     */
++    @Query("DELETE FROM vital_records WHERE typeId = :typeId AND timestampMillis = :timestampMillis")
++    suspend fun delete(typeId: String, timestampMillis: Long): Int
++
++    /**
++     * 删除指定类型、指定时间范围内的所有记录（用于 addRecord 时的同分钟去重）。
++     */
++    @Query("DELETE FROM vital_records WHERE typeId = :typeId AND timestampMillis BETWEEN :fromMillis AND :toMillis")
++    suspend fun deleteInRange(typeId: String, fromMillis: Long, toMillis: Long): Int
++
++    @Query("DELETE FROM vital_records")
++    suspend fun clearAll()
++
++    @Query("SELECT COUNT(*) FROM vital_records")
++    suspend fun count(): Int
++}
+diff --git a/app/src/main/java/com/silema/app/db/dao/WorkoutDao.kt b/app/src/main/java/com/silema/app/db/dao/WorkoutDao.kt
+new file mode 100644
+index 0000000..4d30728
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/dao/WorkoutDao.kt
+@@ -0,0 +1,30 @@
++package com.silema.app.db.dao
++
++import androidx.room.Dao
++import androidx.room.Insert
++import androidx.room.OnConflictStrategy
++import androidx.room.Query
++import com.silema.app.db.entity.WorkoutEntity
++import kotlinx.coroutines.flow.Flow
++
++@Dao
++interface WorkoutDao {
++
++    @Query("SELECT * FROM workouts ORDER BY startMillis DESC")
++    fun observeAll(): Flow<List<WorkoutEntity>>
++
++    @Query("SELECT * FROM workouts ORDER BY startMillis DESC")
++    suspend fun getAll(): List<WorkoutEntity>
++
++    @Query("SELECT * FROM workouts WHERE startMillis >= :sinceMillis ORDER BY startMillis DESC")
++    suspend fun getSince(sinceMillis: Long): List<WorkoutEntity>
++
++    @Insert(onConflict = OnConflictStrategy.REPLACE)
++    suspend fun insert(workout: WorkoutEntity)
++
++    @Query("DELETE FROM workouts WHERE id = :id")
++    suspend fun deleteById(id: String): Int
++
++    @Query("DELETE FROM workouts")
++    suspend fun clearAll()
++}
+diff --git a/app/src/main/java/com/silema/app/db/entity/ContactEntity.kt b/app/src/main/java/com/silema/app/db/entity/ContactEntity.kt
+new file mode 100644
+index 0000000..a045348
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/entity/ContactEntity.kt
+@@ -0,0 +1,13 @@
++package com.silema.app.db.entity
++
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++
++/**
++ * 紧急联系人实体。
++ */
++@Entity(tableName = "contacts")
++data class ContactEntity(
++    @PrimaryKey val phone: String,
++    val name: String
++)
+diff --git a/app/src/main/java/com/silema/app/db/entity/VitalRecordEntity.kt b/app/src/main/java/com/silema/app/db/entity/VitalRecordEntity.kt
+new file mode 100644
+index 0000000..4d9d31f
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/entity/VitalRecordEntity.kt
+@@ -0,0 +1,26 @@
++package com.silema.app.db.entity
++
++import androidx.room.Entity
++import androidx.room.Index
++import androidx.room.PrimaryKey
++
++/**
++ * 体征记录实体。
++ *
++ * 与领域模型 [com.silema.app.data.VitalRecord] 一一对应，
++ * 单独定义 Entity 避免把 Room 注解污染纯 Kotlin 的 core 模块。
++ */
++@Entity(
++    tableName = "vital_records",
++    indices = [
++        Index(value = ["typeId", "timestampMillis"]),
++        Index(value = ["timestampMillis"])
++    ]
++)
++data class VitalRecordEntity(
++    @PrimaryKey(autoGenerate = true) val id: Long = 0,
++    val typeId: String,
++    val value: Double,
++    val timestampMillis: Long,
++    val source: String
++)
+diff --git a/app/src/main/java/com/silema/app/db/entity/WorkoutEntity.kt b/app/src/main/java/com/silema/app/db/entity/WorkoutEntity.kt
+new file mode 100644
+index 0000000..1caced9
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/db/entity/WorkoutEntity.kt
+@@ -0,0 +1,21 @@
++package com.silema.app.db.entity
++
++import androidx.room.Entity
++import androidx.room.PrimaryKey
++
++/**
++ * 运动记录实体。
++ *
++ * 轨迹点 [track] 以 JSON 字符串存储（List<List<Double>> → String），
++ * 由 [com.silema.app.db.Converters] 负责转换。
++ */
++@Entity(tableName = "workouts")
++data class WorkoutEntity(
++    @PrimaryKey val id: String,
++    val type: String,
++    val startMillis: Long,
++    val durationMillis: Long,
++    val distanceMeters: Double,
++    val caloriesKcal: Double,
++    val track: String // JSON: List<List<Double>>
++)
+diff --git a/app/src/main/java/com/silema/app/di/AppRepositoryEntryPoint.kt b/app/src/main/java/com/silema/app/di/AppRepositoryEntryPoint.kt
+new file mode 100644
+index 0000000..888c469
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/di/AppRepositoryEntryPoint.kt
+@@ -0,0 +1,19 @@
++package com.silema.app.di
++
++import com.silema.app.db.SilemaDatabase
++import dagger.hilt.EntryPoint
++import dagger.hilt.InstallIn
++import dagger.hilt.components.SingletonComponent
++
++/**
++ * Hilt EntryPoint：让非 Hilt 管理的对象（如 object 单例 [com.silema.app.store.AppRepository]）
++ * 也能从 Hilt 容器获取依赖。
++ *
++ * 这是渐进式迁移的中间形态：AppRepository 暂保留 object 形式以避免大面积修改调用处，
++ * 后续可改为 @Singleton 类 + 构造函数注入。
++ */
++@EntryPoint
++@InstallIn(SingletonComponent::class)
++interface AppRepositoryEntryPoint {
++    fun database(): SilemaDatabase
++}
+diff --git a/app/src/main/java/com/silema/app/di/DatabaseModule.kt b/app/src/main/java/com/silema/app/di/DatabaseModule.kt
+new file mode 100644
+index 0000000..5a98559
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/di/DatabaseModule.kt
+@@ -0,0 +1,45 @@
++package com.silema.app.di
++
++import android.content.Context
++import androidx.room.Room
++import com.silema.app.db.SilemaDatabase
++import com.silema.app.db.dao.ContactDao
++import com.silema.app.db.dao.VitalRecordDao
++import com.silema.app.db.dao.WorkoutDao
++import dagger.Module
++import dagger.Provides
++import dagger.hilt.InstallIn
++import dagger.hilt.android.qualifiers.ApplicationContext
++import dagger.hilt.components.SingletonComponent
++import javax.inject.Singleton
++
++/**
++ * Hilt 数据库模块。
++ *
++ * 提供 [SilemaDatabase] 及其 DAO 的单例。
++ * 开发期使用 fallbackToDestructiveMigration；正式发布应替换为显式 Migration。
++ */
++@Module
++@InstallIn(SingletonComponent::class)
++object DatabaseModule {
++
++    @Provides
++    @Singleton
++    fun provideDatabase(@ApplicationContext context: Context): SilemaDatabase =
++        Room.databaseBuilder(
++            context.applicationContext,
++            SilemaDatabase::class.java,
++            SilemaDatabase.DB_NAME
++        )
++            .fallbackToDestructiveMigration()
++            .build()
++
++    @Provides
++    fun provideVitalRecordDao(db: SilemaDatabase): VitalRecordDao = db.vitalRecordDao()
++
++    @Provides
++    fun provideContactDao(db: SilemaDatabase): ContactDao = db.contactDao()
++
++    @Provides
++    fun provideWorkoutDao(db: SilemaDatabase): WorkoutDao = db.workoutDao()
++}
+diff --git a/app/src/main/java/com/silema/app/store/AppRepository.kt b/app/src/main/java/com/silema/app/store/AppRepository.kt
+index 2ed7342..73e2d1a 100644
+--- a/app/src/main/java/com/silema/app/store/AppRepository.kt
++++ b/app/src/main/java/com/silema/app/store/AppRepository.kt
+@@ -1,39 +1,48 @@
+ package com.silema.app.store
+ 
+ import android.content.Context
++import android.content.SharedPreferences
+ import com.silema.app.data.Contact
+ import com.silema.app.data.VitalRecord
++import com.silema.app.data.Workout
++import com.silema.app.db.SilemaDatabase
++import com.silema.app.db.toDomain
++import com.silema.app.db.toEntity
++import com.silema.app.di.AppRepositoryEntryPoint
++import dagger.hilt.android.EntryPointAccessors
++import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.Dispatchers
++import kotlinx.coroutines.SupervisorJob
+ import kotlinx.coroutines.flow.MutableStateFlow
+ import kotlinx.coroutines.flow.StateFlow
+ import kotlinx.coroutines.flow.asStateFlow
+-import kotlinx.serialization.Serializable
+-import kotlinx.serialization.encodeToString
+-import kotlinx.serialization.json.Json
+-import java.io.File
+-
+-@Serializable
+-private data class VitalsFile(val records: List<VitalRecord>)
+-
+-@Serializable
+-private data class ContactsFile(val contacts: List<Contact>)
+-
+-@Serializable
+-private data class WorkoutsFile(val workouts: List<com.silema.app.data.Workout>)
++import kotlinx.coroutines.launch
++import kotlinx.coroutines.withContext
++import timber.log.Timber
+ 
+ /**
+- * 离线优先的本地仓储：JSON 文件持久化 + StateFlow 供 UI 订阅。
+- * 数据量级（老人一年的体征记录 < 数千条）远小于需要数据库的规模，
+- * 用互斥锁保护的同步文件读写即可保证一致性。
++ * 离线优先的本地仓储。
++ *
++ * v0.5.0 起底层从 JSON 文件迁移到 Room 数据库，对外接口（StateFlow + 方法）保持不变，
++ * UI 层无需改动。旧版本 JSON 数据会在首次启动时自动导入 Room，导入完成后 JSON 文件保留为备份。
++ *
++ * 设计要点：
++ * - Room DAO 返回 Flow，收集后更新 StateFlow，保证 UI 即时响应
++ * - 写操作在 IO Dispatcher 执行，不阻塞主线程
++ * - [mergeHealthConnect] 为 suspend 函数，返回实际新增条数（修复了旧版异步返回 0 的 bug）
++ * - SharedPreferences 仍用于轻量设置（目标、提醒开关等）
+  */
+ object AppRepository {
+ 
+-    private val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
+-    private val lock = Any()
++    private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
+ 
+-    private var vitalsFile: File? = null
+-    private var contactsFile: File? = null
+-    private var workoutsFile: File? = null
+-    private var prefs: android.content.SharedPreferences? = null
++    private var db: SilemaDatabase? = null
++    private var prefs: SharedPreferences? = null
++
++    // 旧版 JSON 文件路径（迁移用，首次导入后不再写入）
++    private var legacyVitalsFile: java.io.File? = null
++    private var legacyContactsFile: java.io.File? = null
++    private var legacyWorkoutsFile: java.io.File? = null
+ 
+     private val _records = MutableStateFlow<List<VitalRecord>>(emptyList())
+     val records: StateFlow<List<VitalRecord>> = _records.asStateFlow()
+@@ -41,107 +50,163 @@ object AppRepository {
+     private val _contacts = MutableStateFlow<List<Contact>>(emptyList())
+     val contacts: StateFlow<List<Contact>> = _contacts.asStateFlow()
+ 
+-    private val _workouts = MutableStateFlow<List<com.silema.app.data.Workout>>(emptyList())
+-    val workouts: StateFlow<List<com.silema.app.data.Workout>> = _workouts.asStateFlow()
++    private val _workouts = MutableStateFlow<List<Workout>>(emptyList())
++    val workouts: StateFlow<List<Workout>> = _workouts.asStateFlow()
+ 
++    /**
++     * 初始化数据库并订阅数据流。必须在 Application.onCreate 调用一次。
++     *
++     * 通过 Hilt EntryPoint 获取 [SilemaDatabase] 单例，避免重复构建。
++     * 这是 object 单例接入 Hilt 的过渡方式，后续可改为 @Singleton 类 + 构造函数注入。
++     */
+     fun init(context: Context) {
+-        val dir = File(context.filesDir, "silema").apply { mkdirs() }
+-        vitalsFile = File(dir, "vitals.json")
+-        contactsFile = File(dir, "contacts.json")
+-        workoutsFile = File(dir, "workouts.json")
+-        prefs = context.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
+-        synchronized(lock) {
+-            _records.value = readJson(vitalsFile)?.let {
+-                runCatching { json.decodeFromString<VitalsFile>(it).records }.getOrDefault(emptyList())
+-            } ?: emptyList()
+-            _contacts.value = readJson(contactsFile)?.let {
+-                runCatching { json.decodeFromString<ContactsFile>(it).contacts }.getOrDefault(emptyList())
+-            } ?: emptyList()
+-            _workouts.value = readJson(workoutsFile)?.let {
+-                runCatching { json.decodeFromString<WorkoutsFile>(it).workouts }.getOrDefault(emptyList())
+-            } ?: emptyList()
++        val appContext = context.applicationContext
++
++        // 通过 Hilt EntryPoint 获取数据库单例
++        val entryPoint = EntryPointAccessors.fromApplication(
++            appContext,
++            AppRepositoryEntryPoint::class.java
++        )
++        val database = entryPoint.database()
++        db = database
++
++        prefs = appContext.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
++
++        // 旧版 JSON 文件定位（迁移用）
++        val dir = java.io.File(appContext.filesDir, "silema").apply { mkdirs() }
++        legacyVitalsFile = java.io.File(dir, "vitals.json")
++        legacyContactsFile = java.io.File(dir, "contacts.json")
++        legacyWorkoutsFile = java.io.File(dir, "workouts.json")
++
++        // 订阅 Room Flow → StateFlow
++        scope.launch {
++            database.vitalRecordDao().observeAll().collect { entities ->
++                _records.value = entities.toDomain()
++            }
++        }
++        scope.launch {
++            database.contactDao().observeAll().collect { entities ->
++                _contacts.value = entities.toDomain()
++            }
++        }
++        scope.launch {
++            database.workoutDao().observeAll().collect { entities ->
++                _workouts.value = entities.toDomain()
++            }
++        }
++
++        // 首次启动：从旧版 JSON 迁移数据（仅当 Room 为空且 JSON 存在时）
++        scope.launch {
++            migrateLegacyJsonIfNeeded()
+         }
+     }
+ 
+-    /** 新增手动记录；同类型同分钟内的旧记录会被覆盖，避免重复保存。 */
+-    fun addRecord(record: VitalRecord) = synchronized(lock) {
+-        val filtered = _records.value.filterNot {
+-            it.typeId == record.typeId &&
+-                Math.abs(it.timestampMillis - record.timestampMillis) < 60_000L
++    // ---------- 体征记录 ----------
++
++    /**
++     * 新增手动记录；同类型同分钟内的旧记录会被覆盖，避免重复保存。
++     *
++     * 使用 SQL 直接删除时间范围内的旧记录，避免先查再删的低效操作。
++     */
++    fun addRecord(record: VitalRecord) {
++        scope.launch {
++            val dao = db?.vitalRecordDao() ?: return@launch
++            // 同类型同分钟内的旧记录直接 SQL 删除
++            val from = record.timestampMillis - 60_000L
++            val to = record.timestampMillis + 1_000L
++            dao.deleteInRange(record.typeId, from, to)
++            dao.insert(record.toEntity())
++            Timber.d("addRecord: type=${record.typeId} value=${record.value}")
+         }
+-        _records.value = (filtered + record).sortedByDescending { it.timestampMillis }
+-        persistVitals()
+     }
+ 
+-    fun removeRecord(typeId: String, timestampMillis: Long) = synchronized(lock) {
+-        _records.value = _records.value.filterNot { it.typeId == typeId && it.timestampMillis == timestampMillis }
+-        persistVitals()
++    fun removeRecord(typeId: String, timestampMillis: Long) {
++        scope.launch {
++            db?.vitalRecordDao()?.delete(typeId, timestampMillis)
++        }
+     }
+ 
+     /**
+      * 合并 Health Connect 拉取的数据：
+      * 与已有记录（无论来源）在 90 秒内且类型相同的视为同一测量，跳过；
+      * 否则追加。返回实际新增条数。
++     *
++     * 注意：这是 suspend 函数，必须在协程中调用。修复了旧版异步返回 0 的 bug。
+      */
+-    fun mergeHealthConnect(incoming: List<VitalRecord>): Int = synchronized(lock) {
++    suspend fun mergeHealthConnect(incoming: List<VitalRecord>): Int = withContext(Dispatchers.IO) {
++        if (incoming.isEmpty()) return@withContext 0
++        val dao = db?.vitalRecordDao() ?: return@withContext 0
++
+         var added = 0
+-        val current = _records.value.toMutableList()
++        val toInsert = mutableListOf<VitalRecord>()
++
+         for (candidate in incoming.sortedBy { it.timestampMillis }) {
+-            val duplicate = current.any {
++            val from = candidate.timestampMillis - 90_000L
++            val to = candidate.timestampMillis + 90_000L
++
++            // 先查数据库中是否有重复
++            val existsInDb = dao.countInRange(candidate.typeId, from, to) > 0
++            // 再查本次待插入列表中是否有重复
++            val existsInBatch = toInsert.any {
+                 it.typeId == candidate.typeId &&
+                     Math.abs(it.timestampMillis - candidate.timestampMillis) <= 90_000L
+             }
+-            if (!duplicate) {
+-                current += candidate
++
++            if (!existsInDb && !existsInBatch) {
++                toInsert += candidate
+                 added++
+             }
+         }
+-        _records.value = current.sortedByDescending { it.timestampMillis }
+-        persistVitals()
+-        added
+-    }
+ 
+-    fun addContact(contact: Contact) = synchronized(lock) {
+-        if (_contacts.value.none { it.phone == contact.phone }) {
+-            _contacts.value = _contacts.value + contact
+-            persistContacts()
++        if (toInsert.isNotEmpty()) {
++            dao.insertAll(toInsert.toEntity())
+         }
++        Timber.d("mergeHealthConnect: incoming=${incoming.size} added=$added")
++        added
+     }
+ 
+-    fun removeContact(phone: String) = synchronized(lock) {
+-        _contacts.value = _contacts.value.filterNot { it.phone == phone }
+-        persistContacts()
++    // ---------- 联系人 ----------
++
++    fun addContact(contact: Contact) {
++        scope.launch {
++            db?.contactDao()?.insert(contact.toEntity())
++        }
+     }
+ 
+-    /** 一键清空全部数据（演示/隐私场景）。 */
+-    fun clearAll() = synchronized(lock) {
+-        _records.value = emptyList()
+-        _contacts.value = emptyList()
+-        persistVitals()
+-        persistContacts()
+-        runCatching { prefs?.edit()?.clear()?.apply() }
++    fun removeContact(phone: String) {
++        scope.launch {
++            db?.contactDao()?.deleteByPhone(phone)
++        }
+     }
+ 
+     // ---------- 运动记录 ----------
+ 
+-    fun addWorkout(w: com.silema.app.data.Workout) = synchronized(lock) {
+-        _workouts.value = (listOf(w) + _workouts.value).sortedByDescending { it.startMillis }
+-        persistWorkouts()
++    fun addWorkout(w: Workout) {
++        scope.launch {
++            db?.workoutDao()?.insert(w.toEntity())
++        }
+     }
+ 
+-    fun removeWorkout(id: String) = synchronized(lock) {
+-        _workouts.value = _workouts.value.filterNot { it.id == id }
+-        persistWorkouts()
++    fun removeWorkout(id: String) {
++        scope.launch {
++            db?.workoutDao()?.deleteById(id)
++        }
+     }
+ 
+-    private fun persistWorkouts() {
+-        io.execute {
+-            val text = synchronized(lock) { json.encodeToString(WorkoutsFile(_workouts.value)) }
+-            runCatching { workoutsFile?.writeText(text) }
++    // ---------- 一键清空 ----------
++
++    /** 一键清空全部数据（演示/隐私场景）。 */
++    fun clearAll() {
++        scope.launch {
++            db?.vitalRecordDao()?.clearAll()
++            db?.contactDao()?.clearAll()
++            db?.workoutDao()?.clearAll()
++            runCatching { prefs?.edit()?.clear()?.apply() }
++            Timber.w("clearAll: all data cleared")
+         }
+     }
+ 
+-    // ---------- 目标与提醒设置 ----------
++    // ---------- 目标与提醒设置（SharedPreferences） ----------
+ 
+     var stepsGoal: Int
+         get() = prefs?.getInt("steps_goal", 6000) ?: 6000
+@@ -171,28 +236,62 @@ object AppRepository {
+         get() = prefs?.getBoolean("rem_sedentary", false) ?: false
+         set(v) { prefs?.edit()?.putBoolean("rem_sedentary", v)?.apply() }
+ 
++    // ---------- 旧版 JSON 迁移 ----------
++
+     /**
+-     * 持久化在单一后台线程串行执行：FIFO 保证最后一次写入对应最新状态，
+-     * 同时避免在主线程做文件 IO（BLE 连续推送时尤其重要）。
++     * 仅当 Room 为空且旧版 JSON 文件存在时，执行一次性导入。
++     * 导入后 JSON 文件保留（不删除），作为人工备份。
+      */
+-    private val io = java.util.concurrent.Executors.newSingleThreadExecutor()
++    private suspend fun migrateLegacyJsonIfNeeded() {
++        val dao = db?.vitalRecordDao() ?: return
++        if (dao.count() > 0) return // 已有数据，不迁移
++
++        val json = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
++
++        // 迁移体征记录
++        legacyVitalsFile?.let { file ->
++            if (file.exists()) {
++                runCatching {
++                    val data = json.decodeFromString<LegacyVitalsFile>(file.readText())
++                    if (data.records.isNotEmpty()) {
++                        dao.insertAll(data.records.toEntity())
++                        Timber.i("migrated ${data.records.size} vital records from legacy JSON")
++                    }
++                }.onFailure { Timber.w(it, "legacy vitals migration failed") }
++            }
++        }
+ 
+-    private fun persistVitals() {
+-        io.execute {
+-            val text = synchronized(lock) { json.encodeToString(VitalsFile(_records.value)) }
+-            runCatching { vitalsFile?.writeText(text) }
++        // 迁移联系人
++        legacyContactsFile?.let { file ->
++            if (file.exists()) {
++                runCatching {
++                    val data = json.decodeFromString<LegacyContactsFile>(file.readText())
++                    data.contacts.forEach { db?.contactDao()?.insert(it.toEntity()) }
++                    Timber.i("migrated ${data.contacts.size} contacts from legacy JSON")
++                }.onFailure { Timber.w(it, "legacy contacts migration failed") }
++            }
+         }
+-    }
+ 
+-    private fun persistContacts() {
+-        io.execute {
+-            val text = synchronized(lock) { json.encodeToString(ContactsFile(_contacts.value)) }
+-            runCatching { contactsFile?.writeText(text) }
++        // 迁移运动记录
++        legacyWorkoutsFile?.let { file ->
++            if (file.exists()) {
++                runCatching {
++                    val data = json.decodeFromString<LegacyWorkoutsFile>(file.readText())
++                    data.workouts.forEach { db?.workoutDao()?.insert(it.toEntity()) }
++                    Timber.i("migrated ${data.workouts.size} workouts from legacy JSON")
++                }.onFailure { Timber.w(it, "legacy workouts migration failed") }
++            }
+         }
+     }
+ 
+-    private fun readJson(file: File?): String? {
+-        if (file == null || !file.exists()) return null
+-        return runCatching { file.readText() }.getOrNull()
+-    }
++    // ---------- 旧版 JSON 文件结构（仅迁移用） ----------
++
++    @kotlinx.serialization.Serializable
++    private data class LegacyVitalsFile(val records: List<VitalRecord>)
++
++    @kotlinx.serialization.Serializable
++    private data class LegacyContactsFile(val contacts: List<Contact>)
++
++    @kotlinx.serialization.Serializable
++    private data class LegacyWorkoutsFile(val workouts: List<Workout>)
+ }
+diff --git a/app/src/main/java/com/silema/app/vm/DashboardViewModel.kt b/app/src/main/java/com/silema/app/vm/DashboardViewModel.kt
+new file mode 100644
+index 0000000..51d465b
+--- /dev/null
++++ b/app/src/main/java/com/silema/app/vm/DashboardViewModel.kt
+@@ -0,0 +1,98 @@
++package com.silema.app.vm
++
++import androidx.lifecycle.ViewModel
++import androidx.lifecycle.viewModelScope
++import com.silema.app.data.Contact
++import com.silema.app.data.VitalRecord
++import com.silema.app.engine.RiskEngine
++import com.silema.app.store.AppRepository
++import dagger.hilt.android.lifecycle.HiltViewModel
++import kotlinx.coroutines.flow.SharingStarted
++import kotlinx.coroutines.flow.StateFlow
++import kotlinx.coroutines.flow.map
++import kotlinx.coroutines.flow.stateIn
++import javax.inject.Inject
++
++/**
++ * 主页 ViewModel。
++ *
++ * 从 [AppRepository] 获取体征记录和联系人，通过 [RiskEngine] 评估当前风险等级，
++ * 暴露给 UI 层。UI 层只观察 StateFlow，不直接操作数据。
++ *
++ * v0.5.0 引入 ViewModel 层，逐步将 UI 中的业务逻辑迁移到此处。
++ * 当前为渐进式迁移：UI 仍可直接访问 AppRepository，新功能优先使用 ViewModel。
++ */
++@HiltViewModel
++class DashboardViewModel @Inject constructor() : ViewModel() {
++
++    /**
++     * 最新的体征记录列表（按时间倒序）。
++     */
++    val records: StateFlow<List<VitalRecord>> = AppRepository.records
++        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
++
++    /**
++     * 紧急联系人列表。
++     */
++    val contacts: StateFlow<List<Contact>> = AppRepository.contacts
++        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
++
++    /**
++     * 当前风险评估结果（基于最近一次各类型体征）。
++     * UI 观察此值即可获取风险等级和告警列表。
++     */
++    val assessment = AppRepository.records
++        .map { records ->
++            if (records.isEmpty()) {
++                RiskEngine.evaluate(emptyList(), System.currentTimeMillis())
++            } else {
++                // 取每种类型的最新一条记录进行评估
++                val latestByType = records
++                    .groupBy { it.typeId }
++                    .mapValues { it.value.maxByOrNull { r -> r.timestampMillis } }
++                    .values
++                    .filterNotNull()
++                RiskEngine.evaluate(latestByType, System.currentTimeMillis())
++            }
++        }
++        .stateIn(
++            viewModelScope,
++            SharingStarted.WhileSubscribed(5000),
++            RiskEngine.evaluate(emptyList(), System.currentTimeMillis())
++        )
++
++    /**
++     * 新增体征记录。
++     */
++    fun addRecord(record: VitalRecord) {
++        AppRepository.addRecord(record)
++    }
++
++    /**
++     * 删除体征记录。
++     */
++    fun removeRecord(typeId: String, timestampMillis: Long) {
++        AppRepository.removeRecord(typeId, timestampMillis)
++    }
++
++    /**
++     * 添加紧急联系人。
++     */
++    fun addContact(contact: Contact) {
++        AppRepository.addContact(contact)
++    }
++
++    /**
++     * 删除紧急联系人。
++     */
++    fun removeContact(phone: String) {
++        AppRepository.removeContact(phone)
++    }
++
++    /**
++     * 一键清空全部数据。
++     */
++    fun clearAll() {
++        AppRepository.clearAll()
++    }
++}
+diff --git a/app/src/test/kotlin/com/silema/app/db/SilemaDatabaseTest.kt b/app/src/test/kotlin/com/silema/app/db/SilemaDatabaseTest.kt
+new file mode 100644
+index 0000000..0c58776
+--- /dev/null
++++ b/app/src/test/kotlin/com/silema/app/db/SilemaDatabaseTest.kt
+@@ -0,0 +1,240 @@
++package com.silema.app.db
++
++import androidx.room.Room
++import androidx.test.core.app.ApplicationProvider
++import com.silema.app.db.dao.ContactDao
++import com.silema.app.db.dao.VitalRecordDao
++import com.silema.app.db.dao.WorkoutDao
++import com.silema.app.db.entity.ContactEntity
++import com.silema.app.db.entity.VitalRecordEntity
++import com.silema.app.db.entity.WorkoutEntity
++import kotlinx.coroutines.runBlocking
++import org.junit.After
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNotNull
++import org.junit.Assert.assertTrue
++import org.junit.Before
++import org.junit.Test
++import org.junit.runner.RunWith
++import org.robolectric.RobolectricTestRunner
++import org.robolectric.annotation.Config
++
++/**
++ * Room DAO 单元测试。
++ *
++ * 使用 in-memory 数据库，测试增删改查和 Flow 观察。
++ * 运行环境：Robolectric（本地 JVM 测试，无需模拟器）。
++ */
++@RunWith(RobolectricTestRunner::class)
++@Config(sdk = [33])
++class SilemaDatabaseTest {
++
++    private lateinit var db: SilemaDatabase
++    private lateinit var vitalDao: VitalRecordDao
++    private lateinit var contactDao: ContactDao
++    private lateinit var workoutDao: WorkoutDao
++
++    @Before
++    fun setup() {
++        db = Room.inMemoryDatabaseBuilder(
++            ApplicationProvider.getApplicationContext(),
++            SilemaDatabase::class.java
++        )
++            .allowMainThreadQueries() // 测试用，允许主线程查询
++            .build()
++        vitalDao = db.vitalRecordDao()
++        contactDao = db.contactDao()
++        workoutDao = db.workoutDao()
++    }
++
++    @After
++    fun teardown() {
++        db.close()
++    }
++
++    // ---------- VitalRecordDao 测试 ----------
++
++    @Test
++    fun `插入体征记录后可查询`() = runBlocking {
++        val record = VitalRecordEntity(
++            typeId = "heart_rate",
++            value = 72.0,
++            timestampMillis = 1000L,
++            source = "manual"
++        )
++        vitalDao.insert(record)
++
++        val all = vitalDao.getAll()
++        assertEquals(1, all.size)
++        assertEquals("heart_rate", all[0].typeId)
++        assertEquals(72.0, all[0].value, 0.0)
++    }
++
++    @Test
++    fun `按类型查询体征记录`() = runBlocking {
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 72.0, timestampMillis = 1000L, source = "manual")
++        )
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "systolic", value = 120.0, timestampMillis = 2000L, source = "manual")
++        )
++
++        val hrRecords = vitalDao.getByType("heart_rate")
++        assertEquals(1, hrRecords.size)
++        assertEquals(72.0, hrRecords[0].value, 0.0)
++    }
++
++    @Test
++    fun `删除指定体征记录`() = runBlocking {
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 72.0, timestampMillis = 1000L, source = "manual")
++        )
++        assertEquals(1, vitalDao.count())
++
++        vitalDao.delete("heart_rate", 1000L)
++        assertEquals(0, vitalDao.count())
++    }
++
++    @Test
++    fun `按时间范围删除体征记录`() = runBlocking {
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 70.0, timestampMillis = 1000L, source = "manual")
++        )
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 75.0, timestampMillis = 5000L, source = "manual")
++        )
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 80.0, timestampMillis = 10000L, source = "manual")
++        )
++
++        // 删除 4000-6000 范围内的记录
++        val deleted = vitalDao.deleteInRange("heart_rate", 4000L, 6000L)
++        assertEquals(1, deleted)
++        assertEquals(2, vitalDao.count())
++    }
++
++    @Test
++    fun `统计时间范围内记录数`() = runBlocking {
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 70.0, timestampMillis = 1000L, source = "manual")
++        )
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 75.0, timestampMillis = 5000L, source = "manual")
++        )
++
++        val count = vitalDao.countInRange("heart_rate", 0L, 3000L)
++        assertEquals(1, count)
++    }
++
++    @Test
++    fun `清空体征记录`() = runBlocking {
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "heart_rate", value = 72.0, timestampMillis = 1000L, source = "manual")
++        )
++        vitalDao.insert(
++            VitalRecordEntity(typeId = "systolic", value = 120.0, timestampMillis = 2000L, source = "manual")
++        )
++        assertEquals(2, vitalDao.count())
++
++        vitalDao.clearAll()
++        assertEquals(0, vitalDao.count())
++    }
++
++    // ---------- ContactDao 测试 ----------
++
++    @Test
++    fun `插入联系人后可查询`() = runBlocking {
++        contactDao.insert(ContactEntity(phone = "13800138000", name = "张三"))
++
++        val all = contactDao.getAll()
++        assertEquals(1, all.size)
++        assertEquals("张三", all[0].name)
++        assertEquals("13800138000", all[0].phone)
++    }
++
++    @Test
++    fun `按手机号删除联系人`() = runBlocking {
++        contactDao.insert(ContactEntity(phone = "13800138000", name = "张三"))
++        contactDao.insert(ContactEntity(phone = "13900139000", name = "李四"))
++        assertEquals(2, contactDao.getAll().size)
++
++        contactDao.deleteByPhone("13800138000")
++        val remaining = contactDao.getAll()
++        assertEquals(1, remaining.size)
++        assertEquals("李四", remaining[0].name)
++    }
++
++    // ---------- WorkoutDao 测试 ----------
++
++    @Test
++    fun `插入运动记录后可查询`() = runBlocking {
++        val workout = WorkoutEntity(
++            id = "w1",
++            type = "walk",
++            startMillis = 1000L,
++            durationMillis = 1800000L,
++            distanceMeters = 2000.0,
++            caloriesKcal = 68.7,
++            track = "[]"
++        )
++        workoutDao.insert(workout)
++
++        val all = workoutDao.getAll()
++        assertEquals(1, all.size)
++        assertEquals("w1", all[0].id)
++        assertEquals(2000.0, all[0].distanceMeters, 0.0)
++    }
++
++    @Test
++    fun `按时间范围查询运动记录`() = runBlocking {
++        workoutDao.insert(
++            WorkoutEntity("w1", "walk", 1000L, 1000L, 100.0, 1.0, "[]")
++        )
++        workoutDao.insert(
++            WorkoutEntity("w2", "run", 5000L, 1000L, 200.0, 2.0, "[]")
++        )
++
++        val recent = workoutDao.getSince(4000L)
++        assertEquals(1, recent.size)
++        assertEquals("w2", recent[0].id)
++    }
++
++    @Test
++    fun `按ID删除运动记录`() = runBlocking {
++        workoutDao.insert(
++            WorkoutEntity("w1", "walk", 1000L, 1000L, 100.0, 1.0, "[]")
++        )
++        assertEquals(1, workoutDao.getAll().size)
++
++        workoutDao.deleteById("w1")
++        assertEquals(0, workoutDao.getAll().size)
++    }
++
++    // ---------- Converters 测试 ----------
++
++    @Test
++    fun `轨迹点 JSON 转换正确`() {
++        val converters = Converters()
++        val track = listOf(
++            listOf(39.9087, 116.3975, 1000.0),
++            listOf(39.9088, 116.3976, 2000.0)
++        )
++
++        val json = converters.fromTrack(track)
++        assertNotNull(json)
++        assertTrue(json.isNotEmpty())
++
++        val decoded = converters.toTrack(json)
++        assertEquals(2, decoded.size)
++        assertEquals(39.9087, decoded[0][0], 0.0001)
++        assertEquals(116.3975, decoded[0][1], 0.0001)
++    }
++
++    @Test
++    fun `空轨迹转换正确`() {
++        val converters = Converters()
++        val json = converters.fromTrack(emptyList())
++        val decoded = converters.toTrack(json)
++        assertTrue(decoded.isEmpty())
++    }
++}
+diff --git a/app/src/test/kotlin/com/silema/app/engine/FeaturesTest.kt b/app/src/test/kotlin/com/silema/app/engine/FeaturesTest.kt
+new file mode 100644
+index 0000000..6b3131e
+--- /dev/null
++++ b/app/src/test/kotlin/com/silema/app/engine/FeaturesTest.kt
+@@ -0,0 +1,128 @@
++package com.silema.app.engine
++
++import com.silema.app.data.VitalRecord
++import com.silema.app.data.VitalSource
++import com.silema.app.data.VitalType
++import com.silema.app.data.Workout
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertTrue
++import org.junit.Test
++import kotlin.math.abs
++
++/**
++ * 功能特性测试：压力指数、Haversine 距离、周报对比。
++ */
++class FeaturesTest {
++
++    private val now = System.currentTimeMillis()
++
++    // ---------- 1. 压力指数 ----------
++
++    @Test
++    fun `压力指数低端 RMSSD 10 应接近 100`() {
++        val s = StressMath.fromRmssd(10.0)
++        assertTrue("RMSSD=10 压力应 >= 95，实际 $s", s >= 95)
++    }
++
++    @Test
++    fun `压力指数高端 RMSSD 100 应接近 0`() {
++        val s = StressMath.fromRmssd(100.0)
++        assertTrue("RMSSD=100 压力应 <= 5，实际 $s", s <= 5)
++    }
++
++    @Test
++    fun `压力指数单调递减`() {
++        val s10 = StressMath.fromRmssd(10.0)
++        val s50 = StressMath.fromRmssd(50.0)
++        val s100 = StressMath.fromRmssd(100.0)
++        assertTrue("压力应随 RMSSD 增大而减小: $s10 > $s50 > $s100", s10 > s50 && s50 > s100)
++    }
++
++    @Test
++    fun `压力指数钳位在 0_100`() {
++        val s = StressMath.fromRmssd(9999.0)
++        assertTrue("压力应在 [0,100]，实际 $s", s in 0..100)
++    }
++
++    // ---------- 2. Haversine 距离 ----------
++
++    @Test
++    fun `同点距离为 0`() {
++        val d = Stats.haversineMeters(39.9087, 116.3975, 39.9087, 116.3975)
++        assertEquals(0.0, d, 1e-6)
++    }
++
++    @Test
++    fun `纬度差 0_01 度约 1112 米`() {
++        val d = Stats.haversineMeters(39.90, 116.3975, 39.91, 116.3975)
++        assertTrue("0.01° 纬度差应约 1111.9m，实际 $d", abs(d - 1111.9) < 5.0)
++    }
++
++    // ---------- 3. 周报对比 ----------
++
++    @Test
++    fun `周报心率本周与上周对比正确`() {
++        val records = mutableListOf<VitalRecord>()
++        // 上周：心率均值 80
++        for (day in 8..14) {
++            val ts = now - day * 86_400_000L
++            records += VitalRecord(VitalType.HEART_RATE.id, 78.0, ts, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.HEART_RATE.id, 82.0, ts + 3600_000L, VitalSource.MANUAL)
++        }
++        // 本周：心率均值 70 + 睡眠 8h
++        for (day in 1..7) {
++            val ts = now - day * 86_400_000L
++            records += VitalRecord(VitalType.HEART_RATE.id, 68.0, ts, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.HEART_RATE.id, 72.0, ts + 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.SLEEP.id, 8.0, ts, VitalSource.MANUAL)
++        }
++
++        val workouts = listOf(
++            Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList())
++        )
++
++        val report = HealthReport.weekly(records, workouts, now, 2)
++        val hr = report.metrics.firstOrNull { it.type == VitalType.HEART_RATE }
++
++        assertNotNull("周报应包含心率指标", hr)
++        assertEquals("本周心率均值应约 70.15", 70.1538, hr!!.thisWeekAvg, 0.01)
++        assertEquals("上周心率均值应约 79.2", 79.2, hr.lastWeekAvg, 0.01)
++        assertNotNull("变化百分比不应为 null", hr.deltaPct)
++        assertTrue("心率应下降约 11.4%，实际 ${hr.deltaPct}", abs(hr.deltaPct!! + 11.4216) < 0.1)
++    }
++
++    @Test
++    fun `周报睡眠均值正确`() {
++        val records = mutableListOf<VitalRecord>()
++        for (day in 1..7) {
++            val ts = now - day * 86_400_000L
++            records += VitalRecord(VitalType.SLEEP.id, 8.0, ts, VitalSource.MANUAL)
++        }
++        val report = HealthReport.weekly(records, emptyList(), now, 2)
++        assertNotNull("睡眠均值不应为 null", report.sleepAvgHours)
++        assertEquals(8.0, report.sleepAvgHours!!, 0.01)
++    }
++
++    @Test
++    fun `周报运动统计正确`() {
++        val workouts = listOf(
++            Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList())
++        )
++        val report = HealthReport.weekly(emptyList(), workouts, now, 2)
++        assertEquals(1, report.workoutCount)
++        assertEquals(2.0, report.workoutKm, 0.01)
++    }
++
++    @Test
++    fun `周报摘要包含关键指标`() {
++        val records = mutableListOf<VitalRecord>()
++        for (day in 1..7) {
++            val ts = now - day * 86_400_000L
++            records += VitalRecord(VitalType.HEART_RATE.id, 70.0, ts, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.SLEEP.id, 7.5, ts, VitalSource.MANUAL)
++        }
++        val report = HealthReport.weekly(records, emptyList(), now, 2)
++        assertTrue("摘要应包含静息心率", report.summary.any { it.contains("静息心率") })
++        assertTrue("摘要应包含睡眠", report.summary.any { it.contains("睡眠") })
++    }
++}
+diff --git a/app/src/test/kotlin/com/silema/app/engine/RiskEngineTest.kt b/app/src/test/kotlin/com/silema/app/engine/RiskEngineTest.kt
+new file mode 100644
+index 0000000..086da9f
+--- /dev/null
++++ b/app/src/test/kotlin/com/silema/app/engine/RiskEngineTest.kt
+@@ -0,0 +1,108 @@
++package com.silema.app.engine
++
++import com.silema.app.data.VitalRecord
++import com.silema.app.data.VitalSource
++import com.silema.app.data.VitalType
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertFalse
++import org.junit.Assert.assertTrue
++import org.junit.Before
++import org.junit.Test
++
++/**
++ * RiskEngine 风险引擎单元测试。
++ *
++ * 覆盖：正常/危象/低血氧/组合规则/空数据/连续超标升级/告警三段式。
++ */
++class RiskEngineTest {
++
++    private lateinit var engine: RiskEngine
++    private val now = System.currentTimeMillis()
++
++    @Before
++    fun setUp() {
++        engine = RiskEngine
++    }
++
++    @Test
++    fun `全部正常时返回 NORMAL 且无告警`() {
++        val result = engine.evaluate(mkVitals(72, 120, 78, 98, 36.5), now)
++        assertEquals(RiskLevel.NORMAL, result.level)
++        assertTrue(result.alerts.isEmpty())
++    }
++
++    @Test
++    fun `高血压危象时返回 CRITICAL`() {
++        val result = engine.evaluate(mkVitals(80, 185, 115, 97, 36.5), now)
++        assertEquals(RiskLevel.CRITICAL, result.level)
++        assertFalse(result.alerts.isEmpty())
++    }
++
++    @Test
++    fun `低血氧时返回 CRITICAL`() {
++        val result = engine.evaluate(mkVitals(85, 125, 80, 88, 36.5), now)
++        assertEquals(RiskLevel.CRITICAL, result.level)
++    }
++
++    @Test
++    fun `低血压加心跳快触发组合规则休克告警`() {
++        val result = engine.evaluate(mkVitals(108, 95, 62, 96, 36.5), now)
++        assertEquals(RiskLevel.CRITICAL, result.level)
++        val hasCombo = result.alerts.any { it.metric.contains("+") }
++        assertTrue("应检测到组合规则告警", hasCombo)
++    }
++
++    @Test
++    fun `空数据返回 WARNING 不可沉默`() {
++        val result = engine.evaluate(emptyList(), now)
++        assertEquals(RiskLevel.WARNING, result.level)
++    }
++
++    @Test
++    fun `连续3次心率超标自动升级`() {
++        val records = mutableListOf<VitalRecord>()
++        for (i in 3 downTo 1) {
++            records += VitalRecord(
++                typeId = VitalType.HEART_RATE.id,
++                value = 105.0,
++                timestampMillis = now - i * 3600_000L,
++                source = VitalSource.MANUAL
++            )
++        }
++        // 补充其他正常体征
++        records += mkVitals(70, 118, 76, 97, 36.4)
++            .filterNot { it.typeId == VitalType.HEART_RATE.id }
++
++        val result = engine.evaluate(records, now)
++        val escalated = result.alerts.any { it.problem.contains("连续 3 次") }
++        assertTrue("连续3次超标应触发升级告警", escalated)
++    }
++
++    @Test
++    fun `每条告警必须包含是什么为什么做什么三段`() {
++        val scenarios = listOf(
++            mkVitals(160, 190, 120, 85, 40.1),
++            mkVitals(80, 185, 115, 97, 36.5)
++        )
++        for (vitals in scenarios) {
++            val result = engine.evaluate(vitals, now)
++            for (alert in result.alerts) {
++                assertTrue("problem 不应为空", alert.problem.isNotEmpty())
++                assertTrue("why 不应为空", alert.why.isNotEmpty())
++                assertTrue("action 不应为空", alert.action.isNotEmpty())
++            }
++        }
++    }
++
++    // ---------- 辅助 ----------
++
++    private fun mkVitals(
++        hr: Double, sys: Double, dia: Double, spo2: Double, temp: Double
++    ): List<VitalRecord> = listOf(
++        VitalRecord(VitalType.HEART_RATE.id, hr, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.SYSTOLIC.id, sys, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.DIASTOLIC.id, dia, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.SPO2.id, spo2, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.TEMPERATURE.id, temp, now - 1000, VitalSource.MANUAL)
++    )
++}
+diff --git a/app/src/test/kotlin/com/silema/app/engine/StatsAndMathTest.kt b/app/src/test/kotlin/com/silema/app/engine/StatsAndMathTest.kt
+new file mode 100644
+index 0000000..f9ce39f
+--- /dev/null
++++ b/app/src/test/kotlin/com/silema/app/engine/StatsAndMathTest.kt
+@@ -0,0 +1,196 @@
++package com.silema.app.engine
++
++import com.silema.app.ble.BleCodec
++import com.silema.app.data.VitalRecord
++import com.silema.app.data.VitalSource
++import com.silema.app.data.VitalType
++import com.silema.app.ppg.PpgAnalyzer
++import org.junit.Assert.assertEquals
++import org.junit.Assert.assertNotNull
++import org.junit.Assert.assertNull
++import org.junit.Assert.assertTrue
++import org.junit.Test
++import kotlin.math.abs
++
++/**
++ * 统计、血流动力学、PPG、BLE 协议解析测试。
++ */
++class StatsAndMathTest {
++
++    private val now = System.currentTimeMillis()
++
++    // ---------- 1. 数学原语 ----------
++
++    @Test
++    fun `mean 计算正确`() {
++        val result = Stats.mean(listOf(1.0, 2.0, 3.0, 4.0))
++        assertEquals(2.5, result, 1e-9)
++    }
++
++    @Test
++    fun `std 总体标准差计算正确`() {
++        val data = listOf(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0)
++        assertEquals(2.0, Stats.std(data), 1e-9)
++    }
++
++    @Test
++    fun `最小二乘斜率精确线性`() {
++        val x = listOf(0.0, 1.0, 2.0, 3.0)
++        val y = listOf(1.0, 3.0, 5.0, 7.0)
++        assertEquals(2.0, Stats.leastSquaresSlope(x, y), 1e-9)
++    }
++
++    // ---------- 2. 血流动力学公式 ----------
++
++    @Test
++    fun `MAP 120_80 约等于 93_33`() {
++        assertEquals(93.3333, VitalsMath.meanArterialPressure(120, 80), 0.001)
++    }
++
++    @Test
++    fun `休克指数计算正确`() {
++        assertEquals(0.5, VitalsMath.shockIndex(75, 150), 1e-9)
++    }
++
++    @Test
++    fun `SI 大于等于1触发危险级休克指数告警`() {
++        val result = RiskEngine.evaluate(mkVitals(110, 100, 70, 97, 36.5), now)
++        val siAlert = result.alerts.any {
++            it.metric == "休克指数" && it.level == RiskLevel.CRITICAL
++        }
++        assertTrue("SI>=1.0 应触发 CRITICAL 休克指数告警", siAlert)
++    }
++
++    @Test
++    fun `MAP 低于65触发平均动脉压告警`() {
++        // 90/52 → MAP = 52 + (90-52)/3 = 64.67 < 65
++        val result = RiskEngine.evaluate(mkVitals(60, 90, 52, 98, 36.5), now)
++        val mapAlert = result.alerts.any { it.metric == "平均动脉压" }
++        assertTrue("MAP<65 应触发平均动脉压告警", mapAlert)
++    }
++
++    // ---------- 3. 个人基线 z-score ----------
++
++    @Test
++    fun `个人基线偏差触发 z-score 告警`() {
++        val records = mutableListOf<VitalRecord>()
++        val priors = doubleArrayOf(116.0, 120.0, 122.0, 126.0, 130.0)
++        for (i in priors.indices) {
++            records += VitalRecord(
++                VitalType.SYSTOLIC.id, priors[i],
++                now - (i + 1) * 86_400_000L, VitalSource.MANUAL
++            )
++            records += VitalRecord(
++                VitalType.DIASTOLIC.id, 78.0,
++                now - (i + 1) * 86_400_000L, VitalSource.MANUAL
++            )
++        }
++        records += VitalRecord(VitalType.SYSTOLIC.id, 140.0, now - 60_000, VitalSource.MANUAL)
++        records += VitalRecord(VitalType.DIASTOLIC.id, 88.0, now - 60_000, VitalSource.MANUAL)
++
++        val result = RiskEngine.evaluate(records, now)
++        val baseAlert = result.alerts.any {
++            it.metric.startsWith("基线偏差") && it.problem.contains("|z|")
++        }
++        assertTrue("应触发基线偏差 z-score 告警", baseAlert)
++    }
++
++    // ---------- 4. 趋势回归 ----------
++
++    @Test
++    fun `连续一周收缩压上升触发趋势警告`() {
++        val records = mutableListOf<VitalRecord>()
++        for (d in 6 downTo 0) {
++            val v = 112 + (6 - d) * 3.0
++            val ts = now - d * 86_400_000L
++            records += VitalRecord(VitalType.SYSTOLIC.id, v, ts - 8 * 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.SYSTOLIC.id, v, ts - 20 * 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.DIASTOLIC.id, 76.0, ts - 8 * 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.HEART_RATE.id, 70.0, ts - 8 * 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.SPO2.id, 98.0, ts - 8 * 3600_000L, VitalSource.MANUAL)
++            records += VitalRecord(VitalType.TEMPERATURE.id, 36.4, ts - 8 * 3600_000L, VitalSource.MANUAL)
++        }
++
++        val result = RiskEngine.evaluate(records, now)
++        val trendAlert = result.alerts.any {
++            it.metric.startsWith("趋势·血压") && it.level == RiskLevel.WARNING
++        }
++        assertTrue("连续上升应触发趋势 WARNING", trendAlert)
++    }
++
++    // ---------- 5. PPG 分析器 ----------
++
++    @Test
++    fun `合成60bpm脉搏波分析正确`() {
++        val ppg = PpgAnalyzer()
++        val fps = 30
++        for (f in 0 until fps * 35) {
++            val tMs = f * 1000L / fps
++            val phase = (tMs % 1000) / 1000.0
++            val pulse = 900 * Math.exp(-Math.pow((phase - 0.15) / 0.05, 2.0)) +
++                300 * Math.exp(-Math.pow((phase - 0.40) / 0.08, 2.0))
++            val noise = ((f % 7) - 3) * 2.5
++            ppg.addSample(tMs, 5000 + pulse + noise)
++        }
++        val result = ppg.analyze()
++        assertNotNull("PPG 分析不应返回 null", result)
++        assertTrue("BPM 应接近 60", abs(result!!.bpm - 60.0) <= 4.0)
++        assertTrue("心跳数应 >= 20", result.beatCount >= 20)
++    }
++
++    @Test
++    fun `信号不足时返回 null 不编数字`() {
++        val ppg = PpgAnalyzer()
++        for (f in 0 until 30 * 5) {
++            ppg.addSample(f * 33L, 5000.0)
++        }
++        assertNull("短信号应返回 null", ppg.analyze())
++    }
++
++    // ---------- 6. BLE 协议解析 ----------
++
++    @Test
++    fun `BLE 心率 u8 解析`() {
++        val data = byteArrayOf(0x00, 72)
++        assertEquals(72.0, BleCodec.parseHeartRate(data), 0.0)
++    }
++
++    @Test
++    fun `BLE 心率 u16 解析`() {
++        val data = byteArrayOf(0x01, 0xB4.toByte(), 0x00) // 180
++        assertEquals(180.0, BleCodec.parseHeartRate(data), 0.0)
++    }
++
++    @Test
++    fun `BLE SFLOAT 36_5 解析`() {
++        val data = byteArrayOf(0x6D.toByte(), 0xF1.toByte())
++        assertEquals(36.5, BleCodec.sfloat(data, 0), 0.0)
++    }
++
++    @Test
++    fun `BLE SFLOAT 负数解析`() {
++        val data = byteArrayOf(0xEF.toByte(), 0xFE.toByte()) // -27.3
++        assertEquals(-27.3, BleCodec.sfloat(data, 0), 0.0)
++    }
++
++    @Test
++    fun `BLE 血压解析`() {
++        val data = byteArrayOf(0x00, 0x78, 0x00, 0x50, 0x00, 0x00, 0x00)
++        val result = BleCodec.parseBloodPressure(data)
++        assertNotNull(result)
++        assertEquals(120.0, result!![0], 0.0)
++        assertEquals(80.0, result[1], 0.0)
++    }
++
++    // ---------- 辅助 ----------
++
++    private fun mkVitals(
++        hr: Double, sys: Double, dia: Double, spo2: Double, temp: Double
++    ): List<VitalRecord> = listOf(
++        VitalRecord(VitalType.HEART_RATE.id, hr, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.SYSTOLIC.id, sys, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.DIASTOLIC.id, dia, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.SPO2.id, spo2, now - 1000, VitalSource.MANUAL),
++        VitalRecord(VitalType.TEMPERATURE.id, temp, now - 2000, VitalSource.MANUAL)
++    )
++}
+diff --git a/build.gradle.kts b/build.gradle.kts
+index 980e6db..38041b7 100644
+--- a/build.gradle.kts
++++ b/build.gradle.kts
+@@ -4,4 +4,7 @@ plugins {
+     id("org.jetbrains.kotlin.jvm") version "2.4.10" apply false
+     id("org.jetbrains.kotlin.plugin.compose") version "2.4.10" apply false
+     id("org.jetbrains.kotlin.plugin.serialization") version "2.4.10" apply false
++    id("com.google.devtools.ksp") version "2.4.10-1.0.30" apply false
++    id("com.google.dagger.hilt.android") version "2.52" apply false
++    id("org.jlleitschuh.gradle.ktlint") version "12.1.1" apply false
+ }
+diff --git a/test/TestEngine.java b/test/TestEngine.java
+deleted file mode 100644
+index b5d4076..0000000
+--- a/test/TestEngine.java
++++ /dev/null
+@@ -1,79 +0,0 @@
+-import com.silema.app.data.*;
+-import com.silema.app.engine.*;
+-import java.util.*;
+-
+-public class TestEngine {
+-    static long now = System.currentTimeMillis();
+-    static RiskEngine eng = RiskEngine.INSTANCE;
+-    static int fails = 0;
+-
+-    public static void main(String[] args) {
+-        // CASE 1: 全部正常
+-        Assessment r1 = eng.evaluate(mk(72, 120, 78, 98, 36.5), now);
+-        check("normal_all", r1.getLevel() == RiskLevel.NORMAL,
+-              "level=" + r1.getLevel() + " alerts=" + r1.getAlerts().size());
+-
+-        // CASE 2: 高血压危象
+-        Assessment r2 = eng.evaluate(mk(80, 185, 115, 97, 36.5), now);
+-        check("bp_critical", r2.getLevel() == RiskLevel.CRITICAL && !r2.getAlerts().isEmpty(),
+-              "level=" + r2.getLevel());
+-        System.out.println("      first=" + r2.getAlerts().get(0).getProblem());
+-
+-        // CASE 3: 低血氧危险
+-        Assessment r3 = eng.evaluate(mk(85, 125, 80, 88, 36.5), now);
+-        check("spo2_critical", r3.getLevel() == RiskLevel.CRITICAL, "level=" + r3.getLevel());
+-
+-        // CASE 4: 组合规则 低血压+心跳快 => 危险
+-        Assessment r4 = eng.evaluate(mk(108, 95, 62, 96, 36.5), now);
+-        boolean hasCombo4 = r4.getAlerts().stream().anyMatch(x -> x.getMetric().contains("+"));
+-        check("combo_shock", r4.getLevel() == RiskLevel.CRITICAL && hasCombo4,
+-              "level=" + r4.getLevel() + " comboFound=" + hasCombo4);
+-
+-        // CASE 5: 空数据 => 警告（无数据不可沉默）
+-        Assessment r5 = eng.evaluate(new ArrayList<>(), now);
+-        check("empty_warns", r5.getLevel() == RiskLevel.WARNING,
+-              "level=" + r5.getLevel());
+-
+-        // CASE 6: 连续3次心率超标 => 升级为警告
+-        List<VitalRecord> streak = new ArrayList<>();
+-        for (int i = 3; i >= 1; i--) {
+-            streak.add(new VitalRecord("heart_rate", 105d, now - i * 3600000L, "manual"));
+-        }
+-        List<VitalRecord> base6 = mk(70, 118, 76, 97, 36.4);
+-        for (VitalRecord r : base6) {
+-            if (!r.getTypeId().equals("heart_rate")) streak.add(r);
+-        }
+-        Assessment r6 = eng.evaluate(streak, now);
+-        boolean escalated = r6.getAlerts().stream()
+-            .anyMatch(x -> x.getProblem().contains("连续 3 次"));
+-        check("streak_escalation", escalated, "escalated=" + escalated);
+-
+-        // CASE 7: 每条告警必须三段齐全（是什么/为什么/做什么）
+-        boolean ok7 = threeParts(r6) && threeParts(eng.evaluate(mk(160, 190, 120, 85, 40.1), now));
+-        check("alerts_three_parts", ok7, "");
+-
+-        System.out.println(fails == 0 ? "ALL_TESTS_PASSED" : ("TESTS_FAILED=" + fails));
+-        if (fails > 0) System.exit(1);
+-    }
+-
+-    static boolean threeParts(Assessment a) {
+-        return a.getAlerts().stream().allMatch(x ->
+-            !x.getProblem().isEmpty() && !x.getWhy().isEmpty() && !x.getAction().isEmpty());
+-    }
+-
+-    static List<VitalRecord> mk(double hr, double sys, double dia, double spo2, double temp) {
+-        List<VitalRecord> l = new ArrayList<>();
+-        l.add(new VitalRecord("heart_rate", hr, now - 1000, "manual"));
+-        l.add(new VitalRecord("systolic", sys, now - 1000, "manual"));
+-        l.add(new VitalRecord("diastolic", dia, now - 1000, "manual"));
+-        l.add(new VitalRecord("spo2", spo2, now - 1000, "manual"));
+-        l.add(new VitalRecord("temperature", temp, now - 1000, "manual"));
+-        return l;
+-    }
+-
+-    static void check(String name, boolean ok, String detail) {
+-        System.out.println((ok ? "PASS " : "FAIL ") + name + " -> " + detail);
+-        if (!ok) fails++;
+-    }
+-}
+-
+diff --git a/test/TestFeatures.java b/test/TestFeatures.java
+deleted file mode 100644
+index 97a8b09..0000000
+--- a/test/TestFeatures.java
++++ /dev/null
+@@ -1,76 +0,0 @@
+-import com.silema.app.data.*;
+-import com.silema.app.engine.*;
+-import java.util.*;
+-
+-public class TestFeatures {
+-    static long now = System.currentTimeMillis();
+-    static int fails = 0;
+-
+-    public static void main(String[] args) {
+-        // ---- 1. 压力指数映射 ----
+-        int s10 = StressMath.INSTANCE.fromRmssd(10.0);
+-        int s100 = StressMath.INSTANCE.fromRmssd(100.0);
+-        int s50 = StressMath.INSTANCE.fromRmssd(50.0);
+-        check("stress_low_end", s10 >= 95, "rmssd10->" + s10);
+-        check("stress_high_end", s100 <= 5, "rmssd100->" + s100);
+-        check("stress_mid_monotonic", s10 > s50 && s50 > s100, "10:" + s10 + " 50:" + s50 + " 100:" + s100);
+-        int sClamp = StressMath.INSTANCE.fromRmssd(9999.0);
+-        check("stress_clamped", sClamp >= 0 && sClamp <= 100, "rmssd9999->" + sClamp);
+-
+-        // ---- 2. Haversine：北京天安门→故宫约 1.6km 量级；同点=0 ----
+-        double same = Stats.INSTANCE.haversineMeters(39.9087, 116.3975, 39.9087, 116.3975);
+-        check("haversine_zero", Math.abs(same) < 1e-6, "" + same);
+-        // 纬度差 0.01° ≈ 1111.9m（赤道外近似）
+-        double d = Stats.INSTANCE.haversineMeters(39.90, 116.3975, 39.91, 116.3975);
+-        check("haversine_0.01lat", Math.abs(d - 1111.9) < 5.0, "d=" + d);
+-
+-        // ---- 3. 周报：构造两周数据验证对比 ----
+-        List<VitalRecord> recs = new ArrayList<>();
+-        // 上周：心率均值 80（每天2次）
+-        for (int day = 8; day <= 14; day++) {
+-            long ts = now - day * 86400000L;
+-            recs.add(new VitalRecord("heart_rate", 78.0, ts, "manual"));
+-            recs.add(new VitalRecord("heart_rate", 82.0, ts + 3600000L, "manual"));
+-        }
+-        // 本周：心率均值 70（每天2次）
+-        for (int day = 1; day <= 7; day++) {
+-            long ts = now - day * 86400000L;
+-            recs.add(new VitalRecord("heart_rate", 68.0, ts, "manual"));
+-            recs.add(new VitalRecord("heart_rate", 72.0, ts + 3600000L, "manual"));
+-            // 本周睡眠：每天 8 小时
+-            recs.add(new VitalRecord("sleep", 8.0, ts, "manual"));
+-        }
+-        List<Workout> workouts = new ArrayList<>();
+-        workouts.add(new Workout("w1", "walk", now - 86400000L, 1800000L, 2000.0, 68.7, new ArrayList<>()));
+-        HealthReport.Weekly rep = HealthReport.INSTANCE.weekly(recs, workouts, now, 2);
+-
+-        HealthReport.MetricWeek hr = rep.getMetrics().stream()
+-            .filter(m -> m.getType() == VitalType.HEART_RATE).findFirst().orElse(null);
+-        boolean hrOk = hr != null
+-            && Math.abs(hr.getThisWeekAvg() - 70.1538) < 0.01
+-            && Math.abs(hr.getLastWeekAvg() - 79.2) < 0.01
+-            && hr.getDeltaPct() != null && Math.abs(hr.getDeltaPct() + 11.4216) < 0.1;
+-        check("weekly_hr_compare", hrOk,
+-            hr == null ? "missing" : "this=" + hr.getThisWeekAvg() + " last=" + hr.getLastWeekAvg()
+-                + " delta=" + hr.getDeltaPct() + "%");
+-
+-        boolean sleepOk = rep.getSleepAvgHours() != null && Math.abs(rep.getSleepAvgHours() - 8.0) < 0.01;
+-        check("weekly_sleep_avg", sleepOk, "sleep=" + rep.getSleepAvgHours());
+-
+-        boolean workoutOk = rep.getWorkoutCount() == 1 && Math.abs(rep.getWorkoutKm() - 2.0) < 0.01;
+-        check("weekly_workouts", workoutOk, "count=" + rep.getWorkoutCount() + " km=" + rep.getWorkoutKm());
+-
+-        boolean summaryOk = rep.getSummary().stream().anyMatch(l -> l.contains("静息心率"))
+-            && rep.getSummary().stream().anyMatch(l -> l.contains("睡眠"));
+-        check("weekly_summary_lines", summaryOk, "lines=" + rep.getSummary().size());
+-
+-        System.out.println(fails == 0 ? "ALL_FEATURE_TESTS_PASSED" : ("FEATURE_TESTS_FAILED=" + fails));
+-        if (fails > 0) System.exit(1);
+-    }
+-
+-    static void check(String name, boolean ok, String detail) {
+-        System.out.println((ok ? "PASS " : "FAIL ") + name + " -> " + detail);
+-        if (!ok) fails++;
+-    }
+-}
+-
+diff --git a/test/TestStats.java b/test/TestStats.java
+deleted file mode 100644
+index 1906738..0000000
+--- a/test/TestStats.java
++++ /dev/null
+@@ -1,139 +0,0 @@
+-import com.silema.app.data.*;
+-import com.silema.app.engine.*;
+-import com.silema.app.ppg.PpgAnalyzer;
+-import com.silema.app.ble.BleCodec;
+-import java.util.*;
+-
+-public class TestStats {
+-    static long now = System.currentTimeMillis();
+-    static RiskEngine eng = RiskEngine.INSTANCE;
+-    static int fails = 0;
+-
+-    public static void main(String[] args) {
+-        // ---- 1. 数学原语 ----
+-        double mean = Stats.INSTANCE.mean(Arrays.asList(1.0, 2.0, 3.0, 4.0));
+-        check("mean", Math.abs(mean - 2.5) < 1e-9, "mean=" + mean);
+-
+-        double std = Stats.INSTANCE.std(Arrays.asList(2.0, 4.0, 4.0, 4.0, 5.0, 5.0, 7.0, 9.0));
+-        check("std_population", Math.abs(std - 2.0) < 1e-9, "std=" + std);
+-
+-        double slope = Stats.INSTANCE.leastSquaresSlope(
+-            Arrays.asList(0.0, 1.0, 2.0, 3.0), Arrays.asList(1.0, 3.0, 5.0, 7.0));
+-        check("linreg_slope_exact", Math.abs(slope - 2.0) < 1e-9, "slope=" + slope);
+-
+-        // ---- 2. 衍生血流动力学公式 ----
+-        double map = VitalsMath.INSTANCE.meanArterialPressure(120, 80);
+-        check("map_120_80", Math.abs(map - 93.3333) < 0.001, "MAP=" + map);
+-
+-        check("shock_index", Math.abs(VitalsMath.INSTANCE.shockIndex(75, 150) - 0.5) < 1e-9,
+-              "SI=" + VitalsMath.INSTANCE.shockIndex(75, 150));
+-
+-        // 引擎层：SI>=1.0 触发危险级休克指数告警
+-        Assessment rSi = eng.evaluate(mk(110, 100, 70, 97, 36.5), now);
+-        boolean siAlert = rSi.getAlerts().stream()
+-            .anyMatch(x -> x.getMetric().equals("休克指数") && x.getLevel() == RiskLevel.CRITICAL);
+-        check("si_critical_alert", siAlert, "level=" + rSi.getLevel());
+-
+-        // MAP<65 且收缩压不低时触发警告（如 95/60 → MAP 71.7 不触发；用 92/55 → MAP 67.3 不触发；用 90/52 → MAP 64.7 触发）
+-        Assessment rMap = eng.evaluate(mk(60, 90, 52, 98, 36.5), now);
+-        boolean mapAlert = rMap.getAlerts().stream().anyMatch(x -> x.getMetric().equals("平均动脉压"));
+-        check("map_low_warning", mapAlert, "found=" + mapAlert);
+-
+-        // ---- 3. 个人基线 z-score ----
+-        List<VitalRecord> baselineCase = new ArrayList<>();
+-        double[] priors = {116, 120, 122, 126, 130};
+-        for (int i = 0; i < priors.length; i++) {
+-            baselineCase.add(new VitalRecord("systolic", priors[i], now - (i + 1) * 86400000L, "manual"));
+-            baselineCase.add(new VitalRecord("diastolic", 78.0, now - (i + 1) * 86400000L, "manual"));
+-        }
+-        baselineCase.add(new VitalRecord("systolic", 140.0, now - 60000, "manual"));
+-        baselineCase.add(new VitalRecord("diastolic", 88.0, now - 60000, "manual"));
+-        Assessment rBase = eng.evaluate(baselineCase, now);
+-        boolean baseAlert = rBase.getAlerts().stream()
+-            .anyMatch(x -> x.getMetric().startsWith("基线偏差") && x.getProblem().contains("|z|"));
+-        check("baseline_zscore_watch", baseAlert, "alerts=" + rBase.getAlerts().size());
+-
+-        // ---- 4. 趋势回归：连续一周收缩压每日+3mmHg ----
+-        List<VitalRecord> trendCase = new ArrayList<>();
+-        for (int d = 6; d >= 0; d--) {
+-            double v = 112 + (6 - d) * 3;
+-            trendCase.add(new VitalRecord("systolic", v, now - d * 86400000L - 3600000L * 8, "manual"));
+-            trendCase.add(new VitalRecord("systolic", v, now - d * 86400000L - 3600000L * 20, "manual"));
+-            trendCase.add(new VitalRecord("diastolic", 76.0, now - d * 86400000L - 3600000L * 8, "manual"));
+-            trendCase.add(new VitalRecord("heart_rate", 70.0, now - d * 86400000L - 3600000L * 8, "manual"));
+-            trendCase.add(new VitalRecord("spo2", 98.0, now - d * 86400000L - 3600000L * 8, "manual"));
+-            trendCase.add(new VitalRecord("temperature", 36.4, now - d * 86400000L - 3600000L * 8, "manual"));
+-        }
+-        Assessment rTrend = eng.evaluate(trendCase, now);
+-        boolean trendAlert = rTrend.getAlerts().stream()
+-            .anyMatch(x -> x.getMetric().startsWith("趋势·血压") && x.getLevel() == RiskLevel.WARNING);
+-        check("trend_regression_warning", trendAlert, "level=" + rTrend.getLevel());
+-
+-        // ---- 5. PPG 分析器：合成 60bpm 脉搏波 ----
+-        PpgAnalyzer ppg = new PpgAnalyzer();
+-        int fps = 30;
+-        for (int f = 0; f < fps * 35; f++) {
+-            long tMs = f * 1000L / fps;
+-            double phase = (tMs % 1000) / 1000.0;
+-            double pulse = 900 * Math.exp(-Math.pow((phase - 0.15) / 0.05, 2))
+-                         + 300 * Math.exp(-Math.pow((phase - 0.40) / 0.08, 2)); // 主波+重搏波
+-            double noise = ((f % 7) - 3) * 2.5; // 确定性小噪声
+-            ppg.addSample(tMs, 5000 + pulse + noise);
+-        }
+-        PpgAnalyzer.Result pr = ppg.analyze();
+-        boolean ppgOk = pr != null && Math.abs(pr.getBpm() - 60.0) <= 4.0 && pr.getBeatCount() >= 20;
+-        check("ppg_synthetic_60bpm", ppgOk,
+-              pr == null ? "null" : ("bpm=" + pr.getBpm() + " beats=" + pr.getBeatCount()
+-                  + " rmssd=" + pr.getRmssdMs() + " conf=" + pr.getConfidence()));
+-
+-        // 数据不足必须返回 null（诚实拒绝，不编数字）
+-        PpgAnalyzer shortPpg = new PpgAnalyzer();
+-        for (int f = 0; f < fps * 5; f++) shortPpg.addSample(f * 33L, 5000);
+-        check("ppg_reject_short_signal", shortPpg.analyze() == null, "short->null");
+-
+-        // ---- 6. BLE 协议解析 ----
+-        byte[] hr8 = {0x00, 72};
+-        byte[] hr16 = {0x01, (byte) 0xB4, 0x00}; // uint16 LE = 180
+-        check("ble_hr_u8", BleCodec.INSTANCE.parseHeartRate(hr8) == 72.0, "" + BleCodec.INSTANCE.parseHeartRate(hr8));
+-        check("ble_hr_u16", BleCodec.INSTANCE.parseHeartRate(hr16) == 180.0, "" + BleCodec.INSTANCE.parseHeartRate(hr16));
+-
+-        byte[] sfTemp = {(byte) 0x6D, (byte) 0xF1}; // SFLOAT 365 x 10^-1 = 36.5
+-        check("ble_sfloat_36_5", Double.compare(BleCodec.INSTANCE.sfloat(sfTemp, 0), 36.5) == 0,
+-              "" + BleCodec.INSTANCE.sfloat(sfTemp, 0));
+-
+-        byte[] sfNeg = {(byte) 0xEF, (byte) 0xFE}; // SFLOAT -273 x 10^-1 = -27.3
+-        check("ble_sfloat_negative", Double.compare(BleCodec.INSTANCE.sfloat(sfNeg, 0), -27.3) == 0,
+-              "" + BleCodec.INSTANCE.sfloat(sfNeg, 0));
+-
+-        byte[] bp = {0x00, 0x78, 0x00, 0x50, 0x00, 0x00, 0x00}; // SYS=120 DIA=80 MAP=0
+-        List<Double> parsedBp = BleCodec.INSTANCE.parseBloodPressure(bp);
+-        boolean bpOk = parsedBp != null && parsedBp.get(0) == 120.0 && parsedBp.get(1) == 80.0;
+-        check("ble_bp_parse", bpOk, "" + parsedBp);
+-
+-        System.out.println(fails == 0 ? "ALL_STATS_TESTS_PASSED" : ("STATS_TESTS_FAILED=" + fails));
+-        if (fails > 0) System.exit(1);
+-    }
+-
+-    static List<VitalRecord> mk(double hr, double sys, double dia, double spo2, double temp) {
+-        List<VitalRecord> l = new ArrayList<>();
+-        l.add(new VitalRecord("heart_rate", hr, now - 1000, "manual"));
+-        l.add(new VitalRecord("systolic", sys, now - 1000, "manual"));
+-        l.add(new VitalRecord("diastolic", dia, now - 1000, "manual"));
+-        l.add(new VitalRecord("spo2", spo2, now - 1000, "manual"));
+-        l.add(new VitalRecord("temperature", temp, now - 2000, "manual"));
+-        return l;
+-    }
+-
+-    static void check(String name, boolean ok, String detail) {
+-        System.out.println((ok ? "PASS " : "FAIL ") + name + " -> " + detail);
+-        if (!ok) fails++;
+-    }
+-}
+-
+-
+-
+-
+-
+-
+-
+-
+diff --git a/wear/build.gradle.kts b/wear/build.gradle.kts
+index f75e059..cd5cc9f 100644
+--- a/wear/build.gradle.kts
++++ b/wear/build.gradle.kts
+@@ -5,6 +5,9 @@ plugins {
+     id("org.jetbrains.kotlin.android")
+     id("org.jetbrains.kotlin.plugin.compose")
+     id("org.jetbrains.kotlin.plugin.serialization")
++    id("com.google.devtools.ksp")
++    id("com.google.dagger.hilt.android")
++    id("org.jlleitschuh.gradle.ktlint")
+ }
+ 
+ val keystoreProps = Properties().apply {
+@@ -37,11 +40,19 @@ android {
+ 
+     buildTypes {
+         release {
+-            isMinifyEnabled = false
++            isMinifyEnabled = true
++            isShrinkResources = true
++            proguardFiles(
++                getDefaultProguardFile("proguard-android-optimize.txt"),
++                "proguard-rules.pro"
++            )
+             if (keystoreProps.isNotEmpty()) {
+                 signingConfig = signingConfigs.getByName("release")
+             }
+         }
++        debug {
++            isMinifyEnabled = false
++        }
+     }
+ 
+     compileOptions {
+@@ -57,6 +68,7 @@ android {
+ 
+     buildFeatures {
+         compose = true
++        buildConfig = true
+     }
+ }
+ 
+@@ -64,12 +76,29 @@ dependencies {
+     // Wear Compose 与手机端同 BOM（Compose 1.6.8），1.3.x 与该 BOM 对齐
+     val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+     implementation(composeBom)
++
+     implementation("androidx.compose.ui:ui")
+     implementation("androidx.wear.compose:compose-material:1.3.1")
+     implementation("androidx.wear.compose:compose-foundation:1.3.1")
+     implementation("androidx.activity:activity-compose:1.9.2")
++    implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
++    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
++
+     implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+-    
++
+     // 共享真实领域层：RiskEngine / Stats / HealthReport / FHIR 导出 / 数据模型
+     implementation(project(":core"))
++
++    // ---------- Hilt 依赖注入 ----------
++    implementation("com.google.dagger:hilt-android:2.52")
++    ksp("com.google.dagger:hilt-android-compiler:2.52")
++    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
++
++    // ---------- Timber 日志 ----------
++    implementation("com.jakewharton.timber:timber:5.0.1")
++
++    // ---------- 单元测试 ----------
++    testImplementation("junit:junit:4.13.2")
++    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
++    testImplementation("com.google.truth:truth:1.4.4")
+ }
+diff --git a/wear/proguard-rules.pro b/wear/proguard-rules.pro
+new file mode 100644
+index 0000000..b956ba7
+--- /dev/null
++++ b/wear/proguard-rules.pro
+@@ -0,0 +1,26 @@
++# ============================================================
++# Silema Wear OS - ProGuard / R8 Rules
++# ============================================================
++
++# ---------- 数据模型（kotlinx-serialization） ----------
++-keepattributes *Annotation*, InnerClasses
++-keep @kotlinx.serialization.Serializable class com.silema.app.** { *; }
++-keepclassmembers class com.silema.app.data.** {
++    kotlinx.serialization.KSerializer serializer(...);
++}
++
++# ---------- Wear Compose ----------
++-dontwarn androidx.wear.compose.**
++
++# ---------- 蓝牙 / BLE ----------
++-dontwarn android.bluetooth.**
++
++# ---------- 通用：保留枚举 ----------
++-keepclassmembers enum * {
++    public static **[] values();
++    public static ** valueOf(java.lang.String);
++}
++
++# ---------- 调试信息 ----------
++-keepattributes SourceFile,LineNumberTable
++-renamesourcefileattribute SourceFile
+diff --git a/wear/src/main/AndroidManifest.xml b/wear/src/main/AndroidManifest.xml
+index 42a2957..12856b8 100644
+--- a/wear/src/main/AndroidManifest.xml
++++ b/wear/src/main/AndroidManifest.xml
+@@ -14,7 +14,11 @@
+     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
+     <uses-permission android:name="android.permission.health.READ_STEPS" />
+ 
+-    <application>
++    <application
++        android:name=".WearApplication"
++        android:allowBackup="true"
++        android:label="死了吗·手表端"
++        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
+         <activity
+             android:name=".MainActivity"
+             android:exported="true"
+diff --git a/wear/src/main/java/com/silema/app/wear/MainActivity.kt b/wear/src/main/java/com/silema/app/wear/MainActivity.kt
+index 7520a48..203dc01 100644
+--- a/wear/src/main/java/com/silema/app/wear/MainActivity.kt
++++ b/wear/src/main/java/com/silema/app/wear/MainActivity.kt
+@@ -9,29 +9,34 @@ import androidx.activity.compose.setContent
+ import androidx.core.app.ActivityCompat
+ import com.silema.app.wear.ble.BleVitals
+ import com.silema.app.wear.data.WearStore
++import dagger.hilt.android.AndroidEntryPoint
++import timber.log.Timber
+ 
+ /**
+  * 手表端主入口（主产品，给老人家佩戴）。
+  * 自动扫描并连接 BLE 医疗设备（心率带/血压计/血氧仪）
++ *
++ * v0.5.0 起添加 [AndroidEntryPoint] 以支持 Hilt 注入。
+  */
++@AndroidEntryPoint
+ class MainActivity : ComponentActivity() {
+-    
++
+     private var bleVitals: BleVitals? = null
+-    
++
+     override fun onCreate(savedInstanceState: Bundle?) {
+         super.onCreate(savedInstanceState)
+-        
++
+         // 初始化本地持久化
+         WearStore.init(filesDir)
+-        
++
+         // 检查并请求 BLE 权限后启动扫描
+         checkAndRequestPermissions()
+-        
++
+         setContent {
+             WearApp()
+         }
+     }
+-    
++
+     private fun checkAndRequestPermissions() {
+         val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+             arrayOf(
+@@ -44,11 +49,11 @@ class MainActivity : ComponentActivity() {
+                 Manifest.permission.BLUETOOTH_ADMIN
+             )
+         }
+-        
++
+         val missingPermissions = permissions.filter {
+             ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+         }
+-        
++
+         if (missingPermissions.isEmpty()) {
+             startBleScan()
+         } else {
+@@ -56,25 +61,33 @@ class MainActivity : ComponentActivity() {
+             ActivityCompat.requestPermissions(this, missingPermissions.toTypedArray(), 1001)
+         }
+     }
+-    
+-    override fun onRequestPermissionsResult(requestCode: Int, permissions: Array<String>, grantResults: IntArray) {
++
++    override fun onRequestPermissionsResult(
++        requestCode: Int,
++        permissions: Array<String>,
++        grantResults: IntArray
++    ) {
+         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
+         if (requestCode == 1001 && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
+             startBleScan()
++        } else {
++            Timber.w("BLE permissions denied, scan not started")
+         }
+     }
+-    
++
+     private fun startBleScan() {
+         bleVitals = BleVitals(applicationContext).apply {
+             startScan { device ->
+                 // 发现设备后自动连接（在 BleVitals 内部处理）
+-                android.util.Log.d("BleVitals", "Found device: ${device.name ?: "Unknown"}")
++                Timber.d("Found BLE device: ${device.name ?: "Unknown"}")
+             }
+         }
++        Timber.i("BLE scan started")
+     }
+-    
++
+     override fun onDestroy() {
+         super.onDestroy()
+         bleVitals?.stop()
++        Timber.d("MainActivity destroyed, BLE stopped")
+     }
+ }
+diff --git a/wear/src/main/java/com/silema/app/wear/WearApplication.kt b/wear/src/main/java/com/silema/app/wear/WearApplication.kt
+new file mode 100644
+index 0000000..b3f01c7
+--- /dev/null
++++ b/wear/src/main/java/com/silema/app/wear/WearApplication.kt
+@@ -0,0 +1,26 @@
++package com.silema.app.wear
++
++import android.app.Application
++import dagger.hilt.android.HiltAndroidApp
++import timber.log.Timber
++
++/**
++ * 手表端 Application 入口。
++ *
++ * v0.5.0 起接入 Hilt 依赖注入与 Timber 日志，与手机端架构对齐。
++ * - [HiltAndroidApp] 触发 Hilt 代码生成
++ * - Debug 构建安装 [Timber.DebugTree]
++ */
++@HiltAndroidApp
++class WearApplication : Application() {
++
++    override fun onCreate() {
++        super.onCreate()
++
++        if (BuildConfig.DEBUG) {
++            Timber.plant(Timber.DebugTree())
++        }
++
++        Timber.i("WearApplication initialized: version=${BuildConfig.VERSION_NAME}")
++    }
++}
