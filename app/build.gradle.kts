@@ -7,7 +7,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
-    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val keystoreProps = Properties().apply {
@@ -25,6 +24,12 @@ android {
         targetSdk = 34
         versionCode = 5
         versionName = "0.5.0"
+        // Room schema 导出（kapt 方式）
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
+        }
     }
 
     signingConfigs {
@@ -72,13 +77,6 @@ android {
     }
 }
 
-// KAPT 编译器参数（Room schema 导出等）
-kapt {
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
-}
-
 dependencies {
     val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
     implementation(composeBom)
@@ -115,8 +113,8 @@ dependencies {
     kapt("androidx.room:room-compiler:2.6.1")
 
     // ---------- Hilt 依赖注入 ----------
-    implementation("com.google.dagger:hilt-android:2.57")
-    kapt("com.google.dagger:hilt-android-compiler:2.57")
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
     implementation("androidx.hilt:hilt-work:1.2.0")
     kapt("androidx.hilt:hilt-compiler:1.2.0")

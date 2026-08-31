@@ -7,7 +7,6 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
-    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val keystoreProps = Properties().apply {
@@ -90,8 +89,8 @@ dependencies {
     implementation(project(":core"))
 
     // ---------- Hilt 依赖注入 ----------
-    implementation("com.google.dagger:hilt-android:2.57")
-    kapt("com.google.dagger:hilt-android-compiler:2.57")
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // ---------- Timber 日志 ----------
