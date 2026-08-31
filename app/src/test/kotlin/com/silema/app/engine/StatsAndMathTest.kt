@@ -45,12 +45,12 @@ class StatsAndMathTest {
 
     @Test
     fun `MAP 120_80 约等于 93_33`() {
-        assertEquals(93.3333, VitalsMath.meanArterialPressure(120, 80), 0.001)
+        assertEquals(93.3333, VitalsMath.meanArterialPressure(120.0, 80.0), 0.001)
     }
 
     @Test
     fun `休克指数计算正确`() {
-        assertEquals(0.5, VitalsMath.shockIndex(75, 150), 1e-9)
+        assertEquals(0.5, VitalsMath.shockIndex(75.0, 150.0), 1e-9)
     }
 
     @Test
