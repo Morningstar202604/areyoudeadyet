@@ -17,17 +17,19 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import timber.log.Timber
 
 /**
  * 离线优先的本地仓储。
  *
- * v0.5.0 起底层从 JSON 文件迁移到 Room 数据库，对外接口（StateFlow + 同步方法）保持不变，
+ * v0.5.0 起底层从 JSON 文件迁移到 Room 数据库，对外接口（StateFlow + 方法）保持不变，
  * UI 层无需改动。旧版本 JSON 数据会在首次启动时自动导入 Room，导入完成后 JSON 文件保留为备份。
  *
  * 设计要点：
  * - Room DAO 返回 Flow，收集后更新 StateFlow，保证 UI 即时响应
  * - 写操作在 IO Dispatcher 执行，不阻塞主线程
+ * - [mergeHealthConnect] 为 suspend 函数，返回实际新增条数（修复了旧版异步返回 0 的 bug）
  * - SharedPreferences 仍用于轻量设置（目标、提醒开关等）
  */
 object AppRepository {
@@ -101,15 +103,18 @@ object AppRepository {
 
     // ---------- 体征记录 ----------
 
-    /** 新增手动记录；同类型同分钟内的旧记录会被覆盖，避免重复保存。 */
+    /**
+     * 新增手动记录；同类型同分钟内的旧记录会被覆盖，避免重复保存。
+     *
+     * 使用 SQL 直接删除时间范围内的旧记录，避免先查再删的低效操作。
+     */
     fun addRecord(record: VitalRecord) {
         scope.launch {
             val dao = db?.vitalRecordDao() ?: return@launch
-            // 同类型同分钟内的旧记录删除
-            val cutoff = record.timestampMillis - 60_000L
-            val duplicates = dao.getByType(record.typeId)
-                .filter { it.timestampMillis in cutoff..record.timestampMillis }
-            duplicates.forEach { dao.delete(it.typeId, it.timestampMillis) }
+            // 同类型同分钟内的旧记录直接 SQL 删除
+            val from = record.timestampMillis - 60_000L
+            val to = record.timestampMillis + 1_000L
+            dao.deleteInRange(record.typeId, from, to)
             dao.insert(record.toEntity())
             Timber.d("addRecord: type=${record.typeId} value=${record.value}")
         }
@@ -125,33 +130,39 @@ object AppRepository {
      * 合并 Health Connect 拉取的数据：
      * 与已有记录（无论来源）在 90 秒内且类型相同的视为同一测量，跳过；
      * 否则追加。返回实际新增条数。
+     *
+     * 注意：这是 suspend 函数，必须在协程中调用。修复了旧版异步返回 0 的 bug。
      */
-    fun mergeHealthConnect(incoming: List<VitalRecord>): Int {
-        if (incoming.isEmpty()) return 0
+    suspend fun mergeHealthConnect(incoming: List<VitalRecord>): Int = withContext(Dispatchers.IO) {
+        if (incoming.isEmpty()) return@withContext 0
+        val dao = db?.vitalRecordDao() ?: return@withContext 0
+
         var added = 0
-        scope.launch {
-            val dao = db?.vitalRecordDao() ?: return@launch
-            val existing = dao.getAll()
-            val toInsert = mutableListOf<VitalRecord>()
-            for (candidate in incoming.sortedBy { it.timestampMillis }) {
-                val duplicate = existing.any {
-                    it.typeId == candidate.typeId &&
-                        Math.abs(it.timestampMillis - candidate.timestampMillis) <= 90_000L
-                } || toInsert.any {
-                    it.typeId == candidate.typeId &&
-                        Math.abs(it.timestampMillis - candidate.timestampMillis) <= 90_000L
-                }
-                if (!duplicate) {
-                    toInsert += candidate
-                    added++
-                }
+        val toInsert = mutableListOf<VitalRecord>()
+
+        for (candidate in incoming.sortedBy { it.timestampMillis }) {
+            val from = candidate.timestampMillis - 90_000L
+            val to = candidate.timestampMillis + 90_000L
+
+            // 先查数据库中是否有重复
+            val existsInDb = dao.countInRange(candidate.typeId, from, to) > 0
+            // 再查本次待插入列表中是否有重复
+            val existsInBatch = toInsert.any {
+                it.typeId == candidate.typeId &&
+                    Math.abs(it.timestampMillis - candidate.timestampMillis) <= 90_000L
             }
-            if (toInsert.isNotEmpty()) {
-                dao.insertAll(toInsert.toEntity())
+
+            if (!existsInDb && !existsInBatch) {
+                toInsert += candidate
+                added++
             }
-            Timber.d("mergeHealthConnect: incoming=${incoming.size} added=$added")
         }
-        return added
+
+        if (toInsert.isNotEmpty()) {
+            dao.insertAll(toInsert.toEntity())
+        }
+        Timber.d("mergeHealthConnect: incoming=${incoming.size} added=$added")
+        added
     }
 
     // ---------- 联系人 ----------
@@ -241,9 +252,7 @@ object AppRepository {
         legacyVitalsFile?.let { file ->
             if (file.exists()) {
                 runCatching {
-                    @kotlinx.serialization.Serializable
-                    data class VitalsFile(val records: List<VitalRecord>)
-                    val data = json.decodeFromString<VitalsFile>(file.readText())
+                    val data = json.decodeFromString<LegacyVitalsFile>(file.readText())
                     if (data.records.isNotEmpty()) {
                         dao.insertAll(data.records.toEntity())
                         Timber.i("migrated ${data.records.size} vital records from legacy JSON")
@@ -256,9 +265,7 @@ object AppRepository {
         legacyContactsFile?.let { file ->
             if (file.exists()) {
                 runCatching {
-                    @kotlinx.serialization.Serializable
-                    data class ContactsFile(val contacts: List<Contact>)
-                    val data = json.decodeFromString<ContactsFile>(file.readText())
+                    val data = json.decodeFromString<LegacyContactsFile>(file.readText())
                     data.contacts.forEach { db?.contactDao()?.insert(it.toEntity()) }
                     Timber.i("migrated ${data.contacts.size} contacts from legacy JSON")
                 }.onFailure { Timber.w(it, "legacy contacts migration failed") }
@@ -269,13 +276,22 @@ object AppRepository {
         legacyWorkoutsFile?.let { file ->
             if (file.exists()) {
                 runCatching {
-                    @kotlinx.serialization.Serializable
-                    data class WorkoutsFile(val workouts: List<Workout>)
-                    val data = json.decodeFromString<WorkoutsFile>(file.readText())
+                    val data = json.decodeFromString<LegacyWorkoutsFile>(file.readText())
                     data.workouts.forEach { db?.workoutDao()?.insert(it.toEntity()) }
                     Timber.i("migrated ${data.workouts.size} workouts from legacy JSON")
                 }.onFailure { Timber.w(it, "legacy workouts migration failed") }
             }
         }
     }
+
+    // ---------- 旧版 JSON 文件结构（仅迁移用） ----------
+
+    @kotlinx.serialization.Serializable
+    private data class LegacyVitalsFile(val records: List<VitalRecord>)
+
+    @kotlinx.serialization.Serializable
+    private data class LegacyContactsFile(val contacts: List<Contact>)
+
+    @kotlinx.serialization.Serializable
+    private data class LegacyWorkoutsFile(val workouts: List<Workout>)
 }

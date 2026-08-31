@@ -14,7 +14,11 @@
     <uses-permission android:name="android.permission.health.READ_HEART_RATE" />
     <uses-permission android:name="android.permission.health.READ_STEPS" />
 
-    <application>
+    <application
+        android:name=".WearApplication"
+        android:allowBackup="true"
+        android:label="死了吗·手表端"
+        android:theme="@android:style/Theme.DeviceDefault.NoActionBar">
         <activity
             android:name=".MainActivity"
             android:exported="true"

@@ -2,6 +2,8 @@
 .gradle/
 build/
 app/build/
+wear/build/
+core/build/
 
 # Kotlin / AGP 缓存
 .kotlin/
@@ -35,3 +37,13 @@ Thumbs.db
 # 发布产物
 dist/
 
+# ktlint 输出
+.ktlint/
+
+# 测试覆盖率报告
+coverage/
+*.exec
+---
+# 交付文件（不入库）
+engineering-improvements.patch
+PR_DESCRIPTION.md

@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val keystoreProps = Properties().apply {
@@ -24,11 +25,6 @@ android {
         targetSdk = 34
         versionCode = 5
         versionName = "0.5.0"
-
-        // Room 数据库导出 schema 便于迁移审查
-        ksp {
-            arg("room.schemaLocation", "$projectDir/schemas")
-        }
     }
 
     signingConfigs {
@@ -74,6 +70,11 @@ android {
         compose = true
         buildConfig = true
     }
+}
+
+// KSP 编译器参数（Room schema 导出等），必须在 android 块外配置
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
 }
 
 dependencies {
@@ -129,6 +130,8 @@ dependencies {
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
     testImplementation("androidx.room:room-testing:2.6.1")
     testImplementation("com.google.truth:truth:1.4.4")
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test:core:1.6.1")
 
     // ---------- 仪器化测试 ----------
     androidTestImplementation("androidx.test.ext:junit:1.2.1")
