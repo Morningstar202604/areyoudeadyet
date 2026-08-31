@@ -153,25 +153,25 @@ class StatsAndMathTest {
     @Test
     fun `BLE 心率 u8 解析`() {
         val data = byteArrayOf(0x00, 72)
-        assertEquals(72.0, BleCodec.parseHeartRate(data), 0.0)
+        assertEquals(72.0, BleCodec.parseHeartRate(data)!!, 0.0)
     }
 
     @Test
     fun `BLE 心率 u16 解析`() {
         val data = byteArrayOf(0x01, 0xB4.toByte(), 0x00) // 180
-        assertEquals(180.0, BleCodec.parseHeartRate(data), 0.0)
+        assertEquals(180.0, BleCodec.parseHeartRate(data)!!, 0.0)
     }
 
     @Test
     fun `BLE SFLOAT 36_5 解析`() {
         val data = byteArrayOf(0x6D.toByte(), 0xF1.toByte())
-        assertEquals(36.5, BleCodec.sfloat(data, 0), 0.0)
+        assertEquals(36.5, BleCodec.sfloat(data, 0)!!, 0.0)
     }
 
     @Test
     fun `BLE SFLOAT 负数解析`() {
         val data = byteArrayOf(0xEF.toByte(), 0xFE.toByte()) // -27.3
-        assertEquals(-27.3, BleCodec.sfloat(data, 0), 0.0)
+        assertEquals(-27.3, BleCodec.sfloat(data, 0)!!, 0.0)
     }
 
     @Test
@@ -186,12 +186,12 @@ class StatsAndMathTest {
     // ---------- 辅助 ----------
 
     private fun mkVitals(
-        hr: Double, sys: Double, dia: Double, spo2: Double, temp: Double
+        hr: Number, sys: Number, dia: Number, spo2: Number, temp: Number
     ): List<VitalRecord> = listOf(
-        VitalRecord(VitalType.HEART_RATE.id, hr, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SYSTOLIC.id, sys, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.DIASTOLIC.id, dia, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SPO2.id, spo2, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.TEMPERATURE.id, temp, now - 2000, VitalSource.MANUAL)
+        VitalRecord(VitalType.HEART_RATE.id, hr.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.SYSTOLIC.id, sys.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.DIASTOLIC.id, dia.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.SPO2.id, spo2.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.TEMPERATURE.id, temp.toDouble(), now - 2000, VitalSource.MANUAL)
     )
 }
