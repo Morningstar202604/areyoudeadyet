@@ -1,6 +1,7 @@
 package com.silema.app.engine
 
 import com.silema.app.ble.BleCodec
+import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType

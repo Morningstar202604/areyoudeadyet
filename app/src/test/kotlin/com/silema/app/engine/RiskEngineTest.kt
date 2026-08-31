@@ -1,5 +1,6 @@
 package com.silema.app.engine
 
+import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
@@ -97,12 +98,12 @@ class RiskEngineTest {
     // ---------- 辅助 ----------
 
     private fun mkVitals(
-        hr: Double, sys: Double, dia: Double, spo2: Double, temp: Double
+        hr: Number, sys: Number, dia: Number, spo2: Number, temp: Number
     ): List<VitalRecord> = listOf(
-        VitalRecord(VitalType.HEART_RATE.id, hr, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SYSTOLIC.id, sys, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.DIASTOLIC.id, dia, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SPO2.id, spo2, now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.TEMPERATURE.id, temp, now - 1000, VitalSource.MANUAL)
+        VitalRecord(VitalType.HEART_RATE.id, hr.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.SYSTOLIC.id, sys.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.DIASTOLIC.id, dia.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.SPO2.id, spo2.toDouble(), now - 1000, VitalSource.MANUAL),
+        VitalRecord(VitalType.TEMPERATURE.id, temp.toDouble(), now - 1000, VitalSource.MANUAL)
     )
 }

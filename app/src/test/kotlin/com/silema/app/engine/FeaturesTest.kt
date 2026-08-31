@@ -5,6 +5,7 @@ import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.data.Workout
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import kotlin.math.abs
@@ -85,8 +86,8 @@ class FeaturesTest {
         val hr = report.metrics.firstOrNull { it.type == VitalType.HEART_RATE }
 
         assertNotNull("周报应包含心率指标", hr)
-        assertEquals("本周心率均值应约 70.15", 70.1538, hr!!.thisWeekAvg, 0.01)
-        assertEquals("上周心率均值应约 79.2", 79.2, hr.lastWeekAvg, 0.01)
+        assertEquals("本周心率均值应约 70.15", 70.1538, hr!!.thisWeekAvg!!, 0.01)
+        assertEquals("上周心率均值应约 79.2", 79.2, hr.lastWeekAvg!!, 0.01)
         assertNotNull("变化百分比不应为 null", hr.deltaPct)
         assertTrue("心率应下降约 11.4%，实际 ${hr.deltaPct}", abs(hr.deltaPct!! + 11.4216) < 0.1)
     }
