@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
 }
 
@@ -90,7 +90,7 @@ dependencies {
 
     // ---------- Hilt 依赖注入 ----------
     implementation("com.google.dagger:hilt-android:2.52")
-    ksp("com.google.dagger:hilt-android-compiler:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // ---------- Timber 日志 ----------
