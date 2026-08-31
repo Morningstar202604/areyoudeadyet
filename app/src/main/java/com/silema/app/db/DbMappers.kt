@@ -29,6 +29,7 @@ fun VitalRecord.toEntity(): VitalRecordEntity = VitalRecordEntity(
     source = source
 )
 
+@JvmName("vitalRecordEntitiesToDomain")
 fun List<VitalRecordEntity>.toDomain(): List<VitalRecord> = map { it.toDomain() }
 fun List<VitalRecord>.toEntity(): List<VitalRecordEntity> = map { it.toEntity() }
 
@@ -36,6 +37,7 @@ fun List<VitalRecord>.toEntity(): List<VitalRecordEntity> = map { it.toEntity() 
 
 fun ContactEntity.toDomain(): Contact = Contact(name = name, phone = phone)
 fun Contact.toEntity(): ContactEntity = ContactEntity(phone = phone, name = name)
+@JvmName("contactEntitiesToDomain")
 fun List<ContactEntity>.toDomain(): List<Contact> = map { it.toDomain() }
 
 // ---------- Workout ----------
@@ -60,4 +62,5 @@ fun Workout.toEntity(): WorkoutEntity = WorkoutEntity(
     track = Converters().fromTrack(track)
 )
 
+@JvmName("workoutEntitiesToDomain")
 fun List<WorkoutEntity>.toDomain(): List<Workout> = map { it.toDomain() }
