@@ -5,7 +5,7 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
-    id("com.google.devtools.ksp")
+    id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
     id("org.jlleitschuh.gradle.ktlint")
 }
@@ -72,9 +72,11 @@ android {
     }
 }
 
-// KSP 编译器参数（Room schema 导出等），必须在 android 块外配置
-ksp {
-    arg("room.schemaLocation", "$projectDir/schemas")
+// KAPT 编译器参数（Room schema 导出等）
+kapt {
+    arguments {
+        arg("room.schemaLocation", "$projectDir/schemas")
+    }
 }
 
 dependencies {
@@ -110,14 +112,14 @@ dependencies {
     // ---------- Room 数据库 ----------
     implementation("androidx.room:room-runtime:2.6.1")
     implementation("androidx.room:room-ktx:2.6.1")
-    ksp("androidx.room:room-compiler:2.6.1")
+    kapt("androidx.room:room-compiler:2.6.1")
 
     // ---------- Hilt 依赖注入 ----------
-    implementation("com.google.dagger:hilt-android:2.52")
-    ksp("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("com.google.dagger:hilt-android:2.57")
+    kapt("com.google.dagger:hilt-android-compiler:2.57")
     implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
     implementation("androidx.hilt:hilt-work:1.4.0")
-    ksp("androidx.hilt:hilt-compiler:1.4.0")
+    kapt("androidx.hilt:hilt-compiler:1.4.0")
 
     // ---------- Timber 日志 ----------
     implementation("com.jakewharton.timber:timber:5.0.1")
