@@ -390,7 +390,7 @@ object AppRepository {
     // ---------- 导出/导入数据结构（v1 格式） ----------
 
     @kotlinx.serialization.Serializable
-    private data class ExportData(
+    internal data class ExportData(
         val version: Int,
         val exportedAt: Long,
         val records: List<VitalRecord>,
@@ -400,7 +400,7 @@ object AppRepository {
     )
 
     @kotlinx.serialization.Serializable
-    private data class ExportSettings(
+    internal data class ExportSettings(
         val stepsGoal: Int,
         val sleepGoalHours: Int,
         val weightKg: Int,
