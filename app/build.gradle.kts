@@ -84,7 +84,7 @@ android {
 }
 
 dependencies {
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+    val composeBom = platform("androidx.compose:compose-bom:2026.08.00")
     implementation(composeBom)
 
     // 共享领域层（算法/模型/FHIR 导出），手机端与手表端共用，避免规则引擎重复实现

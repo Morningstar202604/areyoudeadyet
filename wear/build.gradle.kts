@@ -79,7 +79,7 @@ android {
 
 dependencies {
     // Wear Compose 与手机端同 BOM（Compose 1.6.8），1.3.x 与该 BOM 对齐
-    val composeBom = platform("androidx.compose:compose-bom:2024.09.03")
+    val composeBom = platform("androidx.compose:compose-bom:2026.08.00")
     implementation(composeBom)
 
     implementation("androidx.compose.ui:ui")
