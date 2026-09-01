@@ -38,12 +38,11 @@ android {
         }
     }
 
-    // 启用 JaCoCo 测试覆盖率报告
-    buildFeatures {
-        testCoverage = true
-    }
-
     buildTypes {
+        debug {
+            // 启用 JaCoCo 测试覆盖率报告
+            isTestCoverageEnabled = true
+        }
         release {
             isMinifyEnabled = true
             isShrinkResources = true
