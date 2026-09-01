@@ -50,7 +50,7 @@ class ReportViewModel @Inject constructor() : ViewModel() {
      *
      * @param weeksAgo 几周前（0 = 本周，1 = 上周）
      */
-    fun generateWeeklyReport(weeksAgo: Int = 0): HealthReport.Report {
+    fun generateWeeklyReport(weeksAgo: Int = 0): HealthReport.Weekly {
         val now = System.currentTimeMillis()
         val weekStart = now - weeksAgo * 7 * 24 * 60 * 60 * 1000L
         return HealthReport.weekly(records.value, workouts.value, weekStart, 2)
@@ -61,7 +61,7 @@ class ReportViewModel @Inject constructor() : ViewModel() {
      */
     fun weeklyAverage(typeId: String): Double {
         return weeklyReport.value.metrics
-            .firstOrNull { it.type == typeId }
+            .firstOrNull { it.type.id == typeId }
             ?.thisWeekAvg ?: 0.0
     }
 
@@ -70,7 +70,7 @@ class ReportViewModel @Inject constructor() : ViewModel() {
      */
     fun weeklyChange(typeId: String): Double? {
         return weeklyReport.value.metrics
-            .firstOrNull { it.type == typeId }
+            .firstOrNull { it.type.id == typeId }
             ?.deltaPct
     }
 
