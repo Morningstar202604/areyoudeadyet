@@ -5,12 +5,16 @@ plugins {
     id("org.jetbrains.kotlin.android")
     id("org.jetbrains.kotlin.plugin.compose")
     id("org.jetbrains.kotlin.plugin.serialization")
+    id("org.jetbrains.kotlin.kapt")
+    id("com.google.dagger.hilt.android")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
-val keystoreProps = Properties().apply {
-    val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}
+val keystoreProps =
+    Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
 
 android {
     namespace = "com.silema.app"
@@ -22,6 +26,12 @@ android {
         targetSdk = 34
         versionCode = 5
         versionName = "0.5.0"
+        // Room schema 导出
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += mapOf("room.schemaLocation" to "$projectDir/schemas")
+            }
+        }
     }
 
     signingConfigs {
@@ -36,15 +46,23 @@ android {
     }
 
     buildTypes {
+        debug {
+            // 启用 JaCoCo 测试覆盖率报告
+            isTestCoverageEnabled = true
+        }
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             if (keystoreProps.isNotEmpty()) {
                 signingConfig = signingConfigs.getByName("release")
             }
+        }
+        debug {
+            isMinifyEnabled = false
         }
     }
 
@@ -63,41 +81,6 @@ android {
         compose = true
         buildConfig = true
     }
-
-    // 算法测试位于项目根 test/，默认不在 Android 单元测试源集内，Gradle 不会执行。
-    // 注册为 unit-test 源集，使其在发布门禁中可被实际运行。
-    sourceSets {
-        getByName("test") {
-            // 算法测试位于项目根 test/，AGP 的 srcDir 相对 module 目录，需用 rootDir 指回项目根
-            java.srcDir(rootDir.resolve("test"))
-        }
-    }
-
-    // 用 Gradle 管理的 runtime classpath 实际跑 3 个算法测试程序（main 程序，非 JUnit）。
-    // 任一程序校验失败会以非零退出，使门禁失败。
-    // 根 test/ 的算法程序是带 main 的独立 Java 程序。显式编译 test 源集并以
-    // 「test 编译产物 + 主代码 runtime classpath（含 kotlin-stdlib + android.jar）」作为运行时 classpath 实际运行。
-    afterEvaluate {
-        val testJavaClasses = "build/intermediates/javac/debugUnitTest/compileDebugUnitTestJavaWithJavac/classes"
-        val testKotlinClasses = "build/tmp/kotlin-classes/debugUnitTest"
-        val compileTest = tasks.named("compileDebugUnitTestJavaWithJavac")
-        listOf("TestEngine", "TestStats", "TestFeatures").forEach { main ->
-            tasks.register("runAlgo${main.removePrefix("Test")}", JavaExec::class) {
-                dependsOn(compileTest)
-                classpath = files(
-                    testJavaClasses,
-                    testKotlinClasses,
-                    "build/tmp/kotlin-classes/debug",
-                    "build/intermediates/javac/debug/compileDebugJavaWithJavac/classes"
-                ) + configurations.getByName("debugRuntimeClasspath")
-                mainClass.set(main)
-            }
-        }
-        tasks.register("runAlgoTests") {
-            group = "verification"
-            dependsOn("runAlgoEngine", "runAlgoStats", "runAlgoFeatures")
-        }
-    }
 }
 
 dependencies {
@@ -107,23 +90,56 @@ dependencies {
     // 共享领域层（算法/模型/FHIR 导出），手机端与手表端共用，避免规则引擎重复实现
     implementation(project(":core"))
 
+    // ---------- AndroidX 基础 ----------
     implementation("androidx.core:core-ktx:1.13.1")
     implementation("androidx.activity:activity-compose:1.9.2")
     implementation("androidx.lifecycle:lifecycle-runtime-compose:2.8.6")
+    implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.6")
     implementation("androidx.navigation:navigation-compose:2.8.1")
 
+    // ---------- Compose ----------
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-tooling-preview")
     implementation("androidx.compose.material3:material3")
     implementation("androidx.compose.material:material-icons-core")
     implementation("androidx.compose.material:material-icons-extended")
 
+    // ---------- Health Connect ----------
     implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
 
+    // ---------- WorkManager ----------
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    // ---------- 序列化 ----------
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 
+    // ---------- Room 数据库 ----------
+    implementation("androidx.room:room-runtime:2.8.4")
+    implementation("androidx.room:room-ktx:2.8.4")
+    kapt("androidx.room:room-compiler:2.8.4")
+
+    // ---------- Hilt 依赖注入 ----------
+    implementation("com.google.dagger:hilt-android:2.52")
+    kapt("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.hilt:hilt-work:1.2.0")
+    kapt("androidx.hilt:hilt-compiler:1.2.0")
+
+    // ---------- Timber 日志 ----------
+    implementation("com.jakewharton.timber:timber:5.0.1")
+
+    // ---------- 调试 ----------
     debugImplementation("androidx.compose.ui:ui-tooling")
+
+    // ---------- 单元测试 ----------
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")
+    testImplementation("androidx.room:room-testing:2.8.4")
+    testImplementation("com.google.truth:truth:1.4.4")
+    testImplementation("org.robolectric:robolectric:4.13")
+    testImplementation("androidx.test:core:1.6.1")
+
+    // ---------- 仪器化测试 ----------
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
 }

@@ -9,6 +9,7 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v7
 
@@ -21,24 +22,101 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Build debug APK
-        run: |
-          chmod +x gradlew
-          ./gradlew :app:assembleDebug --no-daemon --console=plain
+      - name: Grant execute permission for gradlew
+        run: chmod +x gradlew
 
-      - name: Run algorithm tests (34 cases)
-        run: |
-          chmod +x gradlew
-          ./gradlew runAlgoTests --no-daemon --console=plain
+      # ---------- Gradle 缓存（加速构建 30-50%） ----------
+      - name: Cache Gradle wrapper
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/wrapper
+          key: gradle-wrapper-${{ hashFiles('gradle/wrapper/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-wrapper-
 
-      - name: Build Wear OS debug APK
-        run: |
-          ./gradlew :wear:assembleDebug --no-daemon --console=plain
+      - name: Cache Gradle dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches/modules-2
+            ~/.gradle/caches/transforms-4
+            ~/.gradle/caches/jars-9
+          key: gradle-deps-${{ hashFiles('**/*.gradle.kts', '**/gradle-wrapper.properties') }}
+          restore-keys: |
+            gradle-deps-
 
+      - name: Cache build outputs
+        uses: actions/cache@v4
+        with:
+          path: |
+            app/build
+            wear/build
+            core/build
+          key: build-outputs-${{ runner.os }}-${{ github.sha }}
+          restore-keys: |
+            build-outputs-${{ runner.os }}-
+
+      # ---------- 代码质量检查 ----------
+      - name: ktlint check
+        run: ./gradlew ktlintCheck --no-daemon --console=plain
+        continue-on-error: true
+
+      # ---------- 编译 ----------
+      - name: Compile app (debug)
+        run: ./gradlew :app:compileDebugKotlin --no-daemon --console=plain
+
+      - name: Compile wear (debug)
+        run: ./gradlew :wear:compileDebugKotlin --no-daemon --console=plain
+
+      # ---------- 单元测试（已启用 JaCoCo 覆盖率） ----------
+      - name: Run unit tests (app)
+        run: ./gradlew :app:testDebugUnitTest --no-daemon --console=plain
+
+      - name: Run unit tests (wear)
+        run: ./gradlew :wear:testDebugUnitTest --no-daemon --console=plain
+
+      # ---------- 构建 ----------
+      - name: Build debug APK (app)
+        run: ./gradlew :app:assembleDebug --no-daemon --console=plain
+
+      - name: Build debug APK (wear)
+        run: ./gradlew :wear:assembleDebug --no-daemon --console=plain
+
+      - name: Build release APK (verify ProGuard rules)
+        run: |
+          ./gradlew :app:assembleRelease --no-daemon --console=plain
+          ./gradlew :wear:assembleRelease --no-daemon --console=plain
+
+      - name: Lint check
+        run: ./gradlew :app:lint --no-daemon --console=plain
+        continue-on-error: true
+
+      # ---------- 产物上传 ----------
       - name: Upload APK artifacts
         uses: actions/upload-artifact@v7
         with:
-          name: app-debug-apks
+          name: apks
           path: |
             app/build/outputs/apk/debug/app-debug.apk
+            app/build/outputs/apk/release/app-release-unsigned.apk
             wear/build/outputs/apk/debug/wear-debug.apk
+            wear/build/outputs/apk/release/wear-release-unsigned.apk
+
+      - name: Upload test reports
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-reports
+          path: |
+            app/build/reports/tests/testDebugUnitTest/
+            wear/build/reports/tests/testDebugUnitTest/
+
+      - name: Upload coverage reports
+        uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: coverage-reports
+          path: |
+            app/build/reports/jacoco/
+            wear/build/reports/jacoco/

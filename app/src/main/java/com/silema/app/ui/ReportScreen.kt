@@ -5,7 +5,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -23,7 +22,7 @@ import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.engine.HealthReport
 import com.silema.app.engine.RiskEngine
-import com.silema.app.store.AppRepository
+import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.*
 import com.silema.app.ui.theme.*
 import java.time.LocalDate
@@ -31,25 +30,31 @@ import java.time.LocalTime
 import java.time.ZoneId
 
 private val REPORT_TABS = listOf("趋势", "周报", "睡眠")
-private val CHART_TYPES = listOf(
-    VitalType.HEART_RATE, VitalType.SYSTOLIC, VitalType.DIASTOLIC,
-    VitalType.SPO2, VitalType.TEMPERATURE, VitalType.STEPS,
-    VitalType.SLEEP, VitalType.STRESS
-)
+private val CHART_TYPES =
+    listOf(
+        VitalType.HEART_RATE,
+        VitalType.SYSTOLIC,
+        VitalType.DIASTOLIC,
+        VitalType.SPO2,
+        VitalType.TEMPERATURE,
+        VitalType.STEPS,
+        VitalType.SLEEP,
+        VitalType.STRESS,
+    )
 
-private fun chartName(type: VitalType): String = when (type) {
-    VitalType.HEART_RATE -> "心率"
-    VitalType.SYSTOLIC -> "收缩压"
-    VitalType.DIASTOLIC -> "舒张压"
-    VitalType.SPO2 -> "血氧"
-    VitalType.TEMPERATURE -> "体温"
-    VitalType.STEPS -> "步数"
-    VitalType.SLEEP -> "睡眠"
-    VitalType.STRESS -> "压力"
-}
+private fun chartName(type: VitalType): String =
+    when (type) {
+        VitalType.HEART_RATE -> "心率"
+        VitalType.SYSTOLIC -> "收缩压"
+        VitalType.DIASTOLIC -> "舒张压"
+        VitalType.SPO2 -> "血氧"
+        VitalType.TEMPERATURE -> "体温"
+        VitalType.STEPS -> "步数"
+        VitalType.SLEEP -> "睡眠"
+        VitalType.STRESS -> "压力"
+    }
 
-private fun fmt(v: Double): String =
-    if (v == v.toLong().toDouble()) v.toLong().toString() else String.format("%.1f", v)
+private fun fmt(v: Double): String = if (v == v.toLong().toDouble()) v.toLong().toString() else String.format("%.1f", v)
 
 @Composable
 fun ReportScreen(records: List<VitalRecord>) {
@@ -65,10 +70,10 @@ fun ReportScreen(records: List<VitalRecord>) {
                     val position = tabPositions[tab]
                     TabRowDefaults.SecondaryIndicator(
                         modifier = Modifier.offset(position.left).width(position.width),
-                        color = MaterialTheme.colorScheme.primary
+                        color = MaterialTheme.colorScheme.primary,
                     )
                 }
-            }
+            },
         ) {
             REPORT_TABS.forEachIndexed { i, label ->
                 Tab(
@@ -78,9 +83,9 @@ fun ReportScreen(records: List<VitalRecord>) {
                         Text(
                             label,
                             style = MaterialTheme.typography.titleSmall,
-                            fontWeight = if (tab == i) FontWeight.Bold else FontWeight.Normal
+                            fontWeight = if (tab == i) FontWeight.Bold else FontWeight.Normal,
                         )
-                    }
+                    },
                 )
             }
         }
@@ -98,23 +103,25 @@ fun ReportScreen(records: List<VitalRecord>) {
 private fun TrendTab(records: List<VitalRecord>) {
     var selected by remember { mutableStateOf(VitalType.HEART_RATE) }
 
-    val series = records
-        .filter { it.typeId == selected.id }
-        .sortedBy { it.timestampMillis }
-        .takeLast(60)
+    val series =
+        records
+            .filter { it.typeId == selected.id }
+            .sortedBy { it.timestampMillis }
+            .takeLast(60)
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "趋势分析",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
         }
 
@@ -128,7 +135,7 @@ private fun TrendTab(records: List<VitalRecord>) {
                                 label = chartName(type),
                                 selected = type == selected,
                                 modifier = Modifier.weight(1f),
-                                onClick = { selected = type }
+                                onClick = { selected = type },
                             )
                         }
                     }
@@ -143,7 +150,7 @@ private fun TrendTab(records: List<VitalRecord>) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     if (series.size >= 2) {
@@ -151,21 +158,22 @@ private fun TrendTab(records: List<VitalRecord>) {
                             values = series.map { it.value },
                             color = riskColor(RiskEngine.metricLevel(selected, series.last().value)),
                             fillColor = riskColor(RiskEngine.metricLevel(selected, series.last().value)),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(120.dp)
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth()
+                                    .height(120.dp),
                         )
                         Spacer(modifier = Modifier.height(8.dp))
                         Text(
                             "最近 ${series.size} 次测量",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         EmptyState(
                             icon = Icons.Filled.DateRange,
                             title = "数据不足",
-                            message = "至少需要2次测量才能显示趋势图"
+                            message = "至少需要2次测量才能显示趋势图",
                         )
                     }
                 }
@@ -178,10 +186,30 @@ private fun TrendTab(records: List<VitalRecord>) {
                 SectionTitle("统计概览")
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     val values = series.map { it.value }
-                    StatMiniTile(label = "最新", value = formatVal(values.last()), color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                    StatMiniTile(label = "最高", value = formatVal(values.max()), color = LevelCritical, modifier = Modifier.weight(1f))
-                    StatMiniTile(label = "最低", value = formatVal(values.min()), color = LevelNormal, modifier = Modifier.weight(1f))
-                    StatMiniTile(label = "平均", value = formatVal(values.average()), color = BrandBlue, modifier = Modifier.weight(1f))
+                    StatMiniTile(
+                        label = "最新",
+                        value = formatVal(values.last()),
+                        color = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.weight(1f),
+                    )
+                    StatMiniTile(
+                        label = "最高",
+                        value = formatVal(values.max()),
+                        color = LevelCritical,
+                        modifier = Modifier.weight(1f),
+                    )
+                    StatMiniTile(
+                        label = "最低",
+                        value = formatVal(values.min()),
+                        color = LevelNormal,
+                        modifier = Modifier.weight(1f),
+                    )
+                    StatMiniTile(
+                        label = "平均",
+                        value = formatVal(values.average()),
+                        color = BrandBlue,
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
         }
@@ -195,22 +223,42 @@ private fun TrendTab(records: List<VitalRecord>) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = AppShapes.card,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     if (weekly.isEmpty()) {
                         Text(
                             "最近 7 天没有${chartName(selected)}记录",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     } else {
                         val weekValues = weekly.map { it.value }
                         Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            StatMiniTile(label = "次数", value = "${weekly.size}", color = MaterialTheme.colorScheme.primary, modifier = Modifier.weight(1f))
-                            StatMiniTile(label = "均值", value = formatVal(weekValues.average()), color = BrandBlue, modifier = Modifier.weight(1f))
-                            StatMiniTile(label = "最高", value = formatVal(weekValues.max()), color = LevelCritical, modifier = Modifier.weight(1f))
-                            StatMiniTile(label = "最低", value = formatVal(weekValues.min()), color = LevelNormal, modifier = Modifier.weight(1f))
+                            StatMiniTile(
+                                label = "次数",
+                                value = "${weekly.size}",
+                                color = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.weight(1f),
+                            )
+                            StatMiniTile(
+                                label = "均值",
+                                value = formatVal(weekValues.average()),
+                                color = BrandBlue,
+                                modifier = Modifier.weight(1f),
+                            )
+                            StatMiniTile(
+                                label = "最高",
+                                value = formatVal(weekValues.max()),
+                                color = LevelCritical,
+                                modifier = Modifier.weight(1f),
+                            )
+                            StatMiniTile(
+                                label = "最低",
+                                value = formatVal(weekValues.min()),
+                                color = LevelNormal,
+                                modifier = Modifier.weight(1f),
+                            )
                         }
                     }
                 }
@@ -227,7 +275,7 @@ private fun TrendTab(records: List<VitalRecord>) {
                 EmptyState(
                     icon = Icons.Filled.History,
                     title = "暂无记录",
-                    message = "去「录入」页添加数据"
+                    message = "去「录入」页添加数据",
                 )
             }
         } else {
@@ -235,19 +283,21 @@ private fun TrendTab(records: List<VitalRecord>) {
                 val t = rec.type ?: return@items
                 Row(
                     horizontalArrangement = Arrangement.SpaceBetween,
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 5.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 5.dp),
                 ) {
                     Text(
                         text = RiskEngine.clockText(rec.timestampMillis),
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                     Text(
-                        text = "${formatVal(rec.value)} ${t.unit}" +
-                            if (rec.source == VitalSource.HEALTH_CONNECT) " ·穿戴" else "",
-                        style = MaterialTheme.typography.bodyMedium
+                        text =
+                            "${formatVal(rec.value)} ${t.unit}" +
+                                if (rec.source == VitalSource.HEALTH_CONNECT) " ·穿戴" else "",
+                        style = MaterialTheme.typography.bodyMedium,
                     )
                 }
             }
@@ -261,29 +311,32 @@ private fun TrendTab(records: List<VitalRecord>) {
 @Composable
 private fun WeeklyTab(records: List<VitalRecord>) {
     val context = LocalContext.current
-    val workouts by AppRepository.workouts.collectAsState()
+    val repository = rememberAppRepository()
+    val workouts by repository.workouts.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
-    val report = remember(records, workouts) {
-        HealthReport.weekly(records, workouts, alertCount = assessment.alerts.size)
-    }
+    val report =
+        remember(records, workouts) {
+            HealthReport.weekly(records, workouts, alertCount = assessment.alerts.size)
+        }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "周度报告",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 "统计区间：最近 7 天，对比再前 7 天",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -293,14 +346,14 @@ private fun WeeklyTab(records: List<VitalRecord>) {
             Card(
                 modifier = Modifier.fillMaxWidth(),
                 shape = AppShapes.card,
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(14.dp)) {
                     report.summary.forEach { line ->
                         Text(
                             text = "· $line",
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(vertical = 3.dp)
+                            modifier = Modifier.padding(vertical = 3.dp),
                         )
                     }
                 }
@@ -314,7 +367,7 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                 EmptyState(
                     icon = Icons.Filled.DateRange,
                     title = "暂无数据",
-                    message = "录入或同步数据后，这里会生成完整对比"
+                    message = "录入或同步数据后，这里会生成完整对比",
                 )
             }
         } else {
@@ -322,17 +375,29 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = AppShapes.card,
-                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
                 ) {
                     Column(modifier = Modifier.padding(14.dp)) {
                         // Header
                         Row(
                             horizontalArrangement = Arrangement.SpaceBetween,
-                            modifier = Modifier.fillMaxWidth()
+                            modifier = Modifier.fillMaxWidth(),
                         ) {
-                            Text("指标", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("本周", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            Text("对比", style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            Text(
+                                "指标",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                "本周",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
+                            Text(
+                                "对比",
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            )
                         }
                         Spacer(modifier = Modifier.height(8.dp))
                         HorizontalDivider(color = MaterialTheme.colorScheme.outlineVariant)
@@ -341,21 +406,22 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                         report.metrics.forEach { m ->
                             Row(
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 6.dp)
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 6.dp),
                             ) {
                                 Text(
                                     m.type.displayName.substringBefore("("),
                                     style = MaterialTheme.typography.bodyMedium,
-                                    modifier = Modifier.weight(1f)
+                                    modifier = Modifier.weight(1f),
                                 )
                                 Text(
                                     "${fmt(m.thisWeekAvg)}${m.unit}",
                                     style = MaterialTheme.typography.bodyMedium,
                                     color = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.weight(1f),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.End
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
                                 )
                                 val delta = m.deltaPct
                                 Text(
@@ -365,14 +431,15 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                                         else -> "${if (delta > 0) "↑" else "↓"} ${fmt(kotlin.math.abs(delta))}%"
                                     },
                                     style = MaterialTheme.typography.bodyMedium,
-                                    color = when {
-                                        delta == null -> MaterialTheme.colorScheme.onSurfaceVariant
-                                        delta > 2 -> MaterialTheme.colorScheme.error
-                                        delta < -2 -> LevelNormal
-                                        else -> MaterialTheme.colorScheme.onSurfaceVariant
-                                    },
+                                    color =
+                                        when {
+                                            delta == null -> MaterialTheme.colorScheme.onSurfaceVariant
+                                            delta > 2 -> MaterialTheme.colorScheme.error
+                                            delta < -2 -> LevelNormal
+                                            else -> MaterialTheme.colorScheme.onSurfaceVariant
+                                        },
                                     modifier = Modifier.weight(1f),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.End
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.End,
                                 )
                             }
                         }
@@ -385,11 +452,38 @@ private fun WeeklyTab(records: List<VitalRecord>) {
         item {
             SectionTitle("本周概览")
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                StatMiniTile(label = "预警", value = "${report.alertCount}", color = if (report.alertCount > 0) LevelCritical else LevelNormal, modifier = Modifier.weight(1f))
-                StatMiniTile(label = "运动", value = "${report.workoutCount}次", color = BrandBlue, modifier = Modifier.weight(1f))
-                StatMiniTile(label = "公里", value = String.format("%.1f", report.workoutKm), color = BrandGreen, modifier = Modifier.weight(1f))
+                StatMiniTile(
+                    label = "预警",
+                    value = "${report.alertCount}",
+                    color =
+                        if (report.alertCount >
+                            0
+                        ) {
+                            LevelCritical
+                        } else {
+                            LevelNormal
+                        },
+                    modifier = Modifier.weight(1f),
+                )
+                StatMiniTile(
+                    label = "运动",
+                    value = "${report.workoutCount}次",
+                    color = BrandBlue,
+                    modifier = Modifier.weight(1f),
+                )
+                StatMiniTile(
+                    label = "公里",
+                    value = String.format("%.1f", report.workoutKm),
+                    color = BrandGreen,
+                    modifier = Modifier.weight(1f),
+                )
                 report.sleepAvgHours?.let {
-                    StatMiniTile(label = "睡眠", value = String.format("%.1f", it), color = BrandPurple, modifier = Modifier.weight(1f))
+                    StatMiniTile(
+                        label = "睡眠",
+                        value = String.format("%.1f", it),
+                        color = BrandPurple,
+                        modifier = Modifier.weight(1f),
+                    )
                 }
             }
         }
@@ -401,20 +495,21 @@ private fun WeeklyTab(records: List<VitalRecord>) {
                 container = MaterialTheme.colorScheme.secondary,
                 icon = Icons.Filled.Share,
                 onClick = {
-                    val text = buildString {
-                        appendLine("【周度健康报告】")
-                        report.summary.forEach { appendLine("· $it") }
-                        appendLine("（来自健康监测应用）")
-                    }
+                    val text =
+                        buildString {
+                            appendLine("【周度健康报告】")
+                            report.summary.forEach { appendLine("· $it") }
+                            appendLine("（来自健康监测应用）")
+                        }
                     runCatching {
                         context.startActivity(
                             Intent.createChooser(
                                 Intent(Intent.ACTION_SEND).setType("text/plain").putExtra(Intent.EXTRA_TEXT, text),
-                                "分享周报"
-                            )
+                                "分享周报",
+                            ),
                         )
                     }
-                }
+                },
             )
         }
 
@@ -425,27 +520,29 @@ private fun WeeklyTab(records: List<VitalRecord>) {
 // ── Sleep Tab ───────────────────────────────────────
 @Composable
 private fun SleepTab(records: List<VitalRecord>) {
+    val repository = rememberAppRepository()
     var bedText by remember { mutableStateOf("23:00") }
     var wakeText by remember { mutableStateOf("06:30") }
     var msg by remember { mutableStateOf<String?>(null) }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 16.dp),
-        verticalArrangement = Arrangement.spacedBy(12.dp)
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(12.dp),
     ) {
         item {
             Spacer(modifier = Modifier.height(16.dp))
             Text(
                 text = "睡眠记录",
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 "手动记录昨晚的入睡与起床时间，自动计算时长",
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -455,12 +552,12 @@ private fun SleepTab(records: List<VitalRecord>) {
                 modifier = Modifier.fillMaxWidth(),
                 shape = AppShapes.card,
                 elevation = CardDefaults.cardElevation(defaultElevation = 3.dp),
-                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface)
+                colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         OutlinedTextField(
                             value = bedText,
@@ -468,7 +565,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                             label = { Text("入睡 (HH:mm)") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                         OutlinedTextField(
                             value = wakeText,
@@ -476,7 +573,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                             label = { Text("起床 (HH:mm)") },
                             singleLine = true,
                             keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                            modifier = Modifier.weight(1f)
+                            modifier = Modifier.weight(1f),
                         )
                     }
                     Spacer(modifier = Modifier.height(12.dp))
@@ -494,20 +591,24 @@ private fun SleepTab(records: List<VitalRecord>) {
                             var bedDt = LocalDate.now().minusDays(1).atTime(bed)
                             var wakeDt = LocalDate.now().atTime(wake)
                             if (!wakeDt.isAfter(bedDt)) bedDt = bedDt.minusDays(1)
-                            val hours = java.time.Duration.between(bedDt, wakeDt).toMinutes() / 60.0
+                            val hours =
+                                java.time.Duration
+                                    .between(bedDt, wakeDt)
+                                    .toMinutes() / 60.0
                             if (hours < 1 || hours > 16) {
                                 msg = "计算出的睡眠时长 ${"%.1f".format(hours)} 小时不合理，请检查时间"
                                 return@BigButton
                             }
-                            AppRepository.addRecord(
+                            repository.addRecord(
                                 VitalRecord.of(
-                                    VitalType.SLEEP, hours,
+                                    VitalType.SLEEP,
+                                    hours,
                                     wakeDt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),
-                                    VitalSource.MANUAL
-                                )
+                                    VitalSource.MANUAL,
+                                ),
                             )
                             msg = "已保存：睡眠 ${"%.1f".format(hours)} 小时 ✓"
-                        }
+                        },
                     )
 
                     msg?.let { m ->
@@ -515,10 +616,15 @@ private fun SleepTab(records: List<VitalRecord>) {
                         Card(
                             modifier = Modifier.fillMaxWidth(),
                             shape = AppShapes.chip,
-                            colors = CardDefaults.cardColors(
-                                containerColor = if (m.startsWith("已")) LevelNormal.copy(alpha = 0.08f)
-                                else LevelWarning.copy(alpha = 0.08f)
-                            )
+                            colors =
+                                CardDefaults.cardColors(
+                                    containerColor =
+                                        if (m.startsWith("已")) {
+                                            LevelNormal.copy(alpha = 0.08f)
+                                        } else {
+                                            LevelWarning.copy(alpha = 0.08f)
+                                        },
+                                ),
                         ) {
                             Text(m, style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(14.dp))
                         }
@@ -529,48 +635,52 @@ private fun SleepTab(records: List<VitalRecord>) {
 
         // Sleep history
         item { SectionTitle("最近 14 条") }
-        val sleepRecords = records.filter { it.typeId == VitalType.SLEEP.id }
-            .sortedByDescending { it.timestampMillis }
-            .take(14)
+        val sleepRecords =
+            records
+                .filter { it.typeId == VitalType.SLEEP.id }
+                .sortedByDescending { it.timestampMillis }
+                .take(14)
 
         if (sleepRecords.isEmpty()) {
             item {
                 EmptyState(
                     icon = Icons.Filled.History,
                     title = "暂无睡眠记录",
-                    message = "上面记录昨晚的入睡和起床时间"
+                    message = "上面记录昨晚的入睡和起床时间",
                 )
             }
         } else {
             items(sleepRecords) { rec ->
                 val hours = rec.value
-                val qualityColor = when {
-                    hours >= 7.5 -> LevelNormal
-                    hours >= 6.0 -> LevelWatch
-                    else -> LevelWarning
-                }
+                val qualityColor =
+                    when {
+                        hours >= 7.5 -> LevelNormal
+                        hours >= 6.0 -> LevelWatch
+                        else -> LevelWarning
+                    }
 
                 Card(
                     modifier = Modifier.fillMaxWidth(),
                     shape = AppShapes.chip,
                     colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
-                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp)
+                    elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(14.dp)
+                        modifier = Modifier.padding(14.dp),
                     ) {
                         Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .background(qualityColor.copy(alpha = 0.12f), AppShapes.small),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .size(40.dp)
+                                    .background(qualityColor.copy(alpha = 0.12f), AppShapes.small),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 Icons.Filled.DateRange,
                                 contentDescription = null,
                                 tint = qualityColor,
-                                modifier = Modifier.size(20.dp)
+                                modifier = Modifier.size(20.dp),
                             )
                         }
                         Spacer(modifier = Modifier.width(12.dp))
@@ -578,12 +688,12 @@ private fun SleepTab(records: List<VitalRecord>) {
                             Text(
                                 "${fmt(hours)} 小时",
                                 style = MaterialTheme.typography.bodyLarge,
-                                fontWeight = FontWeight.SemiBold
+                                fontWeight = FontWeight.SemiBold,
                             )
                             Text(
                                 RiskEngine.clockText(rec.timestampMillis),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                             )
                         }
                         Text(
@@ -593,7 +703,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                                 else -> "不足"
                             },
                             style = MaterialTheme.typography.labelMedium,
-                            color = qualityColor
+                            color = qualityColor,
                         )
                     }
                 }
@@ -605,57 +715,76 @@ private fun SleepTab(records: List<VitalRecord>) {
 }
 
 @Composable
-private fun TrendChip(label: String, selected: Boolean, onClick: () -> Unit, modifier: Modifier = Modifier) {
-    val bgColor = if (selected) MaterialTheme.colorScheme.primary
-    else MaterialTheme.colorScheme.surfaceVariant
-    val contentColor = if (selected) MaterialTheme.colorScheme.onPrimary
-    else MaterialTheme.colorScheme.onSurfaceVariant
+private fun TrendChip(
+    label: String,
+    selected: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+) {
+    val bgColor =
+        if (selected) {
+            MaterialTheme.colorScheme.primary
+        } else {
+            MaterialTheme.colorScheme.surfaceVariant
+        }
+    val contentColor =
+        if (selected) {
+            MaterialTheme.colorScheme.onPrimary
+        } else {
+            MaterialTheme.colorScheme.onSurfaceVariant
+        }
 
     Card(
         modifier = modifier,
         shape = AppShapes.small,
         colors = CardDefaults.cardColors(containerColor = bgColor),
-        onClick = onClick
+        onClick = onClick,
     ) {
         Box(
             contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(44.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(44.dp),
         ) {
             Text(
                 label,
                 style = MaterialTheme.typography.labelMedium,
                 color = contentColor,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal,
             )
         }
     }
 }
 
 @Composable
-private fun StatMiniTile(label: String, value: String, color: Color, modifier: Modifier = Modifier) {
+private fun StatMiniTile(
+    label: String,
+    value: String,
+    color: Color,
+    modifier: Modifier = Modifier,
+) {
     Card(
         modifier = modifier,
         shape = AppShapes.chip,
-        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f))
+        colors = CardDefaults.cardColors(containerColor = color.copy(alpha = 0.08f)),
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp)
+            modifier = Modifier.padding(vertical = 10.dp, horizontal = 4.dp),
         ) {
             Text(
                 value,
                 style = MaterialTheme.typography.titleSmall,
                 color = color,
                 fontWeight = FontWeight.Bold,
-                maxLines = 1
+                maxLines = 1,
             )
             Text(
                 label,
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                maxLines = 1,
             )
         }
     }
@@ -664,7 +793,8 @@ private fun StatMiniTile(label: String, value: String, color: Color, modifier: M
 private fun formatVal(v: Double): String =
     if (v == v.toLong().toDouble()) v.toLong().toString() else String.format("%.1f", v)
 
-private fun parseHm(s: String): LocalTime? = runCatching {
-    val parts = s.trim().split(":")
-    LocalTime.of(parts[0].toInt(), parts[1].toInt())
-}.getOrNull()
+private fun parseHm(s: String): LocalTime? =
+    runCatching {
+        val parts = s.trim().split(":")
+        LocalTime.of(parts[0].toInt(), parts[1].toInt())
+    }.getOrNull()

@@ -11,7 +11,8 @@ plugins {
 
 dependencies {
     // 领域模型与 FHIR 导出使用 kotlinx-serialization；算法(RiskEngine/Stats)纯 Kotlin + java.time(>=26 原生)
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
+    // 1.7.3 与 Kotlin 2.1.x 兼容（1.11.0 是用 Kotlin 2.3.0 编译的，无法被 2.1.x 读取）
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
 }
 
 // 用构建环境已有的 JDK 21 编译，但统一发出 JVM 17 字节码：

@@ -263,6 +263,132 @@ This app provides health-management reference based on publicly available medica
 
 ---
 
+## 🎨 UI 设计系统 v3（2026-09 更新）
+
+### 设计理念
+参考 Keep 等运动应用和现代养生应用，采用**清新健康活力风**设计语言，兼顾美观与适老化。
+
+### 配色系统
+| 角色 | 颜色 | 用途 |
+|------|------|------|
+| **主品牌色** | 薄荷绿 `#00A86B` | 健康/自然/活力，主按钮、选中态 |
+| **强调色** | 活力橙 `#FF6D00` | 温暖/能量/CTA，重要操作、提醒 |
+| **辅助色** | 深邃蓝 `#1A237E` | 专业/信任/医疗，次要信息、设备 |
+| **危险色** | 珊瑚红 `#E53935` | SOS、风险警告、错误 |
+| **背景** | 浅薄荷绿渐变 `#F1F8E9 → #E8F5E9` | 页面背景，清新自然 |
+
+### 数据可视化色板
+- 心率：粉红 `#E91E63`
+- 血压：靛蓝 `#3F51B5`
+- 血氧：青色 `#00BCD4`
+- 体温：橙红 `#FF5722`
+- 步数：浅绿 `#8BC34A`
+- 睡眠：蓝紫 `#7986CB`
+
+### 核心组件
+- **ProgressRing** — 渐变进度环（带动画）
+- **GlassCard** — 玻璃拟态卡片
+- **DataTile** — 数据块（图标+数值+单位+标签+趋势）
+- **GradientBanner** — 渐变横幅
+- **QuickActionButton** — 快速操作按钮
+- **TrendChart** — 趋势图（折线+渐变填充）
+- **BarChart** — 柱状图（带动画）
+- **ModernBottomNav** — 浮动卡片式底部导航
+
+### 适老化规范
+- 正文字号 16-17sp，标题 20-30sp
+- 对比度 ≥ 4.5:1（WCAG AA）
+- 点击区域 ≥ 48dp
+- 大按钮、大图标、清晰视觉层次
+
+---
+
+## 🏗️ 工程化改进（v3.0）
+
+### 架构升级
+- **Room 数据库** — 替代 JSON 文件存储，类型安全、查询高效
+- **Hilt 依赖注入** — AppRepository 改为 @Singleton 类，构造函数注入
+- **ViewModel 架构** — Dashboard/Devices/Family/Medical/Report 5 个 ViewModel
+- **Timber 日志框架** — 替代 System.out.println，Release 自动关闭
+
+### 测试体系
+- **JUnit 4** — 替代 main 方法测试，3 个引擎测试类
+- **Room 数据库测试** — 16 个 DAO 测试用例
+- **Repository 集成测试** — 8 个端到端测试
+- **JaCoCo 覆盖率报告** — CI 自动生成
+
+### 构建与 CI
+- **R8 混淆** — Release 构建开启代码压缩和优化
+- **ktlint 代码检查** — 12.1.1，非阻塞模式
+- **CI 流水线** — 编译检查+测试+Debug+Release混淆验证+Lint+ktlint+产物上传
+- **Gradle 缓存优化** — wrapper/依赖/构建三层缓存
+
+### 数据管理
+- **数据导出** — JSON 格式导出健康数据
+- **数据导入** — 从备份文件恢复数据
+- **Wear 端数据层** — 完善删除/清空/导出/导入功能
+
+---
+
+## 📱 功能模块
+
+### 手机端（守护端）
+| 模块 | 功能 |
+|------|------|
+| **Dashboard 首页** | 健康概览、风险评估、核心数据、快速操作、SOS |
+| **Devices 设备** | PPG相机测量、蓝牙设备连接、Health Connect同步 |
+| **Report 报告** | 健康评分、指标分析、导出PDF/JSON、AI分析 |
+| **Guardian 守护** | SOS设置、守护功能开关、紧急联系人、通知方式 |
+| **Family 家人** | 快捷联系、家人列表、家庭健康共享 |
+| **Medical 医疗** | 用药提醒、就诊记录、医疗档案、健康知识 |
+| **More 更多** | 数据管理、个性化设置、安全隐私、关于 |
+| **AiReport AI分析** | AI智能分析、健康建议、趋势预测 |
+| **Entry 测量入口** | 心率/血压/血氧/体温测量、数据来源选择 |
+
+### 手表端（Wear OS）
+| 模块 | 功能 |
+|------|------|
+| **WearHome 首页** | 心率大数字、风险等级、血氧/步数、SOS按钮 |
+| **WearSos 紧急呼救** | 倒计时防误触、一键呼救、发送位置 |
+| **WearWorkout 运动** | 步数/心率/卡路里/时长、开始/暂停 |
+| **WearSettings 设置** | 通知、深色模式、健康追踪、关于 |
+
+### 华为手表适配
+- 支持圆形屏幕（Watch GT 系列）和方形屏幕（Watch Fit 系列）
+- 华为 BLE 设备过滤（血压表、手环、体脂秤）
+- Wear OS 版本可在华为 Wear OS 手表上运行
+- HarmonyOS 版本需单独 ArkTS 项目开发
+
+---
+
+## 📋 更新日志
+
+### v3.0.0（2026-09-01）
+**全新 UI 设计系统 v3**
+- 薄荷绿+活力橙+深邃蓝全新配色
+- 玻璃拟态卡片、渐变背景、进度环数据展示
+- 全部 10 个手机端屏幕重构
+- 4 个手表端屏幕重构（首页/SOS/运动/设置）
+- 华为手表适配工具类
+- 数据可视化图表组件（趋势图/柱状图）
+
+**工程化全面升级**
+- Room 数据库替代 JSON 存储
+- Hilt 依赖注入重构
+- ViewModel 架构（5 个 ViewModel）
+- JUnit 4 测试体系（27+ 测试用例）
+- R8 混淆、Timber 日志、ktlint 检查
+- CI 流水线完善、Gradle 缓存优化
+- 数据导出/导入功能
+
+### v2.0.0（历史版本）
+- 初始版本发布
+- 基础健康监测功能
+- Wear OS 手表端支持
+- PPG 相机心率测量
+
+---
+
 <div align="center">
 
 **Made with ❤️ for elderly care** · [GitHub](https://github.com/Morningstar202604/areyoudeadyet) · [Gitee](https://gitee.com/badhope/areyoudeadyet) · [GitCode](https://gitcode.com/badhope/areyoudeadyet) · [Issues](https://github.com/Morningstar202604/areyoudeadyet/issues) · [Releases](https://github.com/Morningstar202604/areyoudeadyet/releases)
