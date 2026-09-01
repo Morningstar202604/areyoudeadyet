@@ -7,6 +7,7 @@ plugins {
     id("org.jetbrains.kotlin.plugin.serialization")
     id("org.jetbrains.kotlin.kapt")
     id("com.google.dagger.hilt.android")
+    id("org.jlleitschuh.gradle.ktlint")
 }
 
 val keystoreProps = Properties().apply {
@@ -35,6 +36,11 @@ android {
                 keyPassword = keystoreProps["keyPassword"] as String
             }
         }
+    }
+
+    // 启用 JaCoCo 测试覆盖率报告
+    buildFeatures {
+        testCoverage = true
     }
 
     buildTypes {
