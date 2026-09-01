@@ -99,7 +99,7 @@ object Reminders {
     /** 测量提醒 Worker：当天核心指标已测齐则保持安静，缺哪项提醒哪项。 */
     class MeasureWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            val records = repo(context).records.first()
+            val records = repo(applicationContext).records.first()
             val zone = ZoneId.systemDefault()
             val todayStart = LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
             val missing = mutableListOf<String>()
@@ -130,7 +130,7 @@ object Reminders {
             val hour = LocalTime.now().hour
             if (hour in 9..20 && canNotify(applicationContext)) {
                 ensureChannel(applicationContext)
-                val stepsToday = repo(context).records.first()
+                val stepsToday = repo(applicationContext).records.first()
                     .filter { it.typeId == VitalType.STEPS.id && RiskEngine.clockText(it.timestampMillis).startsWith(
                         java.time.format.DateTimeFormatter.ofPattern("MM-dd").format(java.time.LocalDate.now())) }
                     .maxOfOrNull { it.value } ?: 0.0

@@ -155,7 +155,7 @@ fun PpgMeasureSection() {
                 elapsedSec++
             }
             measuring = false
-            stopAndEvaluate(analyzer) { t, saved ->
+            stopAndEvaluate(analyzer, repository) { t, saved ->
                 resultText = t
                 savedMsg = saved
             }
@@ -239,7 +239,11 @@ fun PpgMeasureSection() {
     }
 }
 
-private fun stopAndEvaluate(analyzer: PpgAnalyzer, onDone: (String, String?) -> Unit) {
+private fun stopAndEvaluate(
+    analyzer: PpgAnalyzer,
+    repository: AppRepository,
+    onDone: (String, String?) -> Unit
+) {
     val r = analyzer.analyze()
     when {
         r == null -> onDone(

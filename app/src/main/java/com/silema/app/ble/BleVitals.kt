@@ -224,18 +224,18 @@ object BleVitals {
             characteristic: BluetoothGattCharacteristic,
             value: ByteArray
         ) {
-            handle(characteristic.uuid, value)
+            handle(context, characteristic.uuid, value)
         }
 
         @Deprecated("Deprecated in Java")
         override fun onCharacteristicChanged(g: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             @Suppress("DEPRECATION")
             val value = characteristic.value ?: return
-            handle(characteristic.uuid, value)
+            handle(context, characteristic.uuid, value)
         }
     }
 
-    private fun handle(uuid: UUID, payload: ByteArray) {
+    private fun handle(context: Context, uuid: UUID, payload: ByteArray) {
         val now = System.currentTimeMillis()
         when (uuid) {
             CHAR_HR_MEASUREMENT -> {
