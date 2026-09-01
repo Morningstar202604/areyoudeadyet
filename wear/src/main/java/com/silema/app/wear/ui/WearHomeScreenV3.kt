@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Sos
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,13 +31,13 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Card
+import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
 import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalType
 import com.silema.app.engine.RiskEngine
 import com.silema.app.wear.data.WearStore
-import kotlinx.coroutines.flow.collectAsState
 
 /**
  * 手表端首页 v3 — 现代健康活力风（适配圆形/方形手表，包括华为手表）。
@@ -173,13 +174,16 @@ fun WearHomeScreenV3(
                     Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                background =
-                    Brush.horizontalGradient(
-                        listOf(Color(0xFFE53935), Color(0xFFB71C1C)),
-                    ),
             ) {
                 Box(
-                    modifier = Modifier.fillMaxSize(),
+                    modifier =
+                        Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.horizontalGradient(
+                                    listOf(Color(0xFFE53935), Color(0xFFB71C1C)),
+                                ),
+                            ),
                     contentAlignment = Alignment.Center,
                 ) {
                     Row(
