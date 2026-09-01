@@ -41,6 +41,9 @@ object BleVitals {
     /** 通过 Hilt EntryPoint 获取 AppRepository 单例（v0.6.0 起 AppRepository 改为 @Singleton 类）。 */
     private fun repo(context: Context): AppRepository = appRepositoryFrom(context)
 
+    /** 保存 ApplicationContext，供 gattCallback 等成员回调使用。 */
+    private var appContext: Context? = null
+
     private val SERVICE_HR: UUID = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")
     private val SERVICE_BP: UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
     private val SERVICE_PLX: UUID = UUID.fromString("00001822-0000-1000-8000-00805f9b34fb")
@@ -139,6 +142,7 @@ object BleVitals {
 
     fun connect(context: Context, address: String) {
         if (!hasBluetooth(context)) return
+        appContext = context.applicationContext
         disconnect()
         val device: BluetoothDevice = try {
             adapter!!.getRemoteDevice(address)
@@ -224,38 +228,39 @@ object BleVitals {
             characteristic: BluetoothGattCharacteristic,
             value: ByteArray
         ) {
-            handle(context, characteristic.uuid, value)
+            handle(characteristic.uuid, value)
         }
 
         @Deprecated("Deprecated in Java")
         override fun onCharacteristicChanged(g: BluetoothGatt, characteristic: BluetoothGattCharacteristic) {
             @Suppress("DEPRECATION")
             val value = characteristic.value ?: return
-            handle(context, characteristic.uuid, value)
+            handle(characteristic.uuid, value)
         }
     }
 
-    private fun handle(context: Context, uuid: UUID, payload: ByteArray) {
+    private fun handle(uuid: UUID, payload: ByteArray) {
+        val ctx = appContext ?: return
         val now = System.currentTimeMillis()
         when (uuid) {
             CHAR_HR_MEASUREMENT -> {
                 val bpm = BleCodec.parseHeartRate(payload) ?: return
                 putLive("心率", bpm)
-                repo(context).addRecord(VitalRecord.of(VitalType.HEART_RATE, bpm, now, VitalSource.BLE))
+                repo(ctx).addRecord(VitalRecord.of(VitalType.HEART_RATE, bpm, now, VitalSource.BLE))
             }
             CHAR_BP_MEASUREMENT -> {
                 val bp = BleCodec.parseBloodPressure(payload) ?: return
                 putLive("收缩压", bp[0])
                 putLive("舒张压", bp[1])
-                repo(context).addRecord(VitalRecord.of(VitalType.SYSTOLIC, bp[0], now, VitalSource.BLE))
-                repo(context).addRecord(VitalRecord.of(VitalType.DIASTOLIC, bp[1], now, VitalSource.BLE))
+                repo(ctx).addRecord(VitalRecord.of(VitalType.SYSTOLIC, bp[0], now, VitalSource.BLE))
+                repo(ctx).addRecord(VitalRecord.of(VitalType.DIASTOLIC, bp[1], now, VitalSource.BLE))
                 _connectionState.value = "收到血压：${bp[0].toInt()}/${bp[1].toInt()} mmHg"
             }
             CHAR_PLX_CONTINUOUS -> {
                 val plx = BleCodec.parsePulseOx(payload) ?: return
                 putLive("血氧", plx.first)
                 putLive("脉率", plx.second)
-                repo(context).addRecord(VitalRecord.of(VitalType.SPO2, plx.first, now, VitalSource.BLE))
+                repo(ctx).addRecord(VitalRecord.of(VitalType.SPO2, plx.first, now, VitalSource.BLE))
                 _connectionState.value = "收到血氧：${plx.first.toInt()}%"
             }
         }

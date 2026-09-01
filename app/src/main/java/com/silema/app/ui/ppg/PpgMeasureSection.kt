@@ -41,6 +41,7 @@ import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.engine.StressMath
 import com.silema.app.ppg.PpgAnalyzer
+import com.silema.app.store.AppRepository
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.BigButton
 import kotlinx.coroutines.delay
