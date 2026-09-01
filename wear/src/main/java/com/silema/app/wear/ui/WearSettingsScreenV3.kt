@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Info
@@ -208,7 +209,3 @@ private fun SettingItem(
         )
     }
 }
-
-// 临时导入
-private val RoundedCornerShape = androidx.compose.foundation.shape.RoundedCornerShape
-private val Favorite = Icons.Default.Favorite
