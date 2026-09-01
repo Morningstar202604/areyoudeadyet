@@ -27,7 +27,7 @@ jobs:
 
       # ---------- Gradle 缓存（加速构建 30-50%） ----------
       - name: Cache Gradle wrapper
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/wrapper
@@ -36,7 +36,7 @@ jobs:
             gradle-wrapper-
 
       - name: Cache Gradle dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.gradle/caches/modules-2
@@ -47,7 +47,7 @@ jobs:
             gradle-deps-
 
       - name: Cache build outputs
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             app/build
