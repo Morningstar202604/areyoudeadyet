@@ -111,6 +111,27 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
             composable(Routes.MORE) {
                 MoreScreenV3()
             }
+            composable(Routes.ENTRY) {
+                EntryScreenV3(onClose = { navController.popBackStack() })
+            }
+            composable(Routes.WORKOUT) {
+                // 运动屏幕占位（后续重构）
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Text("运动功能开发中...", style = MaterialTheme.typography.titleMedium)
+                }
+            }
+            composable(Routes.SOS) {
+                // SOS 屏幕占位（后续重构）
+                androidx.compose.foundation.layout.Box(
+                    modifier = androidx.compose.ui.Modifier.fillMaxSize(),
+                    contentAlignment = androidx.compose.ui.Alignment.Center
+                ) {
+                    Text("SOS 紧急呼救功能开发中...", style = MaterialTheme.typography.titleMedium)
+                }
+            }
         }
     }
 }

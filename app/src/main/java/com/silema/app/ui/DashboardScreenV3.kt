@@ -50,6 +50,7 @@ import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.ProgressRing
 import com.silema.app.ui.components.QuickActionButton
+import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
