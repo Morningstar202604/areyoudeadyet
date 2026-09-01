@@ -36,7 +36,6 @@ import java.util.UUID
  * 卡路里经验公式：步行 kcal ≈ 体重kg × 公里 × 0.53；跑步 ≈ ×1.02。
  */
 class WorkoutService : android.app.Service() {
-
     /** AppRepository 单例（v0.6.0 起通过 Hilt EntryPoint 获取）。 */
     private lateinit var repo: AppRepository
 
@@ -46,7 +45,7 @@ class WorkoutService : android.app.Service() {
         val distanceM: Double,
         val points: Int,
         val kcal: Double,
-        val speedKmh: Double
+        val speedKmh: Double,
     )
 
     companion object {
@@ -58,9 +57,14 @@ class WorkoutService : android.app.Service() {
         private val _live = MutableStateFlow<Live?>(null)
         val live: StateFlow<Live?> = _live.asStateFlow()
 
-        fun start(context: Context, type: String) {
-            val intent = Intent(context, WorkoutService::class.java)
-                .setAction(ACTION_START).putExtra("type", type)
+        fun start(
+            context: Context,
+            type: String,
+        ) {
+            val intent =
+                Intent(context, WorkoutService::class.java)
+                    .setAction(ACTION_START)
+                    .putExtra("type", type)
             ContextCompat.startForegroundService(context, intent)
         }
 
@@ -79,21 +83,26 @@ class WorkoutService : android.app.Service() {
     private val track = mutableListOf<List<Double>>()
     private var ticker: Handler? = null
 
-    private val locationListener = LocationListener { loc ->
-        if (!loc.hasAccuracy() || loc.accuracy > 25f) return@LocationListener
-        val prev = lastFix
-        if (prev == null) {
-            appendTrack(loc)
-        } else {
-            val d = Stats.haversineMeters(prev.latitude, prev.longitude, loc.latitude, loc.longitude)
-            if (d in 0.5..200.0) distance += d
-            if (distanceFrom(lastStored, loc) >= 5.0) appendTrack(loc)
+    private val locationListener =
+        LocationListener { loc ->
+            if (!loc.hasAccuracy() || loc.accuracy > 25f) return@LocationListener
+            val prev = lastFix
+            if (prev == null) {
+                appendTrack(loc)
+            } else {
+                val d = Stats.haversineMeters(prev.latitude, prev.longitude, loc.latitude, loc.longitude)
+                if (d in 0.5..200.0) distance += d
+                if (distanceFrom(lastStored, loc) >= 5.0) appendTrack(loc)
+            }
+            lastFix = loc
         }
-        lastFix = loc
-    }
 
-    private fun distanceFrom(stored: Location?, loc: Location): Double =
-        stored?.let { Stats.haversineMeters(it.latitude, it.longitude, loc.latitude, loc.longitude) } ?: Double.MAX_VALUE
+    private fun distanceFrom(
+        stored: Location?,
+        loc: Location,
+    ): Double =
+        stored?.let { Stats.haversineMeters(it.latitude, it.longitude, loc.latitude, loc.longitude) }
+            ?: Double.MAX_VALUE
 
     private fun appendTrack(loc: Location) {
         if (track.size < 4000) {
@@ -112,31 +121,45 @@ class WorkoutService : android.app.Service() {
             getSystemService(NotificationManager::class.java)?.createNotificationChannel(ch)
         }
     }
+
     @SuppressLint("MissingPermission")
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         super.onStartCommand(intent, flags, startId)
         when (intent?.action) {
             ACTION_START -> {
                 type = intent.getStringExtra("type") ?: "walk"
                 startMillis = System.currentTimeMillis()
                 distance = 0.0
-                lastFix = null; lastStored = null
+                lastFix = null
+                lastStored = null
                 track.clear()
                 startAsForeground()
 
                 handlerThread = HandlerThread("gps").apply { start() }
                 handler = Handler(handlerThread!!.looper)
                 val lm = getSystemService(Context.LOCATION_SERVICE) as LocationManager
-                val hasFine = ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
-                    PackageManager.PERMISSION_GRANTED
+                val hasFine =
+                    ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
+                        PackageManager.PERMISSION_GRANTED
                 if (hasFine && lm.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
-                    lm.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000L, 0.5f, locationListener, handler!!.looper)
+                    lm.requestLocationUpdates(
+                        LocationManager.GPS_PROVIDER,
+                        1000L,
+                        0.5f,
+                        locationListener,
+                        handler!!.looper,
+                    )
                     tick()
                 } else {
                     _live.value = Live(type, 0, 0.0, 0, 0.0, 0.0)
                     updateNotification("等待 GPS 信号…请到空旷处")
                 }
             }
+
             ACTION_STOP -> finishWorkout()
         }
         return START_NOT_STICKY
@@ -144,40 +167,46 @@ class WorkoutService : android.app.Service() {
 
     private fun tick() {
         ticker = Handler(Looper.getMainLooper())
-        val updateRunnable = object : Runnable {
-            override fun run() {
-                val elapsed = (System.currentTimeMillis() - startMillis) / 1000
-                val km = distance / 1000.0
-                val hours = elapsed / 3600.0
-                val speed = if (hours > 0) km / hours else 0.0
-                val kcal = km * repo.weightKg * (if (type == "run") 1.02 else 0.53)
-                _live.value = Live(type, elapsed, distance, track.size, kcal, speed)
-                updateNotification("${"%.2f".format(km)} km · ${elapsed / 60} 分钟")
-                if (_live.value != null) ticker?.postDelayed(this, 3000)
+        val updateRunnable =
+            object : Runnable {
+                override fun run() {
+                    val elapsed = (System.currentTimeMillis() - startMillis) / 1000
+                    val km = distance / 1000.0
+                    val hours = elapsed / 3600.0
+                    val speed = if (hours > 0) km / hours else 0.0
+                    val kcal = km * repo.weightKg * (if (type == "run") 1.02 else 0.53)
+                    _live.value = Live(type, elapsed, distance, track.size, kcal, speed)
+                    updateNotification("${"%.2f".format(km)} km · ${elapsed / 60} 分钟")
+                    if (_live.value != null) ticker?.postDelayed(this, 3000)
+                }
             }
-        }
         ticker?.post(updateRunnable)
     }
 
-    private fun buildNotification(text: String) = NotificationCompat.Builder(this, CHANNEL_WORKOUT)
-        .setSmallIcon(R.drawable.ic_launcher_foreground)
-        .setContentTitle(if (type == "run") "跑步进行中" else "步行进行中")
-        .setContentText(text)
-        .setOngoing(true)
-        .setContentIntent(
-            PendingIntent.getActivity(
-                this, 0, Intent(this, com.silema.app.MainActivity::class.java),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-        .addAction(
-            0, "结束运动",
-            PendingIntent.getService(
-                this, 1, Intent(this, WorkoutService::class.java).setAction(ACTION_STOP),
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        )
-        .build()
+    private fun buildNotification(text: String) =
+        NotificationCompat
+            .Builder(this, CHANNEL_WORKOUT)
+            .setSmallIcon(R.drawable.ic_launcher_foreground)
+            .setContentTitle(if (type == "run") "跑步进行中" else "步行进行中")
+            .setContentText(text)
+            .setOngoing(true)
+            .setContentIntent(
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    Intent(this, com.silema.app.MainActivity::class.java),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
+            ).addAction(
+                0,
+                "结束运动",
+                PendingIntent.getService(
+                    this,
+                    1,
+                    Intent(this, WorkoutService::class.java).setAction(ACTION_STOP),
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+                ),
+            ).build()
 
     private fun startAsForeground() {
         val notif = buildNotification("等待 GPS 数据…")
@@ -200,15 +229,16 @@ class WorkoutService : android.app.Service() {
         val km = distance / 1000.0
         val kcal = km * repo.weightKg * (if (type == "run") 1.02 else 0.53)
         if (distance >= 20.0 && elapsed > 60_000) {
-            val w = Workout(
-                id = UUID.randomUUID().toString(),
-                type = type,
-                startMillis = startMillis,
-                durationMillis = elapsed,
-                distanceMeters = distance,
-                caloriesKcal = Math.round(kcal * 10) / 10.0,
-                track = ArrayList(track)
-            )
+            val w =
+                Workout(
+                    id = UUID.randomUUID().toString(),
+                    type = type,
+                    startMillis = startMillis,
+                    durationMillis = elapsed,
+                    distanceMeters = distance,
+                    caloriesKcal = Math.round(kcal * 10) / 10.0,
+                    track = ArrayList(track),
+                )
             Thread { repo.addWorkout(w) }.start()
         }
         _live.value = null

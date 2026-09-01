@@ -2,7 +2,11 @@ package com.silema.app.data
 
 import kotlinx.serialization.Serializable
 
-enum class VitalType(val id: String, val displayName: String, val unit: String) {
+enum class VitalType(
+    val id: String,
+    val displayName: String,
+    val unit: String,
+) {
     HEART_RATE("heart_rate", "心率", "次/分"),
     SYSTOLIC("systolic", "收缩压(高压)", "mmHg"),
     DIASTOLIC("diastolic", "舒张压(低压)", "mmHg"),
@@ -10,7 +14,8 @@ enum class VitalType(val id: String, val displayName: String, val unit: String) 
     TEMPERATURE("temperature", "体温", "℃"),
     STEPS("steps", "今日步数", "步"),
     SLEEP("sleep", "睡眠时长", "小时"),
-    STRESS("stress", "压力指数", "分");
+    STRESS("stress", "压力指数", "分"),
+    ;
 
     companion object {
         fun fromId(id: String): VitalType? = entries.firstOrNull { it.id == id }
@@ -30,32 +35,37 @@ data class VitalRecord(
     val typeId: String,
     val value: Double,
     val timestampMillis: Long,
-    val source: String = VitalSource.MANUAL
+    val source: String = VitalSource.MANUAL,
 ) {
     val type: VitalType? get() = VitalType.fromId(typeId)
 
     companion object {
-        fun of(type: VitalType, value: Double, timestampMillis: Long, source: String): VitalRecord =
-            VitalRecord(type.id, value, timestampMillis, source)
+        fun of(
+            type: VitalType,
+            value: Double,
+            timestampMillis: Long,
+            source: String,
+        ): VitalRecord = VitalRecord(type.id, value, timestampMillis, source)
     }
 }
 
 @Serializable
 data class Contact(
     val name: String,
-    val phone: String
+    val phone: String,
+    val relation: String = "",
 )
 
 /** 一次运动记录（跑步/步行），轨迹点为 [lat, lon, tMillis] 扁平列表。 */
 @Serializable
 data class Workout(
     val id: String,
-    val type: String,            // "walk" | "run"
+    val type: String, // "walk" | "run"
     val startMillis: Long,
     val durationMillis: Long,
     val distanceMeters: Double,
     val caloriesKcal: Double,
-    val track: List<List<Double>> // lat, lon, t（节流后存储）
+    val track: List<List<Double>>, // lat, lon, t（节流后存储）
 ) {
     val distanceKm: Double get() = distanceMeters / 1000.0
     val avgSpeedKmh: Double

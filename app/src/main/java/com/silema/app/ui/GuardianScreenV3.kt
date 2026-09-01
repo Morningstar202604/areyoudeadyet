@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -40,6 +39,8 @@ import com.silema.app.data.Contact
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
+import com.silema.app.ui.components.GradientItem
+import com.silema.app.ui.components.IconItem
 import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
@@ -47,7 +48,6 @@ import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
 import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
 import com.silema.app.ui.theme.CardGradientRed
 import com.silema.app.ui.theme.SosGradient
 
@@ -60,23 +60,25 @@ import com.silema.app.ui.theme.SosGradient
 fun GuardianScreenV3(
     contacts: List<Contact>,
     onAddContact: () -> Unit = {},
-    onClose: () -> Unit = {}
+    onClose: () -> Unit = {},
 ) {
     val repository = rememberAppRepository()
     val savedContacts by repository.contacts.collectAsState(initial = emptyList())
     val allContacts = contacts.ifEmpty { savedContacts }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF))
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = AppSpacing.xxl, bottom = 100.dp)
+        contentPadding =
+            androidx.compose.foundation.layout
+                .PaddingValues(top = AppSpacing.xxl, bottom = 100.dp),
     ) {
         // 1. 标题
         item {
@@ -84,12 +86,12 @@ fun GuardianScreenV3(
                 text = "守护设置",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 text = "设置紧急联系人和守护功能，保障老人安全",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -99,7 +101,7 @@ fun GuardianScreenV3(
                 title = "SOS 紧急呼救",
                 subtitle = "一键呼叫紧急联系人，同时发送位置信息",
                 gradientColors = SosGradient,
-                icon = Icons.Default.Phone
+                icon = Icons.Default.Phone,
             )
         }
 
@@ -109,16 +111,17 @@ fun GuardianScreenV3(
                 text = "守护功能",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val features = listOf(
-                Triple("异常心率提醒", "心率异常时自动通知家人", Icons.Default.Notifications, BrandWarm),
-                Triple("位置共享", "实时共享位置给紧急联系人", Icons.Default.LocationOn, BrandBlue),
-                Triple("跌倒检测", "检测到跌倒时自动呼救", Icons.Default.HealthAndSafety, BrandPurple),
-                Triple("用药提醒", "定时提醒老人服药", Icons.Default.Notifications, BrandGreen)
-            )
+            val features =
+                listOf(
+                    IconItem("异常心率提醒", "心率异常时自动通知家人", Icons.Default.Notifications, BrandWarm),
+                    IconItem("位置共享", "实时共享位置给紧急联系人", Icons.Default.LocationOn, BrandBlue),
+                    IconItem("跌倒检测", "检测到跌倒时自动呼救", Icons.Default.HealthAndSafety, BrandPurple),
+                    IconItem("用药提醒", "定时提醒老人服药", Icons.Default.Notifications, BrandGreen),
+                )
 
             features.forEach { (name, desc, icon, color) ->
                 FeatureCard(
@@ -126,7 +129,7 @@ fun GuardianScreenV3(
                     description = desc,
                     icon = icon,
                     color = color,
-                    isEnabled = true
+                    isEnabled = true,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -137,13 +140,13 @@ fun GuardianScreenV3(
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "紧急联系人",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 OutlinedButton(onClick = onAddContact) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -155,27 +158,28 @@ fun GuardianScreenV3(
             if (allContacts.isEmpty()) {
                 GlassCard {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(24.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(24.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         Icon(
                             Icons.Default.Phone,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(48.dp)
+                            modifier = Modifier.size(48.dp),
                         )
                         Text(
                             text = "暂无紧急联系人",
                             style = MaterialTheme.typography.titleMedium,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = "点击右上角添加紧急联系人",
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -193,15 +197,16 @@ fun GuardianScreenV3(
                 text = "通知方式",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val notifyMethods = listOf(
-                Triple("电话通知", "紧急情况直接拨打电话", Icons.Default.Phone, CardGradientRed),
-                Triple("短信通知", "发送短信通知紧急联系人", Icons.Default.Sms, CardGradientBlue),
-                Triple("APP 推送", "通过 APP 推送通知", Icons.Default.Notifications, CardGradientGreen)
-            )
+            val notifyMethods =
+                listOf(
+                    GradientItem("电话通知", "紧急情况直接拨打电话", Icons.Default.Phone, CardGradientRed),
+                    GradientItem("短信通知", "发送短信通知紧急联系人", Icons.Default.Sms, CardGradientBlue),
+                    GradientItem("APP 推送", "通过 APP 推送通知", Icons.Default.Notifications, CardGradientGreen),
+                )
 
             notifyMethods.forEach { (name, desc, icon, gradient) ->
                 NotifyMethodCard(
@@ -209,7 +214,7 @@ fun GuardianScreenV3(
                     description = desc,
                     icon = icon,
                     gradient = gradient,
-                    isEnabled = true
+                    isEnabled = true,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -226,22 +231,24 @@ private fun FeatureCard(
     description: String,
     icon: ImageVector,
     color: Color,
-    isEnabled: Boolean
+    isEnabled: Boolean,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             }
@@ -250,17 +257,17 @@ private fun FeatureCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             androidx.compose.material3.Switch(
                 checked = isEnabled,
-                onCheckedChange = { /* 切换开关 */ }
+                onCheckedChange = { /* 切换开关 */ },
             )
         }
     }
@@ -273,24 +280,26 @@ private fun FeatureCard(
 private fun ContactCard(contact: Contact) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(CardGradientBlue)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(CardGradientBlue)),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = contact.name.first().toString(),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.White,
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
@@ -298,12 +307,12 @@ private fun ContactCard(contact: Contact) {
                     text = contact.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = contact.relation,
+                    text = contact.relation.ifEmpty { "紧急联系人" },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             OutlinedButton(onClick = { /* 拨打电话 */ }) {
@@ -322,22 +331,24 @@ private fun NotifyMethodCard(
     description: String,
     icon: ImageVector,
     gradient: List<Color>,
-    isEnabled: Boolean
+    isEnabled: Boolean,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
@@ -346,17 +357,17 @@ private fun NotifyMethodCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             androidx.compose.material3.Switch(
                 checked = isEnabled,
-                onCheckedChange = { /* 切换开关 */ }
+                onCheckedChange = { /* 切换开关 */ },
             )
         }
     }

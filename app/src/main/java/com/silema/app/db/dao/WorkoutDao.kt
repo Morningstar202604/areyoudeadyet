@@ -9,7 +9,6 @@ import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface WorkoutDao {
-
     @Query("SELECT * FROM workouts ORDER BY startMillis DESC")
     fun observeAll(): Flow<List<WorkoutEntity>>
 

@@ -13,7 +13,6 @@ import timber.log.Timber
  */
 @HiltAndroidApp
 class WearApplication : Application() {
-
     override fun onCreate() {
         super.onCreate()
 

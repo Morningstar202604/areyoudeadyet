@@ -37,11 +37,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
+import com.silema.app.ui.components.GradientItem
+import com.silema.app.ui.components.MedicationItem
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.BrandPurple
-import com.silema.app.ui.theme.BrandWarm
 import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
 import com.silema.app.ui.theme.CardGradientOrange
@@ -55,42 +54,45 @@ import com.silema.app.ui.theme.CardGradientPurple
 @Composable
 fun MedicalScreenV3(onClose: () -> Unit = {}) {
     // 示例用药数据
-    val medications = listOf(
-        Triple("阿司匹林", "100mg", "每天早上 8:00", true),
-        Triple("降压药", "5mg", "每天晚上 20:00", false),
-        Triple("钙片", "500mg", "每天中午 12:00", true)
-    )
+    val medications =
+        listOf(
+            MedicationItem("阿司匹林", "100mg", "每天早上 8:00", true),
+            MedicationItem("降压药", "5mg", "每天晚上 20:00", false),
+            MedicationItem("钙片", "500mg", "每天中午 12:00", true),
+        )
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF))
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = AppSpacing.xxl, bottom = 100.dp)
+        contentPadding =
+            androidx.compose.foundation.layout
+                .PaddingValues(top = AppSpacing.xxl, bottom = 100.dp),
     ) {
         // 1. 标题
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Text(
                         text = "医疗健康",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
                         text = "用药提醒、就诊记录、健康知识",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
             }
@@ -100,43 +102,46 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
         item {
             GlassCard {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
+                        verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Text(
                             text = "今日用药",
                             style = MaterialTheme.typography.titleMedium,
                             fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = "2/3 已服用",
                             style = MaterialTheme.typography.bodyMedium,
                             color = BrandGreen,
-                            fontWeight = FontWeight.Medium
+                            fontWeight = FontWeight.Medium,
                         )
                     }
                     // 进度条
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(8.dp)
-                            .clip(CircleShape)
-                            .background(Color(0xFFE0E0E0))
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth(0.67f)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
                                 .height(8.dp)
                                 .clip(CircleShape)
-                                .background(Brush.horizontalGradient(CardGradientGreen))
+                                .background(Color(0xFFE0E0E0)),
+                    ) {
+                        Box(
+                            modifier =
+                                Modifier
+                                    .fillMaxWidth(0.67f)
+                                    .height(8.dp)
+                                    .clip(CircleShape)
+                                    .background(Brush.horizontalGradient(CardGradientGreen)),
                         )
                     }
                 }
@@ -148,13 +153,13 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = "用药提醒",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 OutlinedButton(onClick = { /* 添加用药 */ }) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
@@ -169,7 +174,7 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
                 name = name,
                 dosage = dosage,
                 time = time,
-                isTaken = taken
+                isTaken = taken,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
         }
@@ -180,23 +185,24 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
                 text = "快捷功能",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val features = listOf(
-                Triple("就诊记录", "查看历史就诊记录", Icons.Default.LocalHospital, CardGradientBlue),
-                Triple("医疗档案", "管理个人医疗档案", Icons.Default.MedicalServices, CardGradientPurple),
-                Triple("健康知识", "学习健康养生知识", Icons.Default.LocalPharmacy, CardGradientGreen),
-                Triple("复诊提醒", "设置复诊提醒", Icons.Default.Schedule, CardGradientOrange)
-            )
+            val features =
+                listOf(
+                    GradientItem("就诊记录", "查看历史就诊记录", Icons.Default.LocalHospital, CardGradientBlue),
+                    GradientItem("医疗档案", "管理个人医疗档案", Icons.Default.MedicalServices, CardGradientPurple),
+                    GradientItem("健康知识", "学习健康养生知识", Icons.Default.LocalPharmacy, CardGradientGreen),
+                    GradientItem("复诊提醒", "设置复诊提醒", Icons.Default.Schedule, CardGradientOrange),
+                )
 
             features.forEach { (name, desc, icon, gradient) ->
                 FeatureCard(
                     name = name,
                     description = desc,
                     icon = icon,
-                    gradient = gradient
+                    gradient = gradient,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -208,7 +214,7 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
                 title = "用药安全提示",
                 subtitle = "请遵医嘱按时服药，如有不适请及时就医",
                 gradientColors = CardGradientOrange,
-                icon = Icons.Default.Notifications
+                icon = Icons.Default.Notifications,
             )
         }
     }
@@ -222,31 +228,36 @@ private fun MedicationCard(
     name: String,
     dosage: String,
     time: String,
-    isTaken: Boolean
+    isTaken: Boolean,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(
-                        if (isTaken) Brush.horizontalGradient(CardGradientGreen)
-                        else Brush.horizontalGradient(CardGradientOrange)
-                    ),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(
+                            if (isTaken) {
+                                Brush.horizontalGradient(CardGradientGreen)
+                            } else {
+                                Brush.horizontalGradient(CardGradientOrange)
+                            },
+                        ),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     Icons.Default.LocalPharmacy,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(24.dp)
+                    modifier = Modifier.size(24.dp),
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
@@ -254,12 +265,12 @@ private fun MedicationCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = "$dosage · $time",
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (isTaken) {
@@ -268,14 +279,14 @@ private fun MedicationCard(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = BrandGreen,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                     Text(
                         text = "已服用",
                         style = MaterialTheme.typography.labelMedium,
                         color = BrandGreen,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier.padding(start = 4.dp),
                     )
                 }
             } else {
@@ -295,22 +306,24 @@ private fun FeatureCard(
     name: String,
     description: String,
     icon: ImageVector,
-    gradient: List<Color>
+    gradient: List<Color>,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
@@ -319,12 +332,12 @@ private fun FeatureCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

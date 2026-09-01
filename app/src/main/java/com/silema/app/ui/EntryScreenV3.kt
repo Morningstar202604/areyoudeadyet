@@ -36,11 +36,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
+import com.silema.app.ui.components.GradientItem
+import com.silema.app.ui.components.MeasureTypeItem
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.BrandBlue
-import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.BrandPurple
-import com.silema.app.ui.theme.BrandWarm
 import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
 import com.silema.app.ui.theme.CardGradientOrange
@@ -59,16 +57,18 @@ import com.silema.app.ui.theme.DataTemp
 @Composable
 fun EntryScreenV3(onClose: () -> Unit = {}) {
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF))
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = AppSpacing.xxl, bottom = 100.dp)
+        contentPadding =
+            androidx.compose.foundation.layout
+                .PaddingValues(top = AppSpacing.xxl, bottom = 100.dp),
     ) {
         // 1. 标题
         item {
@@ -76,12 +76,12 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                 text = "测量数据",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 text = "选择测量方式，记录健康数据",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -91,7 +91,7 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                 title = "PPG 相机测量",
                 subtitle = "使用手机摄像头测量心率和血氧",
                 gradientColors = CardGradientRed,
-                icon = Icons.Default.CameraAlt
+                icon = Icons.Default.CameraAlt,
             )
         }
 
@@ -101,16 +101,17 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                 text = "测量类型",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val measureTypes = listOf(
-                Triple("心率", "测量心率（次/分）", Icons.Default.Favorite, DataHeart, CardGradientRed),
-                Triple("血压", "记录收缩压/舒张压", Icons.Default.MonitorHeart, DataPressure, CardGradientBlue),
-                Triple("血氧", "测量血氧饱和度（%）", Icons.Default.HealthAndSafety, DataOxygen, CardGradientGreen),
-                Triple("体温", "记录体温（℃）", Icons.Default.Thermostat, DataTemp, CardGradientOrange)
-            )
+            val measureTypes =
+                listOf(
+                    MeasureTypeItem("心率", "测量心率（次/分）", Icons.Default.Favorite, DataHeart, CardGradientRed),
+                    MeasureTypeItem("血压", "记录收缩压/舒张压", Icons.Default.MonitorHeart, DataPressure, CardGradientBlue),
+                    MeasureTypeItem("血氧", "测量血氧饱和度（%）", Icons.Default.HealthAndSafety, DataOxygen, CardGradientGreen),
+                    MeasureTypeItem("体温", "记录体温（℃）", Icons.Default.Thermostat, DataTemp, CardGradientOrange),
+                )
 
             measureTypes.forEach { (name, desc, icon, color, gradient) ->
                 MeasureTypeCard(
@@ -118,7 +119,7 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                     description = desc,
                     icon = icon,
                     color = color,
-                    gradient = gradient
+                    gradient = gradient,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -130,23 +131,24 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                 text = "数据来源",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val sources = listOf(
-                Triple("PPG 相机测量", "使用手机摄像头测量", Icons.Default.CameraAlt, CardGradientRed),
-                Triple("手动记录", "手动输入测量数据", Icons.Default.Edit, CardGradientOrange),
-                Triple("蓝牙设备", "连接蓝牙健康设备", Icons.Default.MonitorHeart, CardGradientBlue),
-                Triple("Health Connect", "从系统健康服务同步", Icons.Default.Sync, CardGradientGreen)
-            )
+            val sources =
+                listOf(
+                    GradientItem("PPG 相机测量", "使用手机摄像头测量", Icons.Default.CameraAlt, CardGradientRed),
+                    GradientItem("手动记录", "手动输入测量数据", Icons.Default.Edit, CardGradientOrange),
+                    GradientItem("蓝牙设备", "连接蓝牙健康设备", Icons.Default.MonitorHeart, CardGradientBlue),
+                    GradientItem("Health Connect", "从系统健康服务同步", Icons.Default.Sync, CardGradientGreen),
+                )
 
             sources.forEach { (name, desc, icon, gradient) ->
                 SourceCard(
                     name = name,
                     description = desc,
                     icon = icon,
-                    gradient = gradient
+                    gradient = gradient,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -158,7 +160,7 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
                 title = "测量小贴士",
                 subtitle = "测量前保持安静 5 分钟，坐姿端正，手臂与心脏同高",
                 gradientColors = CardGradientPurple,
-                icon = Icons.Default.HealthAndSafety
+                icon = Icons.Default.HealthAndSafety,
             )
         }
     }
@@ -173,22 +175,24 @@ private fun MeasureTypeCard(
     description: String,
     icon: ImageVector,
     color: Color,
-    gradient: List<Color>
+    gradient: List<Color>,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(28.dp))
             }
@@ -197,12 +201,12 @@ private fun MeasureTypeCard(
                     text = name,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             OutlinedButton(onClick = { /* 开始测量 */ }) {
@@ -220,22 +224,24 @@ private fun SourceCard(
     name: String,
     description: String,
     icon: ImageVector,
-    gradient: List<Color>
+    gradient: List<Color>,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
@@ -244,12 +250,12 @@ private fun SourceCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }

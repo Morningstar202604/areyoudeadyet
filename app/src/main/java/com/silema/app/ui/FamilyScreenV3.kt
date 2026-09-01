@@ -42,7 +42,6 @@ import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
 import com.silema.app.ui.theme.CardGradientBlue
 import com.silema.app.ui.theme.CardGradientGreen
@@ -60,35 +59,37 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
     val contacts by repository.contacts.collectAsState(initial = emptyList())
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF))
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = AppSpacing.xxl, bottom = 100.dp)
+        contentPadding =
+            androidx.compose.foundation.layout
+                .PaddingValues(top = AppSpacing.xxl, bottom = 100.dp),
     ) {
         // 1. 标题
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Text(
                         text = "家人",
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
                         text = "联系家人，共享健康数据",
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 OutlinedButton(onClick = { /* 添加家人 */ }) {
@@ -104,34 +105,35 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
                 text = "快捷联系",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
             GlassCard {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(20.dp),
-                    horizontalArrangement = Arrangement.SpaceEvenly
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(20.dp),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     QuickContactItem(
                         icon = Icons.Default.Phone,
                         label = "语音通话",
                         color = BrandGreen,
-                        gradient = CardGradientGreen
+                        gradient = CardGradientGreen,
                     )
                     QuickContactItem(
                         icon = Icons.Default.VideoCall,
                         label = "视频通话",
                         color = BrandBlue,
-                        gradient = CardGradientBlue
+                        gradient = CardGradientBlue,
                     )
                     QuickContactItem(
                         icon = Icons.Default.Message,
                         label = "发送消息",
                         color = BrandWarm,
-                        gradient = CardGradientOrange
+                        gradient = CardGradientOrange,
                     )
                 }
             }
@@ -143,7 +145,7 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
                 text = "家人列表",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
         }
@@ -152,27 +154,28 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
             item {
                 GlassCard {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(32.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(32.dp),
                         horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
                     ) {
                         Icon(
                             Icons.Default.Phone,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.onSurfaceVariant,
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier.size(56.dp),
                         )
                         Text(
                             text = "暂无家人",
                             style = MaterialTheme.typography.titleLarge,
-                            color = MaterialTheme.colorScheme.onSurface
+                            color = MaterialTheme.colorScheme.onSurface,
                         )
                         Text(
                             text = "点击右上角添加家人，方便随时联系",
                             style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                         )
                     }
                 }
@@ -190,7 +193,7 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
                 title = "家庭健康共享",
                 subtitle = "邀请家人加入，共享健康数据，一起守护老人健康",
                 gradientColors = CardGradientPurple,
-                icon = Icons.Default.Favorite
+                icon = Icons.Default.Favorite,
             )
         }
     }
@@ -204,18 +207,19 @@ private fun QuickContactItem(
     icon: ImageVector,
     label: String,
     color: Color,
-    gradient: List<Color>
+    gradient: List<Color>,
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp),
     ) {
         Box(
-            modifier = Modifier
-                .size(56.dp)
-                .clip(CircleShape)
-                .background(Brush.horizontalGradient(gradient)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Brush.horizontalGradient(gradient)),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(28.dp))
         }
@@ -223,7 +227,7 @@ private fun QuickContactItem(
             text = label,
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurface,
-            fontWeight = FontWeight.Medium
+            fontWeight = FontWeight.Medium,
         )
     }
 }
@@ -238,24 +242,26 @@ private fun FamilyMemberCard(contact: Contact) {
 
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(56.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(56.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Text(
                     text = contact.name.first().toString(),
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = Color.White
+                    color = Color.White,
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
@@ -263,17 +269,17 @@ private fun FamilyMemberCard(contact: Contact) {
                     text = contact.name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
-                    text = contact.relation,
+                    text = contact.relation.ifEmpty { "家人" },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
                 Text(
                     text = contact.phone,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

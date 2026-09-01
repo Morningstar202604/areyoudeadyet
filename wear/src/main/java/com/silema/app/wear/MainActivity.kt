@@ -20,7 +20,6 @@ import timber.log.Timber
  */
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
-
     private var bleVitals: BleVitals? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -38,21 +37,23 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun checkAndRequestPermissions() {
-        val permissions = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-            arrayOf(
-                Manifest.permission.BLUETOOTH_SCAN,
-                Manifest.permission.BLUETOOTH_CONNECT
-            )
-        } else {
-            arrayOf(
-                Manifest.permission.BLUETOOTH,
-                Manifest.permission.BLUETOOTH_ADMIN
-            )
-        }
+        val permissions =
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                arrayOf(
+                    Manifest.permission.BLUETOOTH_SCAN,
+                    Manifest.permission.BLUETOOTH_CONNECT,
+                )
+            } else {
+                arrayOf(
+                    Manifest.permission.BLUETOOTH,
+                    Manifest.permission.BLUETOOTH_ADMIN,
+                )
+            }
 
-        val missingPermissions = permissions.filter {
-            ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
-        }
+        val missingPermissions =
+            permissions.filter {
+                ActivityCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
+            }
 
         if (missingPermissions.isEmpty()) {
             startBleScan()
@@ -65,7 +66,7 @@ class MainActivity : ComponentActivity() {
     override fun onRequestPermissionsResult(
         requestCode: Int,
         permissions: Array<String>,
-        grantResults: IntArray
+        grantResults: IntArray,
     ) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults)
         if (requestCode == 1001 && grantResults.all { it == PackageManager.PERMISSION_GRANTED }) {
@@ -76,12 +77,13 @@ class MainActivity : ComponentActivity() {
     }
 
     private fun startBleScan() {
-        bleVitals = BleVitals(applicationContext).apply {
-            startScan { device ->
-                // 发现设备后自动连接（在 BleVitals 内部处理）
-                Timber.d("Found BLE device: ${device.name ?: "Unknown"}")
+        bleVitals =
+            BleVitals(applicationContext).apply {
+                startScan { device ->
+                    // 发现设备后自动连接（在 BleVitals 内部处理）
+                    Timber.d("Found BLE device: ${device.name ?: "Unknown"}")
+                }
             }
-        }
         Timber.i("BLE scan started")
     }
 

@@ -38,7 +38,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.silema.app.data.RiskLevel
@@ -48,7 +47,6 @@ import com.silema.app.engine.RiskEngine
 import com.silema.app.ui.components.DataTile
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
-import com.silema.app.ui.components.ProgressRing
 import com.silema.app.ui.components.QuickActionButton
 import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.AppSpacing
@@ -64,8 +62,6 @@ import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
 import com.silema.app.ui.theme.DataSleep
 import com.silema.app.ui.theme.DataSteps
-import com.silema.app.ui.theme.HealthGradientHeart
-import com.silema.app.ui.theme.HealthGradientSteps
 import com.silema.app.ui.theme.SosGradient
 import com.silema.app.ui.theme.riskColor
 import com.silema.app.util.TtsController
@@ -94,69 +90,73 @@ fun DashboardScreenV3(
     onGoGuardian: () -> Unit,
     onGoFamily: () -> Unit = {},
     onGoAi: () -> Unit = {},
-    onGoMedical: () -> Unit = {}
+    onGoMedical: () -> Unit = {},
 ) {
     val assessment = remember(records) { RiskEngine.evaluate(records) }
-    val latest = remember(records) {
-        records.groupBy { it.typeId }.mapValues { (_, list) -> list.maxByOrNull { it.timestampMillis } }
-    }
+    val latest =
+        remember(records) {
+            records.groupBy { it.typeId }.mapValues { (_, list) -> list.maxByOrNull { it.timestampMillis } }
+        }
 
-    val dateText = remember {
-        SimpleDateFormat("M月d日 EEEE", Locale.CHINA).format(Date())
-    }
+    val dateText =
+        remember {
+            SimpleDateFormat("M月d日 EEEE", Locale.CHINA).format(Date())
+        }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(
-                        Color(0xFFF1F8E9),
-                        Color(0xFFE8F5E9),
-                        Color(0xFFFFFFFF)
-                    )
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFFF1F8E9),
+                            Color(0xFFE8F5E9),
+                            Color(0xFFFFFFFF),
+                        ),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            top = AppSpacing.xxl,
-            bottom = 100.dp
-        )
+        contentPadding =
+            androidx.compose.foundation.layout.PaddingValues(
+                top = AppSpacing.xxl,
+                bottom = 100.dp,
+            ),
     ) {
         // 1. 顶部问候 + 日期
         item {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column {
                     Text(
                         text = "早上好",
                         style = MaterialTheme.typography.titleLarge,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onBackground
+                        color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
                         text = dateText,
                         style = MaterialTheme.typography.bodyMedium,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 // 头像占位
                 Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .clip(CircleShape)
-                        .background(Brush.linearGradient(CardGradientGreen)),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(48.dp)
+                            .clip(CircleShape)
+                            .background(Brush.linearGradient(CardGradientGreen)),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.HealthAndSafety,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp),
                     )
                 }
             }
@@ -164,18 +164,19 @@ fun DashboardScreenV3(
 
         // 2. 风险评估渐变横幅 + 进度环
         item {
-            val riskGradient = when (assessment.level) {
-                RiskLevel.NORMAL -> CardGradientGreen
-                RiskLevel.WATCH -> listOf(Color(0xFF00ACC1), Color(0xFF4DD0E1))
-                RiskLevel.WARNING -> CardGradientOrange
-                RiskLevel.CRITICAL -> CardGradientRed
-            }
+            val riskGradient =
+                when (assessment.level) {
+                    RiskLevel.NORMAL -> CardGradientGreen
+                    RiskLevel.WATCH -> listOf(Color(0xFF00ACC1), Color(0xFF4DD0E1))
+                    RiskLevel.WARNING -> CardGradientOrange
+                    RiskLevel.CRITICAL -> CardGradientRed
+                }
 
             GradientBanner(
-                title = "健康状态：${assessment.levelText}",
-                subtitle = assessment.summary.takeIf { it.isNotEmpty() } ?: "各项指标正常，继续保持",
+                title = "健康状态：${assessment.level.label}",
+                subtitle = assessment.alerts.firstOrNull()?.problem ?: "各项指标正常，继续保持",
                 gradientColors = riskGradient,
-                icon = Icons.Default.MonitorHeart
+                icon = Icons.Default.MonitorHeart,
             )
         }
 
@@ -185,72 +186,73 @@ fun DashboardScreenV3(
                 text = "核心数据",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val dataTiles = listOf(
-                Triple(
-                    Icons.Default.Favorite,
-                    DataHeart,
+            val dataTiles =
+                listOf(
                     Triple(
-                        latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--",
-                        "次/分",
-                        "心率"
-                    )
-                ),
-                Triple(
-                    Icons.Default.MonitorHeart,
-                    DataPressure,
+                        Icons.Default.Favorite,
+                        DataHeart,
+                        Triple(
+                            latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--",
+                            "次/分",
+                            "心率",
+                        ),
+                    ),
                     Triple(
-                        latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--",
-                        "mmHg",
-                        "血压"
-                    )
-                ),
-                Triple(
-                    Icons.Default.HealthAndSafety,
-                    DataOxygen,
+                        Icons.Default.MonitorHeart,
+                        DataPressure,
+                        Triple(
+                            latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--",
+                            "mmHg",
+                            "血压",
+                        ),
+                    ),
                     Triple(
-                        latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
-                        "%",
-                        "血氧"
-                    )
-                ),
-                Triple(
-                    Icons.Default.DirectionsWalk,
-                    DataSteps,
+                        Icons.Default.HealthAndSafety,
+                        DataOxygen,
+                        Triple(
+                            latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
+                            "%",
+                            "血氧",
+                        ),
+                    ),
                     Triple(
-                        latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
-                        "步",
-                        "步数"
-                    )
-                ),
-                Triple(
-                    Icons.Default.NightsStay,
-                    DataSleep,
+                        Icons.Default.DirectionsWalk,
+                        DataSteps,
+                        Triple(
+                            latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
+                            "步",
+                            "步数",
+                        ),
+                    ),
                     Triple(
-                        latest[VitalType.SLEEP.id]?.value?.toInt()?.toString() ?: "--",
-                        "小时",
-                        "睡眠"
-                    )
-                ),
-                Triple(
-                    Icons.Default.LocalFireDepartment,
-                    BrandWarm,
+                        Icons.Default.NightsStay,
+                        DataSleep,
+                        Triple(
+                            latest[VitalType.SLEEP.id]?.value?.toInt()?.toString() ?: "--",
+                            "小时",
+                            "睡眠",
+                        ),
+                    ),
                     Triple(
-                        latest[VitalType.TEMPERATURE.id]?.value?.toString() ?: "--",
-                        "℃",
-                        "体温"
-                    )
+                        Icons.Default.LocalFireDepartment,
+                        BrandWarm,
+                        Triple(
+                            latest[VitalType.TEMPERATURE.id]?.value?.toString() ?: "--",
+                            "℃",
+                            "体温",
+                        ),
+                    ),
                 )
-            )
 
             LazyVerticalGrid(
                 columns = GridCells.Fixed(2),
                 modifier = Modifier.height(420.dp),
                 horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
-                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                verticalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             ) {
                 items(dataTiles) { (icon, color, data) ->
                     DataTile(
@@ -259,7 +261,7 @@ fun DashboardScreenV3(
                         value = data.first,
                         unit = data.second,
                         label = data.third,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -271,73 +273,74 @@ fun DashboardScreenV3(
                 text = "快速操作",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
             GlassCard {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(AppSpacing.lg),
-                    verticalArrangement = Arrangement.spacedBy(AppSpacing.lg)
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(AppSpacing.lg),
+                    verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
                 ) {
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         QuickActionButton(
                             label = "测心率",
                             icon = Icons.Default.Favorite,
                             color = DataHeart,
-                            onClick = onGoEntry
+                            onClick = onGoEntry,
                         )
                         QuickActionButton(
                             label = "设备",
                             icon = Icons.Default.MonitorHeart,
                             color = BrandBlue,
-                            onClick = onGoDevices
+                            onClick = onGoDevices,
                         )
                         QuickActionButton(
                             label = "运动",
                             icon = Icons.Default.DirectionsWalk,
                             color = DataSteps,
-                            onClick = onGoWorkout
+                            onClick = onGoWorkout,
                         )
                         QuickActionButton(
                             label = "家人",
                             icon = Icons.Default.Phone,
                             color = BrandPurple,
-                            onClick = onGoFamily
+                            onClick = onGoFamily,
                         )
                     }
                     Row(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceEvenly
+                        horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         QuickActionButton(
                             label = "报告",
                             icon = Icons.Default.DateRange,
                             color = BrandGreen,
-                            onClick = onGoMedical
+                            onClick = onGoMedical,
                         )
                         QuickActionButton(
                             label = "AI 分析",
                             icon = Icons.Default.TrendingUp,
                             color = BrandPurple,
-                            onClick = onGoAi
+                            onClick = onGoAi,
                         )
                         QuickActionButton(
                             label = "守护",
                             icon = Icons.Default.HealthAndSafety,
                             color = BrandBlue,
-                            onClick = onGoGuardian
+                            onClick = onGoGuardian,
                         )
                         QuickActionButton(
                             label = "SOS",
                             icon = Icons.Default.Sos,
                             color = Color(0xFFE53935),
-                            onClick = onGoSos
+                            onClick = onGoSos,
                         )
                     }
                 }
@@ -351,7 +354,7 @@ fun DashboardScreenV3(
                 subtitle = "一键呼叫紧急联系人，同时发送位置信息",
                 gradientColors = SosGradient,
                 icon = Icons.Default.Sos,
-                onClick = onGoSos
+                onClick = onGoSos,
             )
         }
 
@@ -362,57 +365,62 @@ fun DashboardScreenV3(
                     text = "最近记录",
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onBackground
+                    color = MaterialTheme.colorScheme.onBackground,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-                val recentRecords = records
-                    .sortedByDescending { it.timestampMillis }
-                    .take(5)
+                val recentRecords =
+                    records
+                        .sortedByDescending { it.timestampMillis }
+                        .take(5)
 
                 GlassCard {
                     Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(AppSpacing.md)
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(AppSpacing.md),
                     ) {
                         recentRecords.forEach { record ->
                             Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = AppSpacing.sm),
+                                modifier =
+                                    Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = AppSpacing.sm),
                                 horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
+                                verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Row(
                                     horizontalArrangement = Arrangement.spacedBy(AppSpacing.md),
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .clip(AppShapes.small)
-                                            .background(riskColor(assessment.level).copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
+                                        modifier =
+                                            Modifier
+                                                .size(36.dp)
+                                                .clip(AppShapes.small)
+                                                .background(riskColor(assessment.level).copy(alpha = 0.15f)),
+                                        contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
                                             imageVector = Icons.Default.Favorite,
                                             contentDescription = null,
                                             tint = riskColor(assessment.level),
-                                            modifier = Modifier.size(20.dp)
+                                            modifier = Modifier.size(20.dp),
                                         )
                                     }
                                     Column {
                                         Text(
                                             text = record.type?.displayName ?: record.typeId,
                                             style = MaterialTheme.typography.bodyMedium,
-                                            fontWeight = FontWeight.Medium
+                                            fontWeight = FontWeight.Medium,
                                         )
                                         Text(
-                                            text = SimpleDateFormat("MM-dd HH:mm", Locale.CHINA)
-                                                .format(Date(record.timestampMillis)),
+                                            text =
+                                                SimpleDateFormat("MM-dd HH:mm", Locale.CHINA)
+                                                    .format(Date(record.timestampMillis)),
                                             style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
                                         )
                                     }
                                 }
@@ -420,7 +428,7 @@ fun DashboardScreenV3(
                                     text = "${record.value.toInt()} ${record.type?.unit ?: ""}",
                                     style = MaterialTheme.typography.titleMedium,
                                     fontWeight = FontWeight.Bold,
-                                    color = MaterialTheme.colorScheme.onSurface
+                                    color = MaterialTheme.colorScheme.onSurface,
                                 )
                             }
                         }

@@ -10,10 +10,11 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
 }
 
-val keystoreProps = Properties().apply {
-    val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}
+val keystoreProps =
+    Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
 
 android {
     namespace = "com.silema.app.wear"
@@ -21,7 +22,7 @@ android {
 
     defaultConfig {
         applicationId = "com.silema.app.wear"
-        minSdk = 30   // Wear OS 3+（API 30）
+        minSdk = 30 // Wear OS 3+（API 30）
         targetSdk = 34
         versionCode = 5
         versionName = "0.5.0"
@@ -48,7 +49,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             if (keystoreProps.isNotEmpty()) {
                 signingConfig = signingConfigs.getByName("release")

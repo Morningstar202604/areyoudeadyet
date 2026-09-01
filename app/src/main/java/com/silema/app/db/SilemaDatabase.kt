@@ -24,16 +24,17 @@ import com.silema.app.db.entity.WorkoutEntity
     entities = [
         VitalRecordEntity::class,
         ContactEntity::class,
-        WorkoutEntity::class
+        WorkoutEntity::class,
     ],
     version = 1,
-    exportSchema = true
+    exportSchema = true,
 )
 @TypeConverters(Converters::class)
 abstract class SilemaDatabase : RoomDatabase() {
-
     abstract fun vitalRecordDao(): VitalRecordDao
+
     abstract fun contactDao(): ContactDao
+
     abstract fun workoutDao(): WorkoutDao
 
     companion object {

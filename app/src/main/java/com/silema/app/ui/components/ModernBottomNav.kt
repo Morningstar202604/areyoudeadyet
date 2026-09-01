@@ -9,14 +9,10 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -32,7 +28,6 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import com.silema.app.ui.theme.AppElevation
 import com.silema.app.ui.theme.AppShapes
 
 /**
@@ -50,67 +45,71 @@ fun ModernBottomNav(
     items: List<BottomNavItem>,
     currentRoute: String,
     onItemClick: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 16.dp, vertical = 12.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 12.dp),
     ) {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(AppShapes.banner)
-                .background(MaterialTheme.colorScheme.surface)
-                .padding(horizontal = 8.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .clip(AppShapes.banner)
+                    .background(MaterialTheme.colorScheme.surface)
+                    .padding(horizontal = 8.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             items.forEach { item ->
                 val isSelected = currentRoute == item.route
                 val iconColor by animateColorAsState(
                     targetValue = if (isSelected) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
                     animationSpec = tween(durationMillis = 300),
-                    label = "navIconColor"
+                    label = "navIconColor",
                 )
                 val textColor by animateColorAsState(
                     targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
                     animationSpec = tween(durationMillis = 300),
-                    label = "navTextColor"
+                    label = "navTextColor",
                 )
 
                 Column(
-                    modifier = Modifier
-                        .clip(AppShapes.card)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null
-                        ) { onItemClick(item.route) }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    modifier =
+                        Modifier
+                            .clip(AppShapes.card)
+                            .clickable(
+                                interactionSource = remember { MutableInteractionSource() },
+                                indication = null,
+                            ) { onItemClick(item.route) }
+                            .padding(horizontal = 12.dp, vertical = 8.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     // 选中项的渐变背景
                     if (isSelected) {
                         Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.primary,
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
+                            modifier =
+                                Modifier
+                                    .size(40.dp)
+                                    .clip(CircleShape)
+                                    .background(
+                                        Brush.horizontalGradient(
+                                            listOf(
+                                                MaterialTheme.colorScheme.primary,
+                                                MaterialTheme.colorScheme.primary.copy(alpha = 0.7f),
+                                            ),
+                                        ),
+                                    ),
+                            contentAlignment = Alignment.Center,
                         ) {
                             Icon(
                                 imageVector = item.icon,
                                 contentDescription = item.label,
                                 tint = iconColor,
-                                modifier = Modifier.size(22.dp)
+                                modifier = Modifier.size(22.dp),
                             )
                         }
                     } else {
@@ -118,7 +117,7 @@ fun ModernBottomNav(
                             imageVector = item.icon,
                             contentDescription = item.label,
                             tint = iconColor,
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(24.dp),
                         )
                     }
 
@@ -127,7 +126,7 @@ fun ModernBottomNav(
                         style = MaterialTheme.typography.labelMedium,
                         color = textColor,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 12.sp
+                        fontSize = 12.sp,
                     )
                 }
             }
@@ -141,5 +140,5 @@ fun ModernBottomNav(
 data class BottomNavItem(
     val route: String,
     val label: String,
-    val icon: ImageVector
+    val icon: ImageVector,
 )

@@ -23,11 +23,15 @@ private data class WearStoreFile(
     val version: Int = 1,
     val exportedAt: Long = System.currentTimeMillis(),
     val records: List<VitalRecord> = emptyList(),
-    val workouts: List<Workout> = emptyList()
+    val workouts: List<Workout> = emptyList(),
 )
 
 object WearStore {
-    private val json = Json { ignoreUnknownKeys = true; prettyPrint = true }
+    private val json =
+        Json {
+            ignoreUnknownKeys = true
+            prettyPrint = true
+        }
     private val lock = Any()
     private lateinit var dataFile: File
 
@@ -59,9 +63,9 @@ object WearStore {
                             version = 1,
                             exportedAt = System.currentTimeMillis(),
                             records = _records.value,
-                            workouts = _workouts.value
-                        )
-                    )
+                            workouts = _workouts.value,
+                        ),
+                    ),
                 )
             }
         }
@@ -74,10 +78,14 @@ object WearStore {
         save()
     }
 
-    fun removeRecord(typeId: String, timestampMillis: Long) {
-        _records.value = _records.value.filterNot {
-            it.typeId == typeId && it.timestampMillis == timestampMillis
-        }
+    fun removeRecord(
+        typeId: String,
+        timestampMillis: Long,
+    ) {
+        _records.value =
+            _records.value.filterNot {
+                it.typeId == typeId && it.timestampMillis == timestampMillis
+            }
         save()
     }
 
@@ -105,38 +113,35 @@ object WearStore {
     /**
      * 导出全部数据为 JSON 字符串，用于备份或与手机端同步。
      */
-    fun exportToJson(): String {
-        return json.encodeToString(
+    fun exportToJson(): String =
+        json.encodeToString(
             WearStoreFile(
                 version = 1,
                 exportedAt = System.currentTimeMillis(),
                 records = _records.value,
-                workouts = _workouts.value
-            )
+                workouts = _workouts.value,
+            ),
         )
-    }
 
     /**
      * 从 JSON 字符串导入数据，导入前清空现有数据。
      *
      * @return 导入是否成功
      */
-    fun importFromJson(jsonString: String): Boolean {
-        return runCatching {
+    fun importFromJson(jsonString: String): Boolean =
+        runCatching {
             val data = json.decodeFromString<WearStoreFile>(jsonString)
             _records.value = data.records
             _workouts.value = data.workouts
             save()
             true
         }.getOrDefault(false)
-    }
 
     /**
      * 获取指定类型的最新一条记录。
      */
-    fun latestOfType(typeId: String): VitalRecord? {
-        return _records.value
+    fun latestOfType(typeId: String): VitalRecord? =
+        _records.value
             .filter { it.typeId == typeId }
             .maxByOrNull { it.timestampMillis }
-    }
 }

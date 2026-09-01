@@ -14,7 +14,6 @@ import kotlin.math.abs
  * 功能特性测试：压力指数、Haversine 距离、周报对比。
  */
 class FeaturesTest {
-
     private val now = System.currentTimeMillis()
 
     // ---------- 1. 压力指数 ----------
@@ -78,9 +77,10 @@ class FeaturesTest {
             records += VitalRecord(VitalType.SLEEP.id, 8.0, ts, VitalSource.MANUAL)
         }
 
-        val workouts = listOf(
-            Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList())
-        )
+        val workouts =
+            listOf(
+                Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList()),
+            )
 
         val report = HealthReport.weekly(records, workouts, now, 2)
         val hr = report.metrics.firstOrNull { it.type == VitalType.HEART_RATE }
@@ -106,9 +106,10 @@ class FeaturesTest {
 
     @Test
     fun `周报运动统计正确`() {
-        val workouts = listOf(
-            Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList())
-        )
+        val workouts =
+            listOf(
+                Workout("w1", "walk", now - 86_400_000L, 1_800_000L, 2000.0, 68.7, emptyList()),
+            )
         val report = HealthReport.weekly(emptyList(), workouts, now, 2)
         assertEquals(1, report.workoutCount)
         assertEquals(2.0, report.workoutKm, 0.01)

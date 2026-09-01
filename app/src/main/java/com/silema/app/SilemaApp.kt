@@ -24,10 +24,11 @@ class SilemaApp : Application() {
             Timber.plant(Timber.DebugTree())
         }
         // 触发 AppRepository 首次创建（@Singleton 懒加载，通过 EntryPoint 获取实例触发初始化）
-        val entryPoint = EntryPointAccessors.fromApplication(
-            this,
-            AppRepositoryEntryPoint::class.java
-        )
+        val entryPoint =
+            EntryPointAccessors.fromApplication(
+                this,
+                AppRepositoryEntryPoint::class.java,
+            )
         entryPoint.appRepository() // 触发初始化（Room 订阅 + JSON 迁移）
         // 创建通知渠道（测量提醒、久坐提醒）
         Reminders.ensureChannel(this)

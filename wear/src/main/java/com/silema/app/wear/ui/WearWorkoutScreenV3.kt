@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.DirectionsWalk
@@ -45,26 +44,28 @@ import androidx.wear.compose.material.Text
 @Composable
 fun WearWorkoutScreenV3(
     onStart: () -> Unit = {},
-    onPause: () -> Unit = {}
+    onPause: () -> Unit = {},
 ) {
     var isRunning by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB))
-                )
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF1A237E), Color(0xFF283593), Color(0xFF3949AB)),
+                    ),
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // 标题
             Text(
@@ -72,7 +73,7 @@ fun WearWorkoutScreenV3(
                 style = MaterialTheme.typography.title2,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             // 运动状态
@@ -80,13 +81,13 @@ fun WearWorkoutScreenV3(
                 text = if (isRunning) "运动中" else "准备开始",
                 style = MaterialTheme.typography.body2,
                 color = if (isRunning) Color(0xFF69F0AE) else Color.White.copy(alpha = 0.7f),
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
 
             // 数据网格 2x2
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 WorkoutDataItem(
                     icon = Icons.Default.DirectionsWalk,
@@ -94,7 +95,7 @@ fun WearWorkoutScreenV3(
                     unit = "步",
                     label = "步数",
                     color = Color(0xFF69F0AE),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 WorkoutDataItem(
                     icon = Icons.Default.Favorite,
@@ -102,12 +103,12 @@ fun WearWorkoutScreenV3(
                     unit = "bpm",
                     label = "心率",
                     color = Color(0xFFFF80AB),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
             ) {
                 WorkoutDataItem(
                     icon = Icons.Default.LocalFireDepartment,
@@ -115,7 +116,7 @@ fun WearWorkoutScreenV3(
                     unit = "kcal",
                     label = "卡路里",
                     color = Color(0xFFFFAB40),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
                 WorkoutDataItem(
                     icon = Icons.Default.Timer,
@@ -123,7 +124,7 @@ fun WearWorkoutScreenV3(
                     unit = "",
                     label = "时长",
                     color = Color(0xFF80D8FF),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
                 )
             }
 
@@ -135,18 +136,20 @@ fun WearWorkoutScreenV3(
                     isRunning = !isRunning
                     if (isRunning) onStart() else onPause()
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(48.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = if (isRunning) Color(0xFFFF5252) else Color(0xFF69F0AE),
-                    contentColor = Color(0xFF1A237E)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = if (isRunning) Color(0xFFFF5252) else Color(0xFF69F0AE),
+                        contentColor = Color(0xFF1A237E),
+                    ),
             ) {
                 Text(
                     text = if (isRunning) "暂停" else "开始运动",
                     style = MaterialTheme.typography.button,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
         }
@@ -163,47 +166,48 @@ private fun WorkoutDataItem(
     unit: String,
     label: String,
     color: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(12.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .padding(8.dp),
-        contentAlignment = Alignment.Center
+        modifier =
+            modifier
+                .clip(RoundedCornerShape(12.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .padding(8.dp),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            verticalArrangement = Arrangement.spacedBy(2.dp),
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = color,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(14.dp),
             )
             Row(
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(1.dp)
+                horizontalArrangement = Arrangement.spacedBy(1.dp),
             ) {
                 Text(
                     text = value,
                     style = MaterialTheme.typography.body1,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
                 if (unit.isNotEmpty()) {
                     Text(
                         text = unit,
                         style = MaterialTheme.typography.caption3,
-                        color = Color.White.copy(alpha = 0.6f)
+                        color = Color.White.copy(alpha = 0.6f),
                     )
                 }
             }
             Text(
                 text = label,
                 style = MaterialTheme.typography.caption3,
-                color = Color.White.copy(alpha = 0.5f)
+                color = Color.White.copy(alpha = 0.5f),
             )
         }
     }

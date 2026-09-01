@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -30,9 +29,6 @@ import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import com.silema.app.ui.theme.AppShapes
-import com.silema.app.ui.theme.AppSpacing
 
 /**
  * 趋势图组件（折线图 + 渐变填充）。
@@ -48,7 +44,7 @@ fun TrendChart(
     gradientColors: List<Color>? = null,
     showFill: Boolean = true,
     showDots: Boolean = true,
-    height: Int = 120
+    height: Int = 120,
 ) {
     if (data.isEmpty()) return
 
@@ -59,16 +55,17 @@ fun TrendChart(
     val animatedProgress by animateFloatAsState(
         targetValue = 1f,
         animationSpec = tween(durationMillis = 800),
-        label = "trendChart"
+        label = "trendChart",
     )
 
     val lineGradient = gradientColors ?: listOf(color, color.copy(alpha = 0.6f))
     val fillGradient = gradientColors ?: listOf(color.copy(alpha = 0.3f), color.copy(alpha = 0.05f))
 
     Canvas(
-        modifier = modifier
-            .fillMaxWidth()
-            .height(height.dp)
+        modifier =
+            modifier
+                .fillMaxWidth()
+                .height(height.dp),
     ) {
         val path = Path()
         val fillPath = Path()
@@ -92,12 +89,12 @@ fun TrendChart(
                 drawCircle(
                     color = Color.White,
                     radius = 4.dp.toPx(),
-                    center = Offset(x, y)
+                    center = Offset(x, y),
                 )
                 drawCircle(
                     color = color,
                     radius = 3.dp.toPx(),
-                    center = Offset(x, y)
+                    center = Offset(x, y),
                 )
             }
         }
@@ -108,7 +105,7 @@ fun TrendChart(
             fillPath.close()
             drawPath(
                 path = fillPath,
-                brush = Brush.verticalGradient(fillGradient)
+                brush = Brush.verticalGradient(fillGradient),
             )
         }
 
@@ -116,7 +113,7 @@ fun TrendChart(
         drawPath(
             path = path,
             brush = Brush.linearGradient(lineGradient),
-            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round)
+            style = Stroke(width = 3.dp.toPx(), cap = StrokeCap.Round),
         )
     }
 }
@@ -133,7 +130,7 @@ fun BarChart(
     modifier: Modifier = Modifier,
     color: Color = Color(0xFF00A86B),
     gradientColors: List<Color>? = null,
-    height: Int = 120
+    height: Int = 120,
 ) {
     if (data.isEmpty()) return
 
@@ -144,38 +141,40 @@ fun BarChart(
     Column(modifier = modifier) {
         // 柱状图区域
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(height.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .height(height.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
-            verticalAlignment = Alignment.Bottom
+            verticalAlignment = Alignment.Bottom,
         ) {
             data.forEach { (label, value) ->
                 val barHeight = (value / max) * height
                 val animatedHeight by animateFloatAsState(
                     targetValue = barHeight,
                     animationSpec = tween(durationMillis = 600),
-                    label = "barChart_$label"
+                    label = "barChart_$label",
                 )
 
                 Column(
                     horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                    verticalArrangement = Arrangement.spacedBy(4.dp),
                 ) {
                     // 数值
                     Text(
                         text = value.toInt().toString(),
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.onSurface,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     // 柱子
                     Box(
-                        modifier = Modifier
-                            .width(24.dp)
-                            .height(animatedHeight.dp)
-                            .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
-                            .background(Brush.verticalGradient(barGradient))
+                        modifier =
+                            Modifier
+                                .width(24.dp)
+                                .height(animatedHeight.dp)
+                                .clip(RoundedCornerShape(topStart = 6.dp, topEnd = 6.dp))
+                                .background(Brush.verticalGradient(barGradient)),
                     )
                 }
             }
@@ -184,13 +183,13 @@ fun BarChart(
         // 标签
         Row(
             modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.SpaceEvenly
+            horizontalArrangement = Arrangement.SpaceEvenly,
         ) {
             data.forEach { (label, _) ->
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
         }
@@ -211,33 +210,34 @@ fun DataCardWithChart(
     trendColor: Color,
     chartData: List<Float>,
     chartColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     GlassCard(modifier = modifier) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 标题行
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 if (trend != null) {
                     Text(
                         text = trend,
                         style = MaterialTheme.typography.labelMedium,
                         color = trendColor,
-                        fontWeight = FontWeight.SemiBold
+                        fontWeight = FontWeight.SemiBold,
                     )
                 }
             }
@@ -245,19 +245,19 @@ fun DataCardWithChart(
             // 数值行
             Row(
                 verticalAlignment = Alignment.Bottom,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                horizontalArrangement = Arrangement.spacedBy(4.dp),
             ) {
                 Text(
                     text = value,
                     style = MaterialTheme.typography.displaySmall,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(bottom = 6.dp)
+                    modifier = Modifier.padding(bottom = 6.dp),
                 )
             }
 
@@ -265,7 +265,7 @@ fun DataCardWithChart(
             TrendChart(
                 data = chartData,
                 color = chartColor,
-                height = 80
+                height = 80,
             )
         }
     }

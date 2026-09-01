@@ -50,24 +50,26 @@ val LevelWatch = Color(0xFF00ACC1)
 val LevelWarning = Color(0xFFFF8F00)
 val LevelCritical = Color(0xFFE53935)
 
-fun riskColor(level: com.silema.app.data.RiskLevel): Color = when (level) {
-    com.silema.app.data.RiskLevel.NORMAL -> LevelNormal
-    com.silema.app.data.RiskLevel.WATCH -> LevelWatch
-    com.silema.app.data.RiskLevel.WARNING -> LevelWarning
-    com.silema.app.data.RiskLevel.CRITICAL -> LevelCritical
-}
+fun riskColor(level: com.silema.app.data.RiskLevel): Color =
+    when (level) {
+        com.silema.app.data.RiskLevel.NORMAL -> LevelNormal
+        com.silema.app.data.RiskLevel.WATCH -> LevelWatch
+        com.silema.app.data.RiskLevel.WARNING -> LevelWarning
+        com.silema.app.data.RiskLevel.CRITICAL -> LevelCritical
+    }
 
 val LevelNormalSoft = Color(0xFFE0F2F1)
 val LevelWatchSoft = Color(0xFFE0F7FA)
 val LevelWarningSoft = Color(0xFFFFF3E0)
 val LevelCriticalSoft = Color(0xFFFFEBEE)
 
-fun riskSoft(level: com.silema.app.data.RiskLevel): Color = when (level) {
-    com.silema.app.data.RiskLevel.NORMAL -> LevelNormalSoft
-    com.silema.app.data.RiskLevel.WATCH -> LevelWatchSoft
-    com.silema.app.data.RiskLevel.WARNING -> LevelWarningSoft
-    com.silema.app.data.RiskLevel.CRITICAL -> LevelCriticalSoft
-}
+fun riskSoft(level: com.silema.app.data.RiskLevel): Color =
+    when (level) {
+        com.silema.app.data.RiskLevel.NORMAL -> LevelNormalSoft
+        com.silema.app.data.RiskLevel.WATCH -> LevelWatchSoft
+        com.silema.app.data.RiskLevel.WARNING -> LevelWarningSoft
+        com.silema.app.data.RiskLevel.CRITICAL -> LevelCriticalSoft
+    }
 
 // ── 渐变色组 ──
 val CardGradientGreen = listOf(Color(0xFF00A86B), Color(0xFF66BB6A))
@@ -121,94 +123,110 @@ object AppElevation {
 }
 
 // ── 适老化排版 ──
-private val ElderTypography = Typography(
-    displayLarge = TextStyle(fontSize = 36.sp, fontWeight = FontWeight.Bold, lineHeight = 44.sp, letterSpacing = (-0.5).sp),
-    headlineLarge = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 38.sp, letterSpacing = (-0.5).sp),
-    headlineMedium = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp),
-    headlineSmall = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.SemiBold, lineHeight = 30.sp),
-    titleLarge = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold, lineHeight = 28.sp),
-    titleMedium = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, lineHeight = 26.sp),
-    titleSmall = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
-    bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 26.sp),
-    bodyMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
-    bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-    labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, lineHeight = 22.sp),
-    labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-    labelSmall = TextStyle(fontSize = 12.sp, lineHeight = 16.sp)
-)
+private val ElderTypography =
+    Typography(
+        displayLarge =
+            TextStyle(
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 44.sp,
+                letterSpacing = (-0.5).sp,
+            ),
+        headlineLarge =
+            TextStyle(
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 38.sp,
+                letterSpacing = (-0.5).sp,
+            ),
+        headlineMedium = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp),
+        headlineSmall = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.SemiBold, lineHeight = 30.sp),
+        titleLarge = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold, lineHeight = 28.sp),
+        titleMedium = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, lineHeight = 26.sp),
+        titleSmall = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
+        bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 26.sp),
+        bodyMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
+        bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
+        labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, lineHeight = 22.sp),
+        labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
+        labelSmall = TextStyle(fontSize = 12.sp, lineHeight = 16.sp),
+    )
 
-private val LightColors: ColorScheme = lightColorScheme(
-    primary = BrandGreen,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE0F2F1),
-    onPrimaryContainer = Color(0xFF004D40),
-    secondary = BrandWarm,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFFFF3E0),
-    onSecondaryContainer = Color(0xFFE65100),
-    tertiary = BrandBlue,
-    onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFE8EAF6),
-    onTertiaryContainer = Color(0xFF1A237E),
-    background = GradientWarmStart,
-    onBackground = Color(0xFF1B1B1B),
-    surface = Color.White,
-    onSurface = Color(0xFF1B1B1B),
-    surfaceVariant = Color(0xFFF5F5F5),
-    onSurfaceVariant = Color(0xFF49454F),
-    outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0),
-    error = BrandSoftRed,
-    onError = Color.White,
-    errorContainer = Color(0xFFFFEBEE),
-    onErrorContainer = Color(0xFFB71C1C),
-    inverseSurface = Color(0xFF313033),
-    inverseOnSurface = Color(0xFFF3EFF4),
-    inversePrimary = Color(0xFF69F0AE)
-)
+private val LightColors: ColorScheme =
+    lightColorScheme(
+        primary = BrandGreen,
+        onPrimary = Color.White,
+        primaryContainer = Color(0xFFE0F2F1),
+        onPrimaryContainer = Color(0xFF004D40),
+        secondary = BrandWarm,
+        onSecondary = Color.White,
+        secondaryContainer = Color(0xFFFFF3E0),
+        onSecondaryContainer = Color(0xFFE65100),
+        tertiary = BrandBlue,
+        onTertiary = Color.White,
+        tertiaryContainer = Color(0xFFE8EAF6),
+        onTertiaryContainer = Color(0xFF1A237E),
+        background = GradientWarmStart,
+        onBackground = Color(0xFF1B1B1B),
+        surface = Color.White,
+        onSurface = Color(0xFF1B1B1B),
+        surfaceVariant = Color(0xFFF5F5F5),
+        onSurfaceVariant = Color(0xFF49454F),
+        outline = Color(0xFF79747E),
+        outlineVariant = Color(0xFFCAC4D0),
+        error = BrandSoftRed,
+        onError = Color.White,
+        errorContainer = Color(0xFFFFEBEE),
+        onErrorContainer = Color(0xFFB71C1C),
+        inverseSurface = Color(0xFF313033),
+        inverseOnSurface = Color(0xFFF3EFF4),
+        inversePrimary = Color(0xFF69F0AE),
+    )
 
-private val DarkColors: ColorScheme = darkColorScheme(
-    primary = Color(0xFF69F0AE),
-    onPrimary = Color(0xFF004D40),
-    primaryContainer = Color(0xFF00695C),
-    onPrimaryContainer = Color(0xFFB2DFDB),
-    secondary = Color(0xFFFFAB40),
-    onSecondary = Color(0xFFE65100),
-    secondaryContainer = Color(0xFFBF360C),
-    onSecondaryContainer = Color(0xFFFFE0B2),
-    tertiary = Color(0xFF9FA8DA),
-    onTertiary = Color(0xFF1A237E),
-    tertiaryContainer = Color(0xFF283593),
-    onTertiaryContainer = Color(0xFFC5CAE9),
-    background = Color(0xFF121212),
-    onBackground = Color(0xFFE0E0E0),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE0E0E0),
-    surfaceVariant = Color(0xFF2D2D2D),
-    onSurfaceVariant = Color(0xFFBDBDBD),
-    outline = Color(0xFF757575),
-    outlineVariant = Color(0xFF424242),
-    error = Color(0xFFEF5350),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    inverseSurface = Color(0xFFE0E0E0),
-    inverseOnSurface = Color(0xFF121212),
-    inversePrimary = Color(0xFF00695C)
-)
+private val DarkColors: ColorScheme =
+    darkColorScheme(
+        primary = Color(0xFF69F0AE),
+        onPrimary = Color(0xFF004D40),
+        primaryContainer = Color(0xFF00695C),
+        onPrimaryContainer = Color(0xFFB2DFDB),
+        secondary = Color(0xFFFFAB40),
+        onSecondary = Color(0xFFE65100),
+        secondaryContainer = Color(0xFFBF360C),
+        onSecondaryContainer = Color(0xFFFFE0B2),
+        tertiary = Color(0xFF9FA8DA),
+        onTertiary = Color(0xFF1A237E),
+        tertiaryContainer = Color(0xFF283593),
+        onTertiaryContainer = Color(0xFFC5CAE9),
+        background = Color(0xFF121212),
+        onBackground = Color(0xFFE0E0E0),
+        surface = Color(0xFF1E1E1E),
+        onSurface = Color(0xFFE0E0E0),
+        surfaceVariant = Color(0xFF2D2D2D),
+        onSurfaceVariant = Color(0xFFBDBDBD),
+        outline = Color(0xFF757575),
+        outlineVariant = Color(0xFF424242),
+        error = Color(0xFFEF5350),
+        onError = Color(0xFF690005),
+        errorContainer = Color(0xFF93000A),
+        onErrorContainer = Color(0xFFFFDAD6),
+        inverseSurface = Color(0xFFE0E0E0),
+        inverseOnSurface = Color(0xFF121212),
+        inversePrimary = Color(0xFF00695C),
+    )
 
 @Composable
 fun SilemaTheme(content: @Composable () -> Unit) {
     MaterialTheme(
         colorScheme = if (isSystemInDarkTheme()) DarkColors else LightColors,
         typography = ElderTypography,
-        shapes = androidx.compose.material3.Shapes(
-            extraSmall = AppShapes.small,
-            small = AppShapes.small,
-            medium = AppShapes.chip,
-            large = AppShapes.card,
-            extraLarge = AppShapes.banner
-        ),
-        content = content
+        shapes =
+            androidx.compose.material3.Shapes(
+                extraSmall = AppShapes.small,
+                small = AppShapes.small,
+                medium = AppShapes.chip,
+                large = AppShapes.card,
+                extraLarge = AppShapes.banner,
+            ),
+        content = content,
     )
 }

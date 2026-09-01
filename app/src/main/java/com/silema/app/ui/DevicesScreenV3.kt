@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Bluetooth
@@ -24,8 +23,6 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.MonitorHeart
 import androidx.compose.material.icons.filled.Sync
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedButton
@@ -42,11 +39,11 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalType
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.GlassCard
-import com.silema.app.ui.components.GradientBanner
+import com.silema.app.ui.components.GradientItem
+import com.silema.app.ui.components.IconItem
 import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
@@ -69,21 +66,24 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
     val repository = rememberAppRepository()
     val records by repository.records.collectAsState(initial = emptyList())
 
-    val latest = remember(records) {
-        records.groupBy { it.typeId }.mapValues { (_, list) -> list.maxByOrNull { it.timestampMillis } }
-    }
+    val latest =
+        remember(records) {
+            records.groupBy { it.typeId }.mapValues { (_, list) -> list.maxByOrNull { it.timestampMillis } }
+        }
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF))
-                )
-            )
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
+                    ),
+                ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(top = AppSpacing.xxl, bottom = 100.dp)
+        contentPadding =
+            androidx.compose.foundation.layout
+                .PaddingValues(top = AppSpacing.xxl, bottom = 100.dp),
     ) {
         // 1. 标题
         item {
@@ -91,12 +91,12 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                 text = "设备管理",
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
                 text = "连接健康设备，自动同步测量数据",
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
 
@@ -106,20 +106,53 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                 text = "最近测量",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val dataItems = listOf(
-                Triple(Icons.Default.Favorite, DataHeart, Triple(latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--", "次/分", "心率")),
-                Triple(Icons.Default.MonitorHeart, DataPressure, Triple(latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--", "mmHg", "血压")),
-                Triple(Icons.Default.HealthAndSafety, DataOxygen, Triple(latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--", "%", "血氧")),
-                Triple(Icons.Default.DirectionsWalk, BrandGreen, Triple(latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0", "步", "步数"))
-            )
+            val dataItems =
+                listOf(
+                    Triple(
+                        Icons.Default.Favorite,
+                        DataHeart,
+                        Triple(
+                            latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--",
+                            "次/分",
+                            "心率",
+                        ),
+                    ),
+                    Triple(
+                        Icons.Default.MonitorHeart,
+                        DataPressure,
+                        Triple(
+                            latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--",
+                            "mmHg",
+                            "血压",
+                        ),
+                    ),
+                    Triple(
+                        Icons.Default.HealthAndSafety,
+                        DataOxygen,
+                        Triple(
+                            latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
+                            "%",
+                            "血氧",
+                        ),
+                    ),
+                    Triple(
+                        Icons.Default.DirectionsWalk,
+                        BrandGreen,
+                        Triple(
+                            latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
+                            "步",
+                            "步数",
+                        ),
+                    ),
+                )
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             ) {
                 dataItems.take(2).forEach { (icon, color, data) ->
                     MiniDataCard(
@@ -128,13 +161,13 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         value = data.first,
                         unit = data.second,
                         label = data.third,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm)
+                horizontalArrangement = Arrangement.spacedBy(AppSpacing.sm),
             ) {
                 dataItems.drop(2).forEach { (icon, color, data) ->
                     MiniDataCard(
@@ -143,7 +176,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         value = data.first,
                         unit = data.second,
                         label = data.third,
-                        modifier = Modifier.weight(1f)
+                        modifier = Modifier.weight(1f),
                     )
                 }
             }
@@ -155,15 +188,16 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                 text = "已连接设备",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val connectedDevices = listOf(
-                Triple("PPG 相机测量", "手机摄像头", Icons.Default.CameraAlt, CardGradientOrange),
-                Triple("Health Connect", "系统健康服务", Icons.Default.Sync, CardGradientBlue),
-                Triple("手动记录", "手动输入数据", Icons.Default.Edit, CardGradientGreen)
-            )
+            val connectedDevices =
+                listOf(
+                    GradientItem("PPG 相机测量", "手机摄像头", Icons.Default.CameraAlt, CardGradientOrange),
+                    GradientItem("Health Connect", "系统健康服务", Icons.Default.Sync, CardGradientBlue),
+                    GradientItem("手动记录", "手动输入数据", Icons.Default.Edit, CardGradientGreen),
+                )
 
             connectedDevices.forEach { (name, desc, icon, gradient) ->
                 DeviceCard(
@@ -171,7 +205,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                     description = desc,
                     icon = icon,
                     gradient = gradient,
-                    isConnected = true
+                    isConnected = true,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -183,22 +217,23 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                 text = "可连接设备",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
-                color = MaterialTheme.colorScheme.onBackground
+                color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val availableDevices = listOf(
-                Triple("蓝牙心率带", "BLE 心率监测", Icons.Default.Bluetooth, BrandBlue),
-                Triple("蓝牙血压计", "BLE 血压监测", Icons.Default.MonitorHeart, BrandPurple),
-                Triple("蓝牙血氧仪", "BLE 血氧监测", Icons.Default.HealthAndSafety, BrandWarm)
-            )
+            val availableDevices =
+                listOf(
+                    IconItem("蓝牙心率带", "BLE 心率监测", Icons.Default.Bluetooth, BrandBlue),
+                    IconItem("蓝牙血压计", "BLE 血压监测", Icons.Default.MonitorHeart, BrandPurple),
+                    IconItem("蓝牙血氧仪", "BLE 血氧监测", Icons.Default.HealthAndSafety, BrandWarm),
+                )
 
             availableDevices.forEach { (name, desc, icon, color) ->
                 AvailableDeviceCard(
                     name = name,
                     description = desc,
                     icon = icon,
-                    color = color
+                    color = color,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -216,19 +251,20 @@ private fun MiniDataCard(
     value: String,
     unit: String,
     label: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
 ) {
     GlassCard(modifier = modifier) {
         Column(
             modifier = Modifier.padding(16.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Box(
-                modifier = Modifier
-                    .size(36.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(36.dp)
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(20.dp))
             }
@@ -237,19 +273,19 @@ private fun MiniDataCard(
                     text = value,
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = unit,
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(start = 2.dp, bottom = 4.dp)
+                    modifier = Modifier.padding(start = 2.dp, bottom = 4.dp),
                 )
             }
             Text(
                 text = label,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
         }
     }
@@ -264,22 +300,24 @@ private fun DeviceCard(
     description: String,
     icon: ImageVector,
     gradient: List<Color>,
-    isConnected: Boolean
+    isConnected: Boolean,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Brush.horizontalGradient(gradient)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Brush.horizontalGradient(gradient)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))
             }
@@ -288,12 +326,12 @@ private fun DeviceCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             if (isConnected) {
@@ -302,14 +340,14 @@ private fun DeviceCard(
                         Icons.Default.CheckCircle,
                         contentDescription = null,
                         tint = BrandGreen,
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp),
                     )
                     Text(
                         text = "已连接",
                         style = MaterialTheme.typography.labelSmall,
                         color = BrandGreen,
                         fontWeight = FontWeight.Medium,
-                        modifier = Modifier.padding(start = 4.dp)
+                        modifier = Modifier.padding(start = 4.dp),
                     )
                 }
             }
@@ -325,22 +363,24 @@ private fun AvailableDeviceCard(
     name: String,
     description: String,
     icon: ImageVector,
-    color: Color
+    color: Color,
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(color.copy(alpha = 0.15f)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(color.copy(alpha = 0.15f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = color, modifier = Modifier.size(24.dp))
             }
@@ -349,12 +389,12 @@ private fun AvailableDeviceCard(
                     text = name,
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Bold,
-                    color = MaterialTheme.colorScheme.onSurface
+                    color = MaterialTheme.colorScheme.onSurface,
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
             OutlinedButton(onClick = { /* 扫描连接 */ }) {

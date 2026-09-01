@@ -17,7 +17,6 @@ import kotlin.math.abs
  * 统计、血流动力学、PPG、BLE 协议解析测试。
  */
 class StatsAndMathTest {
-
     private val now = System.currentTimeMillis()
 
     // ---------- 1. 数学原语 ----------
@@ -56,9 +55,10 @@ class StatsAndMathTest {
     @Test
     fun `SI 大于等于1触发危险级休克指数告警`() {
         val result = RiskEngine.evaluate(mkVitals(110, 100, 70, 97, 36.5), now)
-        val siAlert = result.alerts.any {
-            it.metric == "休克指数" && it.level == RiskLevel.CRITICAL
-        }
+        val siAlert =
+            result.alerts.any {
+                it.metric == "休克指数" && it.level == RiskLevel.CRITICAL
+            }
         assertTrue("SI>=1.0 应触发 CRITICAL 休克指数告警", siAlert)
     }
 
@@ -77,22 +77,29 @@ class StatsAndMathTest {
         val records = mutableListOf<VitalRecord>()
         val priors = doubleArrayOf(116.0, 120.0, 122.0, 126.0, 130.0)
         for (i in priors.indices) {
-            records += VitalRecord(
-                VitalType.SYSTOLIC.id, priors[i],
-                now - (i + 1) * 86_400_000L, VitalSource.MANUAL
-            )
-            records += VitalRecord(
-                VitalType.DIASTOLIC.id, 78.0,
-                now - (i + 1) * 86_400_000L, VitalSource.MANUAL
-            )
+            records +=
+                VitalRecord(
+                    VitalType.SYSTOLIC.id,
+                    priors[i],
+                    now - (i + 1) * 86_400_000L,
+                    VitalSource.MANUAL,
+                )
+            records +=
+                VitalRecord(
+                    VitalType.DIASTOLIC.id,
+                    78.0,
+                    now - (i + 1) * 86_400_000L,
+                    VitalSource.MANUAL,
+                )
         }
         records += VitalRecord(VitalType.SYSTOLIC.id, 140.0, now - 60_000, VitalSource.MANUAL)
         records += VitalRecord(VitalType.DIASTOLIC.id, 88.0, now - 60_000, VitalSource.MANUAL)
 
         val result = RiskEngine.evaluate(records, now)
-        val baseAlert = result.alerts.any {
-            it.metric.startsWith("基线偏差") && it.problem.contains("|z|")
-        }
+        val baseAlert =
+            result.alerts.any {
+                it.metric.startsWith("基线偏差") && it.problem.contains("|z|")
+            }
         assertTrue("应触发基线偏差 z-score 告警", baseAlert)
     }
 
@@ -113,9 +120,10 @@ class StatsAndMathTest {
         }
 
         val result = RiskEngine.evaluate(records, now)
-        val trendAlert = result.alerts.any {
-            it.metric.startsWith("趋势·血压") && it.level == RiskLevel.WARNING
-        }
+        val trendAlert =
+            result.alerts.any {
+                it.metric.startsWith("趋势·血压") && it.level == RiskLevel.WARNING
+            }
         assertTrue("连续上升应触发趋势 WARNING", trendAlert)
     }
 
@@ -128,8 +136,9 @@ class StatsAndMathTest {
         for (f in 0 until fps * 35) {
             val tMs = f * 1000L / fps
             val phase = (tMs % 1000) / 1000.0
-            val pulse = 900 * Math.exp(-Math.pow((phase - 0.15) / 0.05, 2.0)) +
-                300 * Math.exp(-Math.pow((phase - 0.40) / 0.08, 2.0))
+            val pulse =
+                900 * Math.exp(-Math.pow((phase - 0.15) / 0.05, 2.0)) +
+                    300 * Math.exp(-Math.pow((phase - 0.40) / 0.08, 2.0))
             val noise = ((f % 7) - 3) * 2.5
             ppg.addSample(tMs, 5000 + pulse + noise)
         }
@@ -186,12 +195,17 @@ class StatsAndMathTest {
     // ---------- 辅助 ----------
 
     private fun mkVitals(
-        hr: Number, sys: Number, dia: Number, spo2: Number, temp: Number
-    ): List<VitalRecord> = listOf(
-        VitalRecord(VitalType.HEART_RATE.id, hr.toDouble(), now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SYSTOLIC.id, sys.toDouble(), now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.DIASTOLIC.id, dia.toDouble(), now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.SPO2.id, spo2.toDouble(), now - 1000, VitalSource.MANUAL),
-        VitalRecord(VitalType.TEMPERATURE.id, temp.toDouble(), now - 2000, VitalSource.MANUAL)
-    )
+        hr: Number,
+        sys: Number,
+        dia: Number,
+        spo2: Number,
+        temp: Number,
+    ): List<VitalRecord> =
+        listOf(
+            VitalRecord(VitalType.HEART_RATE.id, hr.toDouble(), now - 1000, VitalSource.MANUAL),
+            VitalRecord(VitalType.SYSTOLIC.id, sys.toDouble(), now - 1000, VitalSource.MANUAL),
+            VitalRecord(VitalType.DIASTOLIC.id, dia.toDouble(), now - 1000, VitalSource.MANUAL),
+            VitalRecord(VitalType.SPO2.id, spo2.toDouble(), now - 1000, VitalSource.MANUAL),
+            VitalRecord(VitalType.TEMPERATURE.id, temp.toDouble(), now - 2000, VitalSource.MANUAL),
+        )
 }

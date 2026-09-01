@@ -19,36 +19,40 @@ import javax.inject.Inject
  * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class DevicesViewModel @Inject constructor(
-    private val repository: AppRepository
-) : ViewModel() {
+class DevicesViewModel
+    @Inject
+    constructor(
+        private val repository: AppRepository,
+    ) : ViewModel() {
+        /**
+         * 最近的体征记录（用于展示设备最近一次测量结果）。
+         */
+        val recentRecords: StateFlow<List<VitalRecord>> =
+            repository.records
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 最近的体征记录（用于展示设备最近一次测量结果）。
-     */
-    val recentRecords: StateFlow<List<VitalRecord>> = repository.records
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        /**
+         * 获取指定类型的最近一条记录。
+         */
+        fun latestOfType(typeId: String): VitalRecord? =
+            recentRecords.value
+                .filter { it.typeId == typeId }
+                .maxByOrNull { it.timestampMillis }
 
-    /**
-     * 获取指定类型的最近一条记录。
-     */
-    fun latestOfType(typeId: String): VitalRecord? {
-        return recentRecords.value
-            .filter { it.typeId == typeId }
-            .maxByOrNull { it.timestampMillis }
+        /**
+         * 手动添加一条体征记录（设备测量后保存）。
+         */
+        fun addRecord(record: VitalRecord) {
+            repository.addRecord(record)
+        }
+
+        /**
+         * 删除指定体征记录。
+         */
+        fun removeRecord(
+            typeId: String,
+            timestampMillis: Long,
+        ) {
+            repository.removeRecord(typeId, timestampMillis)
+        }
     }
-
-    /**
-     * 手动添加一条体征记录（设备测量后保存）。
-     */
-    fun addRecord(record: VitalRecord) {
-        repository.addRecord(record)
-    }
-
-    /**
-     * 删除指定体征记录。
-     */
-    fun removeRecord(typeId: String, timestampMillis: Long) {
-        repository.removeRecord(typeId, timestampMillis)
-    }
-}

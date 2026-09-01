@@ -10,10 +10,11 @@ plugins {
     id("org.jlleitschuh.gradle.ktlint")
 }
 
-val keystoreProps = Properties().apply {
-    val f = rootProject.file("keystore.properties")
-    if (f.exists()) f.inputStream().use { load(it) }
-}
+val keystoreProps =
+    Properties().apply {
+        val f = rootProject.file("keystore.properties")
+        if (f.exists()) f.inputStream().use { load(it) }
+    }
 
 android {
     namespace = "com.silema.app"
@@ -54,7 +55,7 @@ android {
             isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
+                "proguard-rules.pro",
             )
             if (keystoreProps.isNotEmpty()) {
                 signingConfig = signingConfigs.getByName("release")

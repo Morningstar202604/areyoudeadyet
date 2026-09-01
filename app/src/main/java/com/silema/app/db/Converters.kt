@@ -10,7 +10,6 @@ import kotlinx.serialization.json.Json
  * 当前仅处理运动轨迹 [List]<[List]<[Double]>> → JSON 字符串。
  */
 class Converters {
-
     private val json = Json { ignoreUnknownKeys = true }
 
     @TypeConverter

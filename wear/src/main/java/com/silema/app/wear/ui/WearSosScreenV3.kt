@@ -42,27 +42,29 @@ import androidx.wear.compose.material.Text
 @Composable
 fun WearSosScreenV3(
     onSosTriggered: () -> Unit = {},
-    onCancel: () -> Unit = {}
+    onCancel: () -> Unit = {},
 ) {
     var countdown by remember { mutableStateOf(3) }
     var isCounting by remember { mutableStateOf(false) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFFB71C1C), Color(0xFFE53935), Color(0xFFEF5350))
-                )
-            ),
-        contentAlignment = Alignment.Center
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFFB71C1C), Color(0xFFE53935), Color(0xFFEF5350)),
+                    ),
+                ),
+        contentAlignment = Alignment.Center,
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 16.dp, vertical = 12.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             // 标题
             Text(
@@ -70,22 +72,23 @@ fun WearSosScreenV3(
                 style = MaterialTheme.typography.title2,
                 color = Color.White,
                 fontWeight = FontWeight.Bold,
-                textAlign = TextAlign.Center
+                textAlign = TextAlign.Center,
             )
 
             // SOS 大图标
             Box(
-                modifier = Modifier
-                    .size(72.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)),
-                contentAlignment = Alignment.Center
+                modifier =
+                    Modifier
+                        .size(72.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f)),
+                contentAlignment = Alignment.Center,
             ) {
                 Icon(
                     imageVector = Icons.Default.Sos,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(36.dp)
+                    modifier = Modifier.size(36.dp),
                 )
             }
 
@@ -95,14 +98,14 @@ fun WearSosScreenV3(
                     text = "$countdown 秒后自动呼救",
                     style = MaterialTheme.typography.body1,
                     color = Color.White,
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             } else {
                 Text(
                     text = "点击按钮呼叫紧急联系人\n同时发送位置信息",
                     style = MaterialTheme.typography.body2,
                     color = Color.White.copy(alpha = 0.9f),
-                    textAlign = TextAlign.Center
+                    textAlign = TextAlign.Center,
                 )
             }
 
@@ -118,27 +121,29 @@ fun WearSosScreenV3(
                         // 简单的倒计时逻辑
                     }
                 },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                colors = ButtonDefaults.buttonColors(
-                    backgroundColor = Color.White,
-                    contentColor = Color(0xFFB71C1C)
-                )
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(52.dp),
+                colors =
+                    ButtonDefaults.buttonColors(
+                        backgroundColor = Color.White,
+                        contentColor = Color(0xFFB71C1C),
+                    ),
             ) {
                 Row(
                     horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Phone,
                         contentDescription = null,
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(20.dp),
                     )
                     Text(
                         text = if (isCounting) "立即呼救" else "SOS 呼救",
                         style = MaterialTheme.typography.button,
-                        fontWeight = FontWeight.Bold
+                        fontWeight = FontWeight.Bold,
                     )
                 }
             }
@@ -150,13 +155,15 @@ fun WearSosScreenV3(
                         isCounting = false
                         onCancel()
                     },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(40.dp),
-                    colors = ButtonDefaults.buttonColors(
-                        backgroundColor = Color.White.copy(alpha = 0.2f),
-                        contentColor = Color.White
-                    )
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(40.dp),
+                    colors =
+                        ButtonDefaults.buttonColors(
+                            backgroundColor = Color.White.copy(alpha = 0.2f),
+                            contentColor = Color.White,
+                        ),
                 ) {
                     Text("取消", style = MaterialTheme.typography.button)
                 }

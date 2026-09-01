@@ -9,5 +9,5 @@ import androidx.room.PrimaryKey
 @Entity(tableName = "contacts")
 data class ContactEntity(
     @PrimaryKey val phone: String,
-    val name: String
+    val name: String,
 )

@@ -33,9 +33,9 @@ fun rememberAppRepository(): AppRepository {
  *
  * 适用于 Service、BroadcastReceiver、工具类等无法直接注入的场景。
  */
-fun appRepositoryFrom(context: Context): AppRepository {
-    return EntryPointAccessors.fromApplication(
-        context.applicationContext,
-        AppRepositoryEntryPoint::class.java
-    ).appRepository()
-}
+fun appRepositoryFrom(context: Context): AppRepository =
+    EntryPointAccessors
+        .fromApplication(
+            context.applicationContext,
+            AppRepositoryEntryPoint::class.java,
+        ).appRepository()

@@ -22,87 +22,81 @@ import javax.inject.Inject
  * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class ReportViewModel @Inject constructor(
-    private val repository: AppRepository
-) : ViewModel() {
+class ReportViewModel
+    @Inject
+    constructor(
+        private val repository: AppRepository,
+    ) : ViewModel() {
+        /**
+         * 全部体征记录。
+         */
+        val records: StateFlow<List<VitalRecord>> =
+            repository.records
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 全部体征记录。
-     */
-    val records: StateFlow<List<VitalRecord>> = repository.records
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        /**
+         * 全部运动记录。
+         */
+        val workouts: StateFlow<List<Workout>> =
+            repository.workouts
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 全部运动记录。
-     */
-    val workouts: StateFlow<List<Workout>> = repository.workouts
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        /**
+         * 最近一周的健康报告。
+         */
+        val weeklyReport =
+            combine(records, workouts) { recs, works ->
+                HealthReport.weekly(recs, works, System.currentTimeMillis(), 2)
+            }.stateIn(
+                viewModelScope,
+                SharingStarted.WhileSubscribed(5000),
+                HealthReport.weekly(emptyList(), emptyList(), System.currentTimeMillis(), 2),
+            )
 
-    /**
-     * 最近一周的健康报告。
-     */
-    val weeklyReport = combine(records, workouts) { recs, works ->
-        HealthReport.weekly(recs, works, System.currentTimeMillis(), 2)
-    }.stateIn(
-        viewModelScope,
-        SharingStarted.WhileSubscribed(5000),
-        HealthReport.weekly(emptyList(), emptyList(), System.currentTimeMillis(), 2)
-    )
+        /**
+         * 生成指定周数的健康报告。
+         *
+         * @param weeksAgo 几周前（0 = 本周，1 = 上周）
+         */
+        fun generateWeeklyReport(weeksAgo: Int = 0): HealthReport.Weekly {
+            val now = System.currentTimeMillis()
+            val weekStart = now - weeksAgo * 7 * 24 * 60 * 60 * 1000L
+            return HealthReport.weekly(records.value, workouts.value, weekStart, 2)
+        }
 
-    /**
-     * 生成指定周数的健康报告。
-     *
-     * @param weeksAgo 几周前（0 = 本周，1 = 上周）
-     */
-    fun generateWeeklyReport(weeksAgo: Int = 0): HealthReport.Weekly {
-        val now = System.currentTimeMillis()
-        val weekStart = now - weeksAgo * 7 * 24 * 60 * 60 * 1000L
-        return HealthReport.weekly(records.value, workouts.value, weekStart, 2)
+        /**
+         * 获取指定类型体征的周平均值。
+         */
+        fun weeklyAverage(typeId: String): Double =
+            weeklyReport.value.metrics
+                .firstOrNull { it.type.id == typeId }
+                ?.thisWeekAvg ?: 0.0
+
+        /**
+         * 获取指定类型体征的周变化百分比。
+         */
+        fun weeklyChange(typeId: String): Double? =
+            weeklyReport.value.metrics
+                .firstOrNull { it.type.id == typeId }
+                ?.deltaPct
+
+        /**
+         * 本周运动总次数。
+         */
+        fun weeklyWorkoutCount(): Int = weeklyReport.value.workoutCount
+
+        /**
+         * 本周运动总距离（公里）。
+         */
+        fun weeklyWorkoutDistance(): Double = weeklyReport.value.workoutKm
+
+        /**
+         * 本周平均睡眠时长（小时）。
+         */
+        fun weeklySleepAverage(): Double? = weeklyReport.value.sleepAvgHours
+
+        /**
+         * 健康报告摘要文本列表。
+         */
+        fun reportSummary(): List<String> = weeklyReport.value.summary
     }
-
-    /**
-     * 获取指定类型体征的周平均值。
-     */
-    fun weeklyAverage(typeId: String): Double {
-        return weeklyReport.value.metrics
-            .firstOrNull { it.type.id == typeId }
-            ?.thisWeekAvg ?: 0.0
-    }
-
-    /**
-     * 获取指定类型体征的周变化百分比。
-     */
-    fun weeklyChange(typeId: String): Double? {
-        return weeklyReport.value.metrics
-            .firstOrNull { it.type.id == typeId }
-            ?.deltaPct
-    }
-
-    /**
-     * 本周运动总次数。
-     */
-    fun weeklyWorkoutCount(): Int {
-        return weeklyReport.value.workoutCount
-    }
-
-    /**
-     * 本周运动总距离（公里）。
-     */
-    fun weeklyWorkoutDistance(): Double {
-        return weeklyReport.value.workoutKm
-    }
-
-    /**
-     * 本周平均睡眠时长（小时）。
-     */
-    fun weeklySleepAverage(): Double? {
-        return weeklyReport.value.sleepAvgHours
-    }
-
-    /**
-     * 健康报告摘要文本列表。
-     */
-    fun reportSummary(): List<String> {
-        return weeklyReport.value.summary
-    }
-}

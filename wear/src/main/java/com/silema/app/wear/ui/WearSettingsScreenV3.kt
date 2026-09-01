@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Switch
@@ -48,38 +47,40 @@ fun WearSettingsScreenV3() {
     var healthTracking by remember { mutableStateOf(true) }
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(
-                Brush.verticalGradient(
-                    listOf(Color(0xFF121212), Color(0xFF1A1A2E), Color(0xFF16213E))
-                )
-            )
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(Color(0xFF121212), Color(0xFF1A1A2E), Color(0xFF16213E)),
+                    ),
+                ),
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             // 标题
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(6.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Icon(
                     imageVector = Icons.Default.Settings,
                     contentDescription = null,
                     tint = Color.White,
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp),
                 )
                 Text(
                     text = "设置",
                     style = MaterialTheme.typography.title2,
                     color = Color.White,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
                 )
             }
 
@@ -91,7 +92,7 @@ fun WearSettingsScreenV3() {
                 title = "消息通知",
                 subtitle = "接收健康提醒",
                 checked = notifications,
-                onCheckedChange = { notifications = it }
+                onCheckedChange = { notifications = it },
             )
 
             // 深色模式
@@ -100,7 +101,7 @@ fun WearSettingsScreenV3() {
                 title = "深色模式",
                 subtitle = "手表默认深色",
                 checked = darkMode,
-                onCheckedChange = { darkMode = it }
+                onCheckedChange = { darkMode = it },
             )
 
             // 健康追踪
@@ -109,33 +110,35 @@ fun WearSettingsScreenV3() {
                 title = "健康追踪",
                 subtitle = "持续监测心率",
                 checked = healthTracking,
-                onCheckedChange = { healthTracking = it }
+                onCheckedChange = { healthTracking = it },
             )
 
             Spacer(modifier = Modifier.height(4.dp))
 
             // 关于
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(10.dp))
-                    .background(Color.White.copy(alpha = 0.1f))
-                    .padding(10.dp),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color.White.copy(alpha = 0.1f))
+                        .padding(10.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(Brush.horizontalGradient(listOf(Color(0xFF00A86B), Color(0xFF66BB6A)))),
-                    contentAlignment = Alignment.Center
+                    modifier =
+                        Modifier
+                            .size(28.dp)
+                            .clip(CircleShape)
+                            .background(Brush.horizontalGradient(listOf(Color(0xFF00A86B), Color(0xFF66BB6A)))),
+                    contentAlignment = Alignment.Center,
                 ) {
                     Icon(
                         imageVector = Icons.Default.Info,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier.size(14.dp),
                     )
                 }
                 Column(modifier = Modifier.weight(1f)) {
@@ -143,12 +146,12 @@ fun WearSettingsScreenV3() {
                         text = "Silema v3.0",
                         style = MaterialTheme.typography.body2,
                         color = Color.White,
-                        fontWeight = FontWeight.Medium
+                        fontWeight = FontWeight.Medium,
                     )
                     Text(
                         text = "Are You Dead Yet?",
                         style = MaterialTheme.typography.caption3,
-                        color = Color.White.copy(alpha = 0.6f)
+                        color = Color.White.copy(alpha = 0.6f),
                     )
                 }
             }
@@ -165,29 +168,31 @@ private fun SettingItem(
     title: String,
     subtitle: String,
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit
+    onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .padding(10.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f)),
+            contentAlignment = Alignment.Center,
         ) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
                 tint = Color.White,
-                modifier = Modifier.size(14.dp)
+                modifier = Modifier.size(14.dp),
             )
         }
         Column(modifier = Modifier.weight(1f)) {
@@ -195,17 +200,17 @@ private fun SettingItem(
                 text = title,
                 style = MaterialTheme.typography.body2,
                 color = Color.White,
-                fontWeight = FontWeight.Medium
+                fontWeight = FontWeight.Medium,
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.caption3,
-                color = Color.White.copy(alpha = 0.6f)
+                color = Color.White.copy(alpha = 0.6f),
             )
         }
         Switch(
             checked = checked,
-            onCheckedChange = onCheckedChange
+            onCheckedChange = onCheckedChange,
         )
     }
 }

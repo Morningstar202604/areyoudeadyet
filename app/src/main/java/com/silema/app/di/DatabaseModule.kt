@@ -23,16 +23,17 @@ import javax.inject.Singleton
 @Module
 @InstallIn(SingletonComponent::class)
 object DatabaseModule {
-
     @Provides
     @Singleton
-    fun provideDatabase(@ApplicationContext context: Context): SilemaDatabase =
-        Room.databaseBuilder(
-            context.applicationContext,
-            SilemaDatabase::class.java,
-            SilemaDatabase.DB_NAME
-        )
-            .fallbackToDestructiveMigration()
+    fun provideDatabase(
+        @ApplicationContext context: Context,
+    ): SilemaDatabase =
+        Room
+            .databaseBuilder(
+                context.applicationContext,
+                SilemaDatabase::class.java,
+                SilemaDatabase.DB_NAME,
+            ).fallbackToDestructiveMigration()
             .build()
 
     @Provides
@@ -46,6 +47,7 @@ object DatabaseModule {
 
     @Provides
     @Singleton
-    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
-        context.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
+    fun provideSharedPreferences(
+        @ApplicationContext context: Context,
+    ): SharedPreferences = context.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
 }

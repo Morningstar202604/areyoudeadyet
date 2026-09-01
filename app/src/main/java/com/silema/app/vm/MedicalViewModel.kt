@@ -22,83 +22,94 @@ import javax.inject.Inject
  * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class MedicalViewModel @Inject constructor(
-    private val repository: AppRepository
-) : ViewModel() {
+class MedicalViewModel
+    @Inject
+    constructor(
+        private val repository: AppRepository,
+    ) : ViewModel() {
+        /**
+         * 全部体征记录。
+         */
+        val records: StateFlow<List<VitalRecord>> =
+            repository.records
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 全部体征记录。
-     */
-    val records: StateFlow<List<VitalRecord>> = repository.records
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        /**
+         * 全部运动记录。
+         */
+        val workouts: StateFlow<List<Workout>> =
+            repository.workouts
+                .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 全部运动记录。
-     */
-    val workouts: StateFlow<List<Workout>> = repository.workouts
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+        /**
+         * 最近 7 天的心率记录（用于趋势图）。
+         */
+        val recentHeartRate: StateFlow<List<VitalRecord>> =
+            repository.records
+                .map { records ->
+                    val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+                    records
+                        .filter {
+                            it.typeId == VitalType.HEART_RATE.id && it.timestampMillis >= sevenDaysAgo
+                        }.sortedBy { it.timestampMillis }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 最近 7 天的心率记录（用于趋势图）。
-     */
-    val recentHeartRate: StateFlow<List<VitalRecord>> = repository.records
-        .map { records ->
-            val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
-            records.filter {
-                it.typeId == VitalType.HEART_RATE.id && it.timestampMillis >= sevenDaysAgo
-            }.sortedBy { it.timestampMillis }
+        /**
+         * 最近 7 天的血压记录（用于趋势图）。
+         */
+        val recentBloodPressure: StateFlow<List<VitalRecord>> =
+            repository.records
+                .map { records ->
+                    val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
+                    records
+                        .filter {
+                            (it.typeId == VitalType.SYSTOLIC.id || it.typeId == VitalType.DIASTOLIC.id) &&
+                                it.timestampMillis >= sevenDaysAgo
+                        }.sortedBy { it.timestampMillis }
+                }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+        /**
+         * 计算指定类型体征的平均值。
+         */
+        fun averageOfType(
+            typeId: String,
+            sinceMillis: Long = 0,
+        ): Double {
+            val filtered =
+                records.value.filter {
+                    it.typeId == typeId && it.timestampMillis >= sinceMillis
+                }
+            return if (filtered.isEmpty()) {
+                0.0
+            } else {
+                filtered.sumOf { it.value } / filtered.size
+            }
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 最近 7 天的血压记录（用于趋势图）。
-     */
-    val recentBloodPressure: StateFlow<List<VitalRecord>> = repository.records
-        .map { records ->
-            val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
-            records.filter {
-                (it.typeId == VitalType.SYSTOLIC.id || it.typeId == VitalType.DIASTOLIC.id) &&
-                    it.timestampMillis >= sevenDaysAgo
-            }.sortedBy { it.timestampMillis }
+        /**
+         * 获取指定类型体征的最新值。
+         */
+        fun latestOfType(typeId: String): VitalRecord? =
+            records.value
+                .filter { it.typeId == typeId }
+                .maxByOrNull { it.timestampMillis }
+
+        /**
+         * 添加运动记录。
+         */
+        fun addWorkout(workout: Workout) {
+            repository.addWorkout(workout)
         }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
-    /**
-     * 计算指定类型体征的平均值。
-     */
-    fun averageOfType(typeId: String, sinceMillis: Long = 0): Double {
-        val filtered = records.value.filter {
-            it.typeId == typeId && it.timestampMillis >= sinceMillis
+        /**
+         * 删除运动记录。
+         */
+        fun removeWorkout(id: String) {
+            repository.removeWorkout(id)
         }
-        return if (filtered.isEmpty()) 0.0
-        else filtered.sumOf { it.value } / filtered.size
-    }
 
-    /**
-     * 获取指定类型体征的最新值。
-     */
-    fun latestOfType(typeId: String): VitalRecord? {
-        return records.value
-            .filter { it.typeId == typeId }
-            .maxByOrNull { it.timestampMillis }
+        /**
+         * 导出全部数据为 JSON（用于备份或分享）。
+         */
+        suspend fun exportData(): String? = repository.exportToJson()
     }
-
-    /**
-     * 添加运动记录。
-     */
-    fun addWorkout(workout: Workout) {
-        repository.addWorkout(workout)
-    }
-
-    /**
-     * 删除运动记录。
-     */
-    fun removeWorkout(id: String) {
-        repository.removeWorkout(id)
-    }
-
-    /**
-     * 导出全部数据为 JSON（用于备份或分享）。
-     */
-    suspend fun exportData(): String? = repository.exportToJson()
-}
