@@ -99,7 +99,7 @@ dependencies {
     // ---------- Hilt 依赖注入 ----------
     implementation("com.google.dagger:hilt-android:2.52")
     kapt("com.google.dagger:hilt-android-compiler:2.52")
-    implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
+    implementation("androidx.hilt:hilt-navigation-compose:1.4.0")
 
     // ---------- Timber 日志 ----------
     implementation("com.jakewharton.timber:timber:5.0.1")
