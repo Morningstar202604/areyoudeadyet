@@ -93,7 +93,7 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
             modifier = Modifier.padding(innerPadding)
         ) {
             composable(Routes.HOME) {
-                DashboardScreen(
+                DashboardScreenV3(
                     records = records,
                     tts = tts,
                     onGoSos = { navController.navigate(Routes.SOS) { launchSingleTop = true } },
