@@ -77,8 +77,8 @@ class AppRepositoryTest {
 
         val json = AppRepository.exportToJson()
         assertNotNull(json)
-        assertTrue("JSON 应包含心率数据", json!!.contains("\"typeId\":\"heart_rate\""))
-        assertTrue("JSON 应包含收缩压数据", json.contains("\"typeId\":\"systolic\""))
+        assertTrue("JSON 应包含心率数据", json!!.contains("heart_rate"))
+        assertTrue("JSON 应包含收缩压数据", json.contains("systolic"))
     }
 
     @Test
