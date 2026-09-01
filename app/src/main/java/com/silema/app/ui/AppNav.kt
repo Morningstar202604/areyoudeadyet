@@ -105,11 +105,11 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
             composable(Routes.DEVICES) {
                 DevicesScreenV3(onClose = { navController.popBackStack() })
             }
-            composable(Routes.FAMILY) { FamilyScreen() }
-            composable(Routes.AI_REPORT) { AiReportScreen(records = records) }
-            composable(Routes.MEDICAL) { MedicalScreen(records = records) }
+            composable(Routes.FAMILY) { FamilyScreenV3() }
+            composable(Routes.AI_REPORT) { AiReportScreenV3(records = records) }
+            composable(Routes.MEDICAL) { MedicalScreenV3() }
             composable(Routes.MORE) {
-                MoreScreen(onNav = { route -> navController.navigate(route) { launchSingleTop = true } })
+                MoreScreenV3()
             }
         }
     }
