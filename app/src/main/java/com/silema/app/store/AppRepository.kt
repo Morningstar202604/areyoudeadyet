@@ -239,7 +239,7 @@ object AppRepository {
                     sedentaryReminderOn = sedentaryReminderOn
                 )
             )
-            json.encodeToString(data)
+            json.encodeToString(ExportData.serializer(), data)
         }.onFailure { Timber.w(it, "exportToJson failed") }
             .getOrNull()
     }
@@ -258,7 +258,7 @@ object AppRepository {
         val parser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
         runCatching {
             // 先尝试解析新版格式
-            val data = parser.decodeFromString<ExportData>(json)
+            val data = parser.decodeFromString(ExportData.serializer(), json)
             // 清空现有数据
             database.vitalRecordDao().clearAll()
             database.contactDao().clearAll()
