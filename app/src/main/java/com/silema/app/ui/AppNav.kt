@@ -26,6 +26,8 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.silema.app.data.Contact
 import com.silema.app.data.VitalRecord
+import com.silema.app.ui.components.BottomNavItem
+import com.silema.app.ui.components.ModernBottomNav
 import com.silema.app.util.TtsController
 
 object Routes {
@@ -62,29 +64,17 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
     Scaffold(
         containerColor = MaterialTheme.colorScheme.background,
         bottomBar = {
-            NavigationBar(containerColor = MaterialTheme.colorScheme.surface) {
-                tabs.forEach { tab ->
-                    NavigationBarItem(
-                        selected = currentRoute == tab.route,
-                        onClick = {
-                            navController.navigate(tab.route) {
-                                popUpTo(Routes.HOME) { saveState = true }
-                                launchSingleTop = true
-                                restoreState = true
-                            }
-                        },
-                        icon = { Icon(tab.icon, contentDescription = tab.label) },
-                        label = { Text(tab.label) },
-                        colors = NavigationBarItemDefaults.colors(
-                            selectedIconColor = MaterialTheme.colorScheme.primary,
-                            selectedTextColor = MaterialTheme.colorScheme.primary,
-                            unselectedIconColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            unselectedTextColor = MaterialTheme.colorScheme.onSurfaceVariant,
-                            indicatorColor = MaterialTheme.colorScheme.primaryContainer
-                        )
-                    )
+            ModernBottomNav(
+                items = tabs.map { BottomNavItem(it.route, it.label, it.icon) },
+                currentRoute = currentRoute ?: Routes.HOME,
+                onItemClick = { route ->
+                    navController.navigate(route) {
+                        popUpTo(Routes.HOME) { saveState = true }
+                        launchSingleTop = true
+                        restoreState = true
+                    }
                 }
-            }
+            )
         }
     ) { innerPadding ->
         NavHost(
@@ -106,15 +96,14 @@ fun AppRoot(records: List<VitalRecord>, contacts: List<Contact>, tts: TtsControl
                     onGoMedical = { navController.navigate(Routes.MEDICAL) { launchSingleTop = true } }
                 )
             }
-            composable(Routes.REPORT) { ReportScreen(records = records) }
+            composable(Routes.REPORT) { ReportScreenV3(records = records) }
             composable(Routes.GUARDIAN) {
-                GuardianScreen(
-                    records = records,
-                    onGoMedical = { navController.navigate(Routes.MEDICAL) { launchSingleTop = true } }
+                GuardianScreenV3(
+                    contacts = contacts
                 )
             }
             composable(Routes.DEVICES) {
-                DevicesScreen(onClose = { navController.popBackStack() })
+                DevicesScreenV3(onClose = { navController.popBackStack() })
             }
             composable(Routes.FAMILY) { FamilyScreen() }
             composable(Routes.AI_REPORT) { AiReportScreen(records = records) }
