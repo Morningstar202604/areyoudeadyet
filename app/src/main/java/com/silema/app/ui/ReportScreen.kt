@@ -23,7 +23,7 @@ import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.engine.HealthReport
 import com.silema.app.engine.RiskEngine
-import com.silema.app.store.AppRepository
+import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.*
 import com.silema.app.ui.theme.*
 import java.time.LocalDate
@@ -261,7 +261,8 @@ private fun TrendTab(records: List<VitalRecord>) {
 @Composable
 private fun WeeklyTab(records: List<VitalRecord>) {
     val context = LocalContext.current
-    val workouts by AppRepository.workouts.collectAsState()
+    val repository = rememberAppRepository()
+    val workouts by repository.workouts.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val report = remember(records, workouts) {
         HealthReport.weekly(records, workouts, alertCount = assessment.alerts.size)
@@ -425,6 +426,7 @@ private fun WeeklyTab(records: List<VitalRecord>) {
 // ── Sleep Tab ───────────────────────────────────────
 @Composable
 private fun SleepTab(records: List<VitalRecord>) {
+    val repository = rememberAppRepository()
     var bedText by remember { mutableStateOf("23:00") }
     var wakeText by remember { mutableStateOf("06:30") }
     var msg by remember { mutableStateOf<String?>(null) }
@@ -499,7 +501,7 @@ private fun SleepTab(records: List<VitalRecord>) {
                                 msg = "计算出的睡眠时长 ${"%.1f".format(hours)} 小时不合理，请检查时间"
                                 return@BigButton
                             }
-                            AppRepository.addRecord(
+                            repository.addRecord(
                                 VitalRecord.of(
                                     VitalType.SLEEP, hours,
                                     wakeDt.atZone(ZoneId.systemDefault()).toInstant().toEpochMilli(),

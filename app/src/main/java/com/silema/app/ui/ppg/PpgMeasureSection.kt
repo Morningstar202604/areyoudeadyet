@@ -41,7 +41,7 @@ import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.engine.StressMath
 import com.silema.app.ppg.PpgAnalyzer
-import com.silema.app.store.AppRepository
+import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.BigButton
 import kotlinx.coroutines.delay
 
@@ -50,6 +50,7 @@ private const val MEASURE_SECONDS = 30
 @Composable
 fun PpgMeasureSection() {
     val context = LocalContext.current
+    val repository = rememberAppRepository()
 
     var measuring by remember { mutableStateOf(false) }
     var elapsedSec by remember { mutableIntStateOf(0) }
@@ -250,7 +251,7 @@ private fun stopAndEvaluate(analyzer: PpgAnalyzer, onDone: (String, String?) -> 
             null
         )
         else -> {
-            AppRepository.addRecord(
+            repository.addRecord(
                 VitalRecord.of(
                     VitalType.HEART_RATE,
                     Math.round(r.bpm).toDouble(),
@@ -259,7 +260,7 @@ private fun stopAndEvaluate(analyzer: PpgAnalyzer, onDone: (String, String?) -> 
                 )
             )
             val stress = StressMath.fromRmssd(r.rmssdMs).toDouble()
-            AppRepository.addRecord(
+            repository.addRecord(
                 VitalRecord.of(VitalType.STRESS, stress, System.currentTimeMillis(), VitalSource.PPG_CAMERA)
             )
             onDone(

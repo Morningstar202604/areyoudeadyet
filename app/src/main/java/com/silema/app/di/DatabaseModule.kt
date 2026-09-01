@@ -1,6 +1,7 @@
 package com.silema.app.di
 
 import android.content.Context
+import android.content.SharedPreferences
 import androidx.room.Room
 import com.silema.app.db.SilemaDatabase
 import com.silema.app.db.dao.ContactDao
@@ -42,4 +43,9 @@ object DatabaseModule {
 
     @Provides
     fun provideWorkoutDao(db: SilemaDatabase): WorkoutDao = db.workoutDao()
+
+    @Provides
+    @Singleton
+    fun provideSharedPreferences(@ApplicationContext context: Context): SharedPreferences =
+        context.getSharedPreferences("silema_prefs", Context.MODE_PRIVATE)
 }

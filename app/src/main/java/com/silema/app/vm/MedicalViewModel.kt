@@ -18,26 +18,30 @@ import javax.inject.Inject
  *
  * 展示健康数据统计、历史趋势、运动记录、PDF 报告生成。
  * 支持按时间范围筛选数据，生成健康报告。
+ *
+ * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class MedicalViewModel @Inject constructor() : ViewModel() {
+class MedicalViewModel @Inject constructor(
+    private val repository: AppRepository
+) : ViewModel() {
 
     /**
      * 全部体征记录。
      */
-    val records: StateFlow<List<VitalRecord>> = AppRepository.records
+    val records: StateFlow<List<VitalRecord>> = repository.records
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
      * 全部运动记录。
      */
-    val workouts: StateFlow<List<Workout>> = AppRepository.workouts
+    val workouts: StateFlow<List<Workout>> = repository.workouts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
      * 最近 7 天的心率记录（用于趋势图）。
      */
-    val recentHeartRate: StateFlow<List<VitalRecord>> = AppRepository.records
+    val recentHeartRate: StateFlow<List<VitalRecord>> = repository.records
         .map { records ->
             val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
             records.filter {
@@ -49,7 +53,7 @@ class MedicalViewModel @Inject constructor() : ViewModel() {
     /**
      * 最近 7 天的血压记录（用于趋势图）。
      */
-    val recentBloodPressure: StateFlow<List<VitalRecord>> = AppRepository.records
+    val recentBloodPressure: StateFlow<List<VitalRecord>> = repository.records
         .map { records ->
             val sevenDaysAgo = System.currentTimeMillis() - 7 * 24 * 60 * 60 * 1000L
             records.filter {
@@ -83,18 +87,18 @@ class MedicalViewModel @Inject constructor() : ViewModel() {
      * 添加运动记录。
      */
     fun addWorkout(workout: Workout) {
-        AppRepository.addWorkout(workout)
+        repository.addWorkout(workout)
     }
 
     /**
      * 删除运动记录。
      */
     fun removeWorkout(id: String) {
-        AppRepository.removeWorkout(id)
+        repository.removeWorkout(id)
     }
 
     /**
      * 导出全部数据为 JSON（用于备份或分享）。
      */
-    suspend fun exportData(): String? = AppRepository.exportToJson()
+    suspend fun exportData(): String? = repository.exportToJson()
 }

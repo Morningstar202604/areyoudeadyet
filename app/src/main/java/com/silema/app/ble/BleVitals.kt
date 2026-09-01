@@ -19,6 +19,7 @@ import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalSource
 import com.silema.app.data.VitalType
 import com.silema.app.store.AppRepository
+import com.silema.app.store.appRepositoryFrom
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -36,6 +37,9 @@ import kotlin.math.pow
  */
 @SuppressLint("MissingPermission")
 object BleVitals {
+
+    /** 通过 Hilt EntryPoint 获取 AppRepository 单例（v0.6.0 起 AppRepository 改为 @Singleton 类）。 */
+    private fun repo(context: Context): AppRepository = appRepositoryFrom(context)
 
     private val SERVICE_HR: UUID = UUID.fromString("0000180d-0000-1000-8000-00805f9b34fb")
     private val SERVICE_BP: UUID = UUID.fromString("00001810-0000-1000-8000-00805f9b34fb")
@@ -237,21 +241,21 @@ object BleVitals {
             CHAR_HR_MEASUREMENT -> {
                 val bpm = BleCodec.parseHeartRate(payload) ?: return
                 putLive("心率", bpm)
-                AppRepository.addRecord(VitalRecord.of(VitalType.HEART_RATE, bpm, now, VitalSource.BLE))
+                repo(context).addRecord(VitalRecord.of(VitalType.HEART_RATE, bpm, now, VitalSource.BLE))
             }
             CHAR_BP_MEASUREMENT -> {
                 val bp = BleCodec.parseBloodPressure(payload) ?: return
                 putLive("收缩压", bp[0])
                 putLive("舒张压", bp[1])
-                AppRepository.addRecord(VitalRecord.of(VitalType.SYSTOLIC, bp[0], now, VitalSource.BLE))
-                AppRepository.addRecord(VitalRecord.of(VitalType.DIASTOLIC, bp[1], now, VitalSource.BLE))
+                repo(context).addRecord(VitalRecord.of(VitalType.SYSTOLIC, bp[0], now, VitalSource.BLE))
+                repo(context).addRecord(VitalRecord.of(VitalType.DIASTOLIC, bp[1], now, VitalSource.BLE))
                 _connectionState.value = "收到血压：${bp[0].toInt()}/${bp[1].toInt()} mmHg"
             }
             CHAR_PLX_CONTINUOUS -> {
                 val plx = BleCodec.parsePulseOx(payload) ?: return
                 putLive("血氧", plx.first)
                 putLive("脉率", plx.second)
-                AppRepository.addRecord(VitalRecord.of(VitalType.SPO2, plx.first, now, VitalSource.BLE))
+                repo(context).addRecord(VitalRecord.of(VitalType.SPO2, plx.first, now, VitalSource.BLE))
                 _connectionState.value = "收到血氧：${plx.first.toInt()}%"
             }
         }

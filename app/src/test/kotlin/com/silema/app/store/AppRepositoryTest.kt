@@ -26,14 +26,15 @@ import org.robolectric.annotation.Config
  *
  * 覆盖：数据导出、数据导入、导出-导入往返一致性、旧版格式兼容。
  *
- * 使用 Robolectric + 内存 Room 数据库，绕过 Hilt 直接注入数据库实例。
+ * v0.6.0 起 AppRepository 改为 @Singleton 类，测试直接构造实例，
+ * 传入内存 Room 数据库和测试用 SharedPreferences，不再需要反射。
  */
 @RunWith(RobolectricTestRunner::class)
 @Config(sdk = [33])
 class AppRepositoryTest {
-
     private lateinit var db: SilemaDatabase
     private lateinit var context: Context
+    private lateinit var repository: AppRepository
 
     @Before
     fun setUp() {
@@ -41,16 +42,9 @@ class AppRepositoryTest {
         db = Room.inMemoryDatabaseBuilder(context, SilemaDatabase::class.java)
             .allowMainThreadQueries()
             .build()
-
-        // 通过反射注入数据库实例到 AppRepository object
-        val dbField = AppRepository::class.java.getDeclaredField("db")
-        dbField.isAccessible = true
-        dbField.set(null, db)
-
-        // 初始化 SharedPreferences
-        val prefsField = AppRepository::class.java.getDeclaredField("prefs")
-        prefsField.isAccessible = true
-        prefsField.set(null, context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE))
+        val prefs = context.getSharedPreferences("test_prefs", Context.MODE_PRIVATE)
+        // 直接构造 AppRepository 实例（绕过 Hilt）
+        repository = AppRepository(db, prefs, context)
     }
 
     @After
@@ -60,7 +54,7 @@ class AppRepositoryTest {
 
     @Test
     fun `导出空数据库返回有效JSON`() = runBlocking {
-        val json = AppRepository.exportToJson()
+        val json = repository.exportToJson()
         assertNotNull("导出不应返回 null", json)
         assertTrue("JSON 应包含 version 字段", json!!.contains("\"version\""))
         assertTrue("JSON 应包含 records 字段", json.contains("\"records\""))
@@ -75,7 +69,7 @@ class AppRepositoryTest {
         )
         db.vitalRecordDao().insertAll(records.toEntity())
 
-        val json = AppRepository.exportToJson()
+        val json = repository.exportToJson()
         assertNotNull(json)
         assertTrue("JSON 应包含心率数据", json!!.contains("heart_rate"))
         assertTrue("JSON 应包含收缩压数据", json.contains("systolic"))
@@ -96,7 +90,7 @@ class AppRepositoryTest {
             }
         """.trimIndent()
 
-        val result = AppRepository.importFromJson(json)
+        val result = repository.importFromJson(json)
         assertTrue("导入应成功", result)
 
         val imported = db.vitalRecordDao().getAll()
@@ -119,7 +113,7 @@ class AppRepositoryTest {
         db.workoutDao().insert(workout.toEntity())
 
         // 导出
-        val json = AppRepository.exportToJson()
+        val json = repository.exportToJson()
         assertNotNull(json)
 
         // 清空数据库
@@ -129,7 +123,7 @@ class AppRepositoryTest {
         assertEquals(0, db.vitalRecordDao().getAll().size)
 
         // 导入
-        val result = AppRepository.importFromJson(json!!)
+        val result = repository.importFromJson(json!!)
         assertTrue(result)
 
         // 验证数据一致
@@ -155,7 +149,7 @@ class AppRepositoryTest {
             ]}
         """.trimIndent()
 
-        val result = AppRepository.importFromJson(legacyJson)
+        val result = repository.importFromJson(legacyJson)
         assertTrue("旧版格式导入应成功", result)
 
         val imported = db.vitalRecordDao().getAll()
@@ -165,7 +159,7 @@ class AppRepositoryTest {
 
     @Test
     fun `导入无效JSON返回失败`() = runBlocking {
-        val result = AppRepository.importFromJson("invalid json {{{")
+        val result = repository.importFromJson("invalid json {{{")
         assertTrue("无效 JSON 导入应失败", !result)
     }
 
@@ -183,7 +177,7 @@ class AppRepositoryTest {
              "records":[{"typeId":"heart_rate","value":72.0,"timestampMillis":2000,"source":"manual"}],
              "contacts":[],"workouts":[]}
         """.trimIndent()
-        AppRepository.importFromJson(json)
+        repository.importFromJson(json)
 
         // 验证旧数据被清空，只有新数据
         val all = db.vitalRecordDao().getAll()

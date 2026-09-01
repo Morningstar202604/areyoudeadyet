@@ -18,26 +18,30 @@ import javax.inject.Inject
  *
  * 展示紧急联系人列表、老人当前健康状态、风险等级。
  * 支持添加/删除紧急联系人，一键 SOS 呼叫。
+ *
+ * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class FamilyViewModel @Inject constructor() : ViewModel() {
+class FamilyViewModel @Inject constructor(
+    private val repository: AppRepository
+) : ViewModel() {
 
     /**
      * 紧急联系人列表。
      */
-    val contacts: StateFlow<List<Contact>> = AppRepository.contacts
+    val contacts: StateFlow<List<Contact>> = repository.contacts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
      * 最近的体征记录。
      */
-    val records: StateFlow<List<VitalRecord>> = AppRepository.records
+    val records: StateFlow<List<VitalRecord>> = repository.records
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
      * 当前风险评估结果（基于最近一次各类型体征）。
      */
-    val assessment = AppRepository.records
+    val assessment = repository.records
         .map { records ->
             if (records.isEmpty()) {
                 RiskEngine.evaluate(emptyList(), System.currentTimeMillis())
@@ -60,14 +64,14 @@ class FamilyViewModel @Inject constructor() : ViewModel() {
      * 添加紧急联系人。
      */
     fun addContact(contact: Contact) {
-        AppRepository.addContact(contact)
+        repository.addContact(contact)
     }
 
     /**
      * 删除紧急联系人。
      */
     fun removeContact(phone: String) {
-        AppRepository.removeContact(phone)
+        repository.removeContact(phone)
     }
 
     /**

@@ -20,6 +20,7 @@ import com.silema.app.R
 import com.silema.app.data.VitalType
 import com.silema.app.engine.RiskEngine
 import com.silema.app.store.AppRepository
+import com.silema.app.store.appRepositoryFrom
 import kotlinx.coroutines.flow.first
 import java.time.Duration
 import java.time.LocalDate
@@ -33,6 +34,9 @@ import java.util.concurrent.TimeUnit
  * 基于 WorkManager 周期任务，系统重启后自动恢复。
  */
 object Reminders {
+
+    /** 通过 Hilt EntryPoint 获取 AppRepository 单例（v0.6.0 起 AppRepository 改为 @Singleton 类）。 */
+    private fun repo(context: Context): AppRepository = appRepositoryFrom(context)
 
     const val CHANNEL_REMINDERS = "reminders"
     private const val WORK_MEASURE = "rem_measure_daily"
@@ -53,9 +57,9 @@ object Reminders {
     /** 依据当前设置同步测量提醒任务。 */
     fun syncMeasurement(context: Context) {
         val wm = WorkManager.getInstance(context)
-        if (AppRepository.measureReminderOn) {
+        if (repo(context).measureReminderOn) {
             val now = LocalDateTime.now()
-            var next = now.toLocalDate().atTime(AppRepository.measureReminderHour, AppRepository.measureReminderMinute)
+            var next = now.toLocalDate().atTime(repo(context).measureReminderHour, repo(context).measureReminderMinute)
             if (!next.isAfter(now)) next = next.plusDays(1)
             val delay = Duration.between(now, next)
             val request = PeriodicWorkRequestBuilder<MeasureWorker>(1, TimeUnit.DAYS)
@@ -70,7 +74,7 @@ object Reminders {
 
     fun syncSedentary(context: Context) {
         val wm = WorkManager.getInstance(context)
-        if (AppRepository.sedentaryReminderOn) {
+        if (repo(context).sedentaryReminderOn) {
             val request = PeriodicWorkRequestBuilder<SedentaryWorker>(1, TimeUnit.HOURS)
                 .addTag(WORK_SEDENTARY)
                 .build()
@@ -95,7 +99,7 @@ object Reminders {
     /** 测量提醒 Worker：当天核心指标已测齐则保持安静，缺哪项提醒哪项。 */
     class MeasureWorker(context: Context, params: WorkerParameters) : CoroutineWorker(context, params) {
         override suspend fun doWork(): Result {
-            val records = AppRepository.records.first()
+            val records = repo(context).records.first()
             val zone = ZoneId.systemDefault()
             val todayStart = LocalDate.now(zone).atStartOfDay(zone).toInstant().toEpochMilli()
             val missing = mutableListOf<String>()
@@ -126,7 +130,7 @@ object Reminders {
             val hour = LocalTime.now().hour
             if (hour in 9..20 && canNotify(applicationContext)) {
                 ensureChannel(applicationContext)
-                val stepsToday = AppRepository.records.first()
+                val stepsToday = repo(context).records.first()
                     .filter { it.typeId == VitalType.STEPS.id && RiskEngine.clockText(it.timestampMillis).startsWith(
                         java.time.format.DateTimeFormatter.ofPattern("MM-dd").format(java.time.LocalDate.now())) }
                     .maxOfOrNull { it.value } ?: 0.0

@@ -64,7 +64,7 @@ import com.silema.app.BuildConfig
 import com.silema.app.data.Contact
 import com.silema.app.data.VitalRecord
 import com.silema.app.hc.HealthConnectManager
-import com.silema.app.store.AppRepository
+import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.BigButton
 import com.silema.app.ui.components.EmptyState
 import com.silema.app.ui.components.GradientCard
@@ -90,8 +90,9 @@ import kotlinx.coroutines.launch
 @Composable
 fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
     val context = LocalContext.current
+    val repository = rememberAppRepository()
     val scope = rememberCoroutineScope()
-    val contacts by AppRepository.contacts.collectAsState()
+    val contacts by repository.contacts.collectAsState()
 
     var contactName by remember { mutableStateOf("") }
     var contactPhone by remember { mutableStateOf("") }
@@ -108,7 +109,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
             text = { Text("将删除所有体征记录、紧急联系人和设置，无法恢复。演示数据也会一并清除。") },
             confirmButton = {
                 TextButton(onClick = {
-                    AppRepository.clearAll()
+                    repository.clearAll()
                     feedbackMsg = "已清空全部数据"
                     confirmClear = false
                 }) { Text("全部删除") }
@@ -126,7 +127,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
             if (pulled.isEmpty()) {
                 "穿戴设备最近 24 小时没有新数据（确认手表已连接且华为运动健康已上传）"
             } else {
-                val added = AppRepository.mergeHealthConnect(pulled)
+                val added = repository.mergeHealthConnect(pulled)
                 if (added == 0) "同步完成：拉到 ${pulled.size} 条，但都已有记录，无新增"
                 else "同步完成：新增 $added 条数据，首页风险已重新评估"
             }
@@ -373,7 +374,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                                 name.isEmpty() -> feedbackMsg = "请填写称呼"
                                 phone.length < 5 -> feedbackMsg = "手机号看起来不对，请检查"
                                 else -> {
-                                    AppRepository.addContact(Contact(name, phone))
+                                    repository.addContact(Contact(name, phone))
                                     contactName = ""
                                     contactPhone = ""
                                     feedbackMsg = "已添加 $name"
@@ -474,10 +475,10 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
             SectionTitle("提醒设置")
         }
         item {
-            var remMeasure by remember { mutableStateOf(AppRepository.measureReminderOn) }
-            var remHour by remember { mutableStateOf(AppRepository.measureReminderHour.toString()) }
-            var remMin by remember { mutableStateOf(AppRepository.measureReminderMinute.toString()) }
-            var remSed by remember { mutableStateOf(AppRepository.sedentaryReminderOn) }
+            var remMeasure by remember { mutableStateOf(repository.measureReminderOn) }
+            var remHour by remember { mutableStateOf(repository.measureReminderHour.toString()) }
+            var remMin by remember { mutableStateOf(repository.measureReminderMinute.toString()) }
+            var remSed by remember { mutableStateOf(repository.sedentaryReminderOn) }
 
             Card(
                 modifier = Modifier.fillMaxWidth(),
@@ -495,7 +496,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                                 checked = remMeasure,
                                 onCheckedChange = { on ->
                                     requestNotifIfNeeded {
-                                        AppRepository.measureReminderOn = on
+                                        repository.measureReminderOn = on
                                         remMeasure = on
                                         com.silema.app.work.Reminders.syncMeasurement(context)
                                         feedbackMsg = if (on) "测量提醒已开启" else "测量提醒已关闭"
@@ -533,8 +534,8 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                                     val m = remMin.toIntOrNull()?.coerceIn(0, 59)
                                     if (h == null || m == null) feedbackMsg = "时间格式不对"
                                     else {
-                                        AppRepository.measureReminderHour = h
-                                        AppRepository.measureReminderMinute = m
+                                        repository.measureReminderHour = h
+                                        repository.measureReminderMinute = m
                                         com.silema.app.work.Reminders.syncMeasurement(context)
                                         feedbackMsg = "提醒时间已设为 %02d:%02d".format(h, m)
                                     }
@@ -556,7 +557,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
                                 checked = remSed,
                                 onCheckedChange = { on ->
                                     requestNotifIfNeeded {
-                                        AppRepository.sedentaryReminderOn = on
+                                        repository.sedentaryReminderOn = on
                                         remSed = on
                                         com.silema.app.work.Reminders.syncSedentary(context)
                                     }
@@ -665,6 +666,7 @@ fun GuardianScreen(records: List<VitalRecord>, onGoMedical: () -> Unit = {}) {
 
 @Composable
 private fun ContactCard(contact: Contact) {
+    val repository = rememberAppRepository()
     Card(
         modifier = Modifier.fillMaxWidth(),
         shape = AppShapes.card,
@@ -697,7 +699,7 @@ private fun ContactCard(contact: Contact) {
                 )
             }
             FilledIconButton(
-                onClick = { AppRepository.removeContact(contact.phone) },
+                onClick = { repository.removeContact(contact.phone) },
                 colors = IconButtonDefaults.filledIconButtonColors(
                     containerColor = MaterialTheme.colorScheme.surfaceVariant
                 ),

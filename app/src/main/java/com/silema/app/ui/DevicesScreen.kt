@@ -56,7 +56,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.silema.app.ble.BleVitals
-import com.silema.app.store.AppRepository
+import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.ppg.PpgMeasureSection
 import com.silema.app.ui.components.GradientCard
 import com.silema.app.ui.components.ListItemCard
@@ -75,7 +75,8 @@ import com.silema.app.ui.theme.LevelNormal
 
 @Composable
 fun DevicesScreen(onClose: () -> Unit) {
-    val records by AppRepository.records.collectAsState()
+    val repository = rememberAppRepository()
+    val records by repository.records.collectAsState()
     LazyColumn(
         modifier = Modifier
             .fillMaxSize()

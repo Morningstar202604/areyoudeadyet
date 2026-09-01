@@ -23,6 +23,7 @@ import com.silema.app.R
 import com.silema.app.data.Workout
 import com.silema.app.engine.Stats
 import com.silema.app.store.AppRepository
+import com.silema.app.store.appRepositoryFrom
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -35,6 +36,9 @@ import java.util.UUID
  * 卡路里经验公式：步行 kcal ≈ 体重kg × 公里 × 0.53；跑步 ≈ ×1.02。
  */
 class WorkoutService : android.app.Service() {
+
+    /** AppRepository 单例（v0.6.0 起通过 Hilt EntryPoint 获取）。 */
+    private lateinit var repo: AppRepository
 
     data class Live(
         val type: String,
@@ -102,6 +106,7 @@ class WorkoutService : android.app.Service() {
 
     override fun onCreate() {
         super.onCreate()
+        repo = appRepositoryFrom(this)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             val ch = NotificationChannel(CHANNEL_WORKOUT, "运动进行中", NotificationManager.IMPORTANCE_LOW)
             getSystemService(NotificationManager::class.java)?.createNotificationChannel(ch)
@@ -145,7 +150,7 @@ class WorkoutService : android.app.Service() {
                 val km = distance / 1000.0
                 val hours = elapsed / 3600.0
                 val speed = if (hours > 0) km / hours else 0.0
-                val kcal = km * AppRepository.weightKg * (if (type == "run") 1.02 else 0.53)
+                val kcal = km * repo.weightKg * (if (type == "run") 1.02 else 0.53)
                 _live.value = Live(type, elapsed, distance, track.size, kcal, speed)
                 updateNotification("${"%.2f".format(km)} km · ${elapsed / 60} 分钟")
                 if (_live.value != null) ticker?.postDelayed(this, 3000)
@@ -193,7 +198,7 @@ class WorkoutService : android.app.Service() {
         ticker?.removeCallbacksAndMessages(null)
         val elapsed = System.currentTimeMillis() - startMillis
         val km = distance / 1000.0
-        val kcal = km * AppRepository.weightKg * (if (type == "run") 1.02 else 0.53)
+        val kcal = km * repo.weightKg * (if (type == "run") 1.02 else 0.53)
         if (distance >= 20.0 && elapsed > 60_000) {
             val w = Workout(
                 id = UUID.randomUUID().toString(),
@@ -204,7 +209,7 @@ class WorkoutService : android.app.Service() {
                 caloriesKcal = Math.round(kcal * 10) / 10.0,
                 track = ArrayList(track)
             )
-            Thread { AppRepository.addWorkout(w) }.start()
+            Thread { repo.addWorkout(w) }.start()
         }
         _live.value = null
         ServiceCompat.stopForeground(this, ServiceCompat.STOP_FOREGROUND_REMOVE)

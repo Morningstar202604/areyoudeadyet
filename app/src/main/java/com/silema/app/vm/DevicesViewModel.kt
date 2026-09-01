@@ -15,14 +15,18 @@ import javax.inject.Inject
  *
  * 展示已连接的设备列表、设备状态、最近一次测量数据。
  * 支持 BLE 设备、PPG 相机测量、Health Connect 同步等数据源管理。
+ *
+ * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class DevicesViewModel @Inject constructor() : ViewModel() {
+class DevicesViewModel @Inject constructor(
+    private val repository: AppRepository
+) : ViewModel() {
 
     /**
      * 最近的体征记录（用于展示设备最近一次测量结果）。
      */
-    val recentRecords: StateFlow<List<VitalRecord>> = AppRepository.records
+    val recentRecords: StateFlow<List<VitalRecord>> = repository.records
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
@@ -38,13 +42,13 @@ class DevicesViewModel @Inject constructor() : ViewModel() {
      * 手动添加一条体征记录（设备测量后保存）。
      */
     fun addRecord(record: VitalRecord) {
-        AppRepository.addRecord(record)
+        repository.addRecord(record)
     }
 
     /**
      * 删除指定体征记录。
      */
     fun removeRecord(typeId: String, timestampMillis: Long) {
-        AppRepository.removeRecord(typeId, timestampMillis)
+        repository.removeRecord(typeId, timestampMillis)
     }
 }

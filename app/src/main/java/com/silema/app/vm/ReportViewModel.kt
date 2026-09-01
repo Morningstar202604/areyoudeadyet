@@ -18,20 +18,24 @@ import javax.inject.Inject
  *
  * 生成周报/月报，包含体征趋势、运动统计、睡眠分析、风险评估。
  * 支持 PDF 导出和分享。
+ *
+ * v0.6.0 起通过构造函数注入 [AppRepository]。
  */
 @HiltViewModel
-class ReportViewModel @Inject constructor() : ViewModel() {
+class ReportViewModel @Inject constructor(
+    private val repository: AppRepository
+) : ViewModel() {
 
     /**
      * 全部体征记录。
      */
-    val records: StateFlow<List<VitalRecord>> = AppRepository.records
+    val records: StateFlow<List<VitalRecord>> = repository.records
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
      * 全部运动记录。
      */
-    val workouts: StateFlow<List<Workout>> = AppRepository.workouts
+    val workouts: StateFlow<List<Workout>> = repository.workouts
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
 
     /**
