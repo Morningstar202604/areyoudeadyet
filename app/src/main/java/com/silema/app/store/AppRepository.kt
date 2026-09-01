@@ -206,6 +206,98 @@ object AppRepository {
         }
     }
 
+    // ---------- 数据导出/导入（备份恢复） ----------
+
+    /**
+     * 将全部数据导出为 JSON 字符串，用于备份或迁移。
+     *
+     * 包含：体征记录、联系人、运动记录、SharedPreferences 设置。
+     * 导出格式与旧版 JSON 格式兼容，可被 [importFromJson] 恢复。
+     *
+     * @return JSON 字符串，失败时返回 null
+     */
+    suspend fun exportToJson(): String? = withContext(Dispatchers.IO) {
+        val database = db ?: return@withContext null
+        val json = kotlinx.serialization.json.Json {
+            ignoreUnknownKeys = true
+            prettyPrint = true
+        }
+        runCatching {
+            val data = ExportData(
+                version = 1,
+                exportedAt = System.currentTimeMillis(),
+                records = database.vitalRecordDao().getAll().toDomain(),
+                contacts = database.contactDao().getAll().toDomain(),
+                workouts = database.workoutDao().getAll().toDomain(),
+                settings = ExportSettings(
+                    stepsGoal = stepsGoal,
+                    sleepGoalHours = sleepGoalHours,
+                    weightKg = weightKg,
+                    measureReminderOn = measureReminderOn,
+                    measureReminderHour = measureReminderHour,
+                    measureReminderMinute = measureReminderMinute,
+                    sedentaryReminderOn = sedentaryReminderOn
+                )
+            )
+            json.encodeToString(data)
+        }.onFailure { Timber.w(it, "exportToJson failed") }
+            .getOrNull()
+    }
+
+    /**
+     * 从 JSON 字符串导入数据，用于恢复备份。
+     *
+     * 导入前会清空现有数据，然后插入备份中的数据。
+     * 支持旧版 JSON 格式（仅体征记录）和新版格式（含设置）。
+     *
+     * @param json JSON 字符串
+     * @return 导入是否成功
+     */
+    suspend fun importFromJson(json: String): Boolean = withContext(Dispatchers.IO) {
+        val database = db ?: return@withContext false
+        val parser = kotlinx.serialization.json.Json { ignoreUnknownKeys = true }
+        runCatching {
+            // 先尝试解析新版格式
+            val data = parser.decodeFromString<ExportData>(json)
+            // 清空现有数据
+            database.vitalRecordDao().clearAll()
+            database.contactDao().clearAll()
+            database.workoutDao().clearAll()
+            // 插入备份数据
+            if (data.records.isNotEmpty()) {
+                database.vitalRecordDao().insertAll(data.records.toEntity())
+            }
+            if (data.contacts.isNotEmpty()) {
+                data.contacts.forEach { database.contactDao().insert(it.toEntity()) }
+            }
+            if (data.workouts.isNotEmpty()) {
+                data.workouts.forEach { database.workoutDao().insert(it.toEntity()) }
+            }
+            // 恢复设置
+            data.settings?.let { s ->
+                stepsGoal = s.stepsGoal
+                sleepGoalHours = s.sleepGoalHours
+                weightKg = s.weightKg
+                measureReminderOn = s.measureReminderOn
+                measureReminderHour = s.measureReminderHour
+                measureReminderMinute = s.measureReminderMinute
+                sedentaryReminderOn = s.sedentaryReminderOn
+            }
+            Timber.i("importFromJson: records=${data.records.size} contacts=${data.contacts.size} workouts=${data.workouts.size}")
+            true
+        }.recoverCatching {
+            // 新版解析失败，尝试旧版格式（仅体征记录）
+            val legacy = parser.decodeFromString<LegacyVitalsFile>(json)
+            database.vitalRecordDao().clearAll()
+            if (legacy.records.isNotEmpty()) {
+                database.vitalRecordDao().insertAll(legacy.records.toEntity())
+            }
+            Timber.i("importFromJson (legacy): records=${legacy.records.size}")
+            true
+        }.onFailure { Timber.w(it, "importFromJson failed") }
+            .getOrDefault(false)
+    }
+
     // ---------- 目标与提醒设置（SharedPreferences） ----------
 
     var stepsGoal: Int
@@ -294,4 +386,27 @@ object AppRepository {
 
     @kotlinx.serialization.Serializable
     private data class LegacyWorkoutsFile(val workouts: List<Workout>)
+
+    // ---------- 导出/导入数据结构（v1 格式） ----------
+
+    @kotlinx.serialization.Serializable
+    private data class ExportData(
+        val version: Int,
+        val exportedAt: Long,
+        val records: List<VitalRecord>,
+        val contacts: List<Contact>,
+        val workouts: List<Workout>,
+        val settings: ExportSettings? = null
+    )
+
+    @kotlinx.serialization.Serializable
+    private data class ExportSettings(
+        val stepsGoal: Int,
+        val sleepGoalHours: Int,
+        val weightKg: Int,
+        val measureReminderOn: Boolean,
+        val measureReminderHour: Int,
+        val measureReminderMinute: Int,
+        val sedentaryReminderOn: Boolean
+    )
 }
