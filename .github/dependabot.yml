@@ -27,3 +27,9 @@ updates:
         versions: [">=2026.08.00"]
       - dependency-name: "gradle"
         versions: [">=9.6.0"]
+      # Kotlin 2.4 生成元数据 2.4.0，Hilt 内置的 kotlin-metadata-jvm 只读到 2.3.0；
+      # 能读 2.4 的 Hilt 2.58+ 又强制 AGP 9 —— AGP 9 迁移（#15）完成后再放行
+      - dependency-name: "org.jetbrains.kotlin*"
+        versions: [">=2.4.0"]
+      - dependency-name: "com.google.dagger.hilt.android"
+        versions: [">=2.58.0"]
