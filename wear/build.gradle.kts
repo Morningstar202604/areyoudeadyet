@@ -97,8 +97,8 @@ dependencies {
     implementation(project(":core"))
 
     // ---------- Hilt 依赖注入 ----------
-    implementation("com.google.dagger:hilt-android:2.52")
-    kapt("com.google.dagger:hilt-android-compiler:2.52")
+    implementation("com.google.dagger:hilt-android:2.60.1")
+    kapt("com.google.dagger:hilt-android-compiler:2.60.1")
     implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 
     // ---------- Timber 日志 ----------
