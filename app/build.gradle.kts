@@ -111,7 +111,7 @@ dependencies {
     implementation("androidx.work:work-runtime-ktx:2.9.1")
 
     // ---------- 序列化 ----------
-    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    implementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.11.0")
 
     // ---------- Room 数据库 ----------
     implementation("androidx.room:room-runtime:2.8.4")
