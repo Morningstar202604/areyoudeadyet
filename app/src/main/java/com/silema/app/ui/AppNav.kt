@@ -120,22 +120,10 @@ fun AppRoot(
                 EntryScreenV3(onClose = { navController.popBackStack() })
             }
             composable(Routes.WORKOUT) {
-                // 运动屏幕占位（后续重构）
-                androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center,
-                ) {
-                    Text("运动功能开发中...", style = MaterialTheme.typography.titleMedium)
-                }
+                WorkoutScreenV3()
             }
             composable(Routes.SOS) {
-                // SOS 屏幕占位（后续重构）
-                androidx.compose.foundation.layout.Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = androidx.compose.ui.Alignment.Center,
-                ) {
-                    Text("SOS 紧急呼救功能开发中...", style = MaterialTheme.typography.titleMedium)
-                }
+                SosScreenV3()
             }
         }
     }

@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.dp
 import com.silema.app.ui.theme.AppElevation
 import com.silema.app.ui.theme.AppShapes
 import com.silema.app.ui.theme.AppSize
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 
 /**
  * 现代进度环组件（参考 Keep 数据展示风格）。
@@ -50,7 +51,7 @@ fun ProgressRing(
     size: Dp = 120.dp,
     strokeWidth: Dp = AppSize.progressRingWidth,
     gradientColors: List<Color>,
-    trackColor: Color = Color(0xFFE0E0E0),
+    trackColor: Color = MaterialTheme.colorScheme.outlineVariant,
     centerContent: @Composable () -> Unit = {},
 ) {
     val animatedProgress by animateFloatAsState(
@@ -94,19 +95,25 @@ fun ProgressRing(
 /**
  * 玻璃拟态卡片组件（现代毛玻璃质感）。
  *
- * 半透明白色背景 + 柔和阴影 + 大圆角，用于 Dashboard 数据卡片。
+ * 半透明背景 + 柔和阴影 + 大圆角，用于 Dashboard 数据卡片。
  */
 @Composable
 fun GlassCard(
     modifier: Modifier = Modifier,
-    backgroundColor: Color = Color.White.copy(alpha = 0.85f),
+    backgroundColor: Color = Color.Unspecified,
     elevation: Dp = AppElevation.medium,
     content: @Composable () -> Unit,
 ) {
+    val themeColors = LocalSilemaThemeColors.current
+    val bgColor = if (backgroundColor == Color.Unspecified) {
+        themeColors.surfaceGlass
+    } else {
+        backgroundColor
+    }
     Card(
         modifier = modifier,
         shape = AppShapes.card,
-        colors = CardDefaults.cardColors(containerColor = backgroundColor),
+        colors = CardDefaults.cardColors(containerColor = bgColor),
         elevation = CardDefaults.cardElevation(defaultElevation = elevation),
     ) {
         content()
@@ -306,7 +313,23 @@ fun MiniTrendChart(
     modifier: Modifier = Modifier,
     height: Dp = 32.dp,
 ) {
-    if (data.isEmpty()) return
+    if (data.isEmpty()) {
+        // 空数据时显示占位线
+        Canvas(
+            modifier = modifier
+                .fillMaxWidth()
+                .height(height),
+        ) {
+            drawLine(
+                color = color.copy(alpha = 0.2f),
+                start = Offset(0f, size.height / 2),
+                end = Offset(size.width, size.height / 2),
+                strokeWidth = 2.dp.toPx(),
+                cap = StrokeCap.Round,
+            )
+        }
+        return
+    }
 
     val max = data.maxOrNull() ?: 1f
     val min = data.minOrNull() ?: 0f

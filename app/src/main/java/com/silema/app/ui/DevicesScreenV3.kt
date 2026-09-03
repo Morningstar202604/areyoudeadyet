@@ -45,16 +45,19 @@ import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.IconItem
 import com.silema.app.ui.theme.AppSpacing
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
 import com.silema.app.ui.theme.DataHeart
 import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
+import androidx.compose.ui.res.stringResource
+import com.silema.app.R
 
 /**
  * 设备屏幕 V3 — 现代健康活力风。
@@ -63,6 +66,7 @@ import com.silema.app.ui.theme.DataPressure
  */
 @Composable
 fun DevicesScreenV3(onClose: () -> Unit = {}) {
+    val themeColors = LocalSilemaThemeColors.current
     val repository = rememberAppRepository()
     val records by repository.records.collectAsState(initial = emptyList())
 
@@ -76,9 +80,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -88,13 +90,13 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
         // 1. 标题
         item {
             Text(
-                text = "设备管理",
+                text = stringResource(R.string.devices_title_management),
                 style = MaterialTheme.typography.headlineMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Text(
-                text = "连接健康设备，自动同步测量数据",
+                text = stringResource(R.string.devices_subtitle),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
             )
@@ -103,7 +105,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
         // 2. 最近测量数据
         item {
             Text(
-                text = "最近测量",
+                text = stringResource(R.string.devices_recent_measurements),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -117,8 +119,8 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         DataHeart,
                         Triple(
                             latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--",
-                            "次/分",
-                            "心率",
+                            stringResource(R.string.unit_bpm),
+                            stringResource(R.string.dashboard_heart_rate),
                         ),
                     ),
                     Triple(
@@ -127,7 +129,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         Triple(
                             latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--",
                             "mmHg",
-                            "血压",
+                            stringResource(R.string.dashboard_blood_pressure),
                         ),
                     ),
                     Triple(
@@ -136,7 +138,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         Triple(
                             latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
                             "%",
-                            "血氧",
+                            stringResource(R.string.dashboard_blood_oxygen),
                         ),
                     ),
                     Triple(
@@ -144,8 +146,8 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
                         BrandGreen,
                         Triple(
                             latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
-                            "步",
-                            "步数",
+                            stringResource(R.string.common_step),
+                            stringResource(R.string.dashboard_steps),
                         ),
                     ),
                 )
@@ -185,7 +187,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
         // 3. 已连接设备
         item {
             Text(
-                text = "已连接设备",
+                text = stringResource(R.string.devices_connected),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -194,9 +196,9 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
 
             val connectedDevices =
                 listOf(
-                    GradientItem("PPG 相机测量", "手机摄像头", Icons.Default.CameraAlt, CardGradientOrange),
-                    GradientItem("Health Connect", "系统健康服务", Icons.Default.Sync, CardGradientBlue),
-                    GradientItem("手动记录", "手动输入数据", Icons.Default.Edit, CardGradientGreen),
+                    GradientItem(stringResource(R.string.devices_connected_ppg), stringResource(R.string.devices_connected_ppg_desc), Icons.Default.CameraAlt, cardGradientOrange()),
+                    GradientItem(stringResource(R.string.devices_connected_health_connect), stringResource(R.string.devices_connected_health_connect_desc), Icons.Default.Sync, cardGradientBlue()),
+                    GradientItem(stringResource(R.string.devices_connected_manual), stringResource(R.string.devices_connected_manual_desc), Icons.Default.Edit, cardGradientGreen()),
                 )
 
             connectedDevices.forEach { (name, desc, icon, gradient) ->
@@ -214,7 +216,7 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
         // 4. 可连接设备
         item {
             Text(
-                text = "可连接设备",
+                text = stringResource(R.string.devices_available),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -223,9 +225,9 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
 
             val availableDevices =
                 listOf(
-                    IconItem("蓝牙心率带", "BLE 心率监测", Icons.Default.Bluetooth, BrandBlue),
-                    IconItem("蓝牙血压计", "BLE 血压监测", Icons.Default.MonitorHeart, BrandPurple),
-                    IconItem("蓝牙血氧仪", "BLE 血氧监测", Icons.Default.HealthAndSafety, BrandWarm),
+                    IconItem(stringResource(R.string.devices_available_bluetooth_hr), stringResource(R.string.devices_available_bluetooth_hr_desc), Icons.Default.Bluetooth, BrandBlue),
+                    IconItem(stringResource(R.string.devices_available_bluetooth_bp), stringResource(R.string.devices_available_bluetooth_bp_desc), Icons.Default.MonitorHeart, BrandPurple),
+                    IconItem(stringResource(R.string.devices_available_bluetooth_spo2), stringResource(R.string.devices_available_bluetooth_spo2_desc), Icons.Default.HealthAndSafety, BrandWarm),
                 )
 
             availableDevices.forEach { (name, desc, icon, color) ->
@@ -343,7 +345,7 @@ private fun DeviceCard(
                         modifier = Modifier.size(16.dp),
                     )
                     Text(
-                        text = "已连接",
+                        text = stringResource(R.string.devices_status_connected),
                         style = MaterialTheme.typography.labelSmall,
                         color = BrandGreen,
                         fontWeight = FontWeight.Medium,
@@ -398,7 +400,7 @@ private fun AvailableDeviceCard(
                 )
             }
             OutlinedButton(onClick = { /* 扫描连接 */ }) {
-                Text("连接", style = MaterialTheme.typography.labelMedium)
+                Text(stringResource(R.string.devices_button_connect), style = MaterialTheme.typography.labelMedium)
             }
         }
     }

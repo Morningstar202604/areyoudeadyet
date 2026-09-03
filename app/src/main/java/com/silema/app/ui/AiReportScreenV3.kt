@@ -36,6 +36,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.data.AlertItem
 import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalRecord
 import com.silema.app.data.VitalType
@@ -45,17 +46,20 @@ import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.ProgressRing
 import com.silema.app.ui.theme.AppSpacing
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
-import com.silema.app.ui.theme.CardGradientPurple
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
+import com.silema.app.ui.theme.cardGradientPurple
 import com.silema.app.ui.theme.DataHeart
 import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
 import com.silema.app.ui.theme.DataSteps
 import com.silema.app.ui.theme.HealthGradientSteps
 import com.silema.app.ui.theme.riskColor
+import androidx.compose.ui.res.stringResource
+import com.silema.app.R
 
 /**
  * AI 健康分析屏幕 V3 — 现代健康活力风。
@@ -64,6 +68,7 @@ import com.silema.app.ui.theme.riskColor
  */
 @Composable
 fun AiReportScreenV3(records: List<VitalRecord>) {
+    val themeColors = LocalSilemaThemeColors.current
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val latest =
         remember(records) {
@@ -83,9 +88,7 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -101,30 +104,30 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
             ) {
                 Column {
                     Text(
-                        text = "AI 健康分析",
+                        text = stringResource(R.string.ai_title),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        text = "智能分析健康数据，提供个性化建议",
+                        text = stringResource(R.string.ai_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 OutlinedButton(onClick = { /* 重新分析 */ }) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Text("刷新", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 4.dp))
+                    Text(stringResource(R.string.ai_refresh), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 4.dp))
                 }
             }
         }
 
-        // 2. AI 分析横幅
+// 2. AI 分析横幅
         item {
             GradientBanner(
-                title = "AI 智能分析",
-                subtitle = "基于您的健康数据，AI 为您生成个性化健康报告",
-                gradientColors = CardGradientPurple,
+                title = stringResource(R.string.ai_analysis_banner_title),
+                subtitle = stringResource(R.string.ai_analysis_banner_subtitle),
+                gradientColors = cardGradientPurple(),
                 icon = Icons.Default.AutoAwesome,
             )
         }
@@ -141,7 +144,7 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
                     Text(
-                        text = "综合健康评分",
+                        text = stringResource(R.string.ai_comprehensive_score),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onSurface,
@@ -185,7 +188,7 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
         // 4. 各项指标分析
         item {
             Text(
-                text = "指标分析",
+                text = stringResource(R.string.ai_metric_analysis),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
@@ -199,8 +202,8 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                         DataHeart,
                         Triple(
                             latest[VitalType.HEART_RATE.id]?.value?.toInt()?.toString() ?: "--",
-                            "次/分",
-                            "心率",
+                            stringResource(R.string.unit_bpm),
+                            stringResource(R.string.vital_heart_rate),
                         ),
                     ),
                     Triple(
@@ -209,7 +212,7 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                         Triple(
                             latest[VitalType.SYSTOLIC.id]?.value?.toInt()?.toString() ?: "--",
                             "mmHg",
-                            "血压",
+                            stringResource(R.string.vital_blood_pressure),
                         ),
                     ),
                     Triple(
@@ -218,7 +221,7 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                         Triple(
                             latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
                             "%",
-                            "血氧",
+                            stringResource(R.string.vital_oxygen),
                         ),
                     ),
                     Triple(
@@ -226,8 +229,8 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                         DataSteps,
                         Triple(
                             latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
-                            "步",
-                            "步数",
+                            stringResource(R.string.ai_unit_steps),
+                            stringResource(R.string.vital_steps),
                         ),
                     ),
                 )
@@ -239,28 +242,51 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                     value = data.first,
                     unit = data.second,
                     label = data.third,
-                    analysis = "指标正常，继续保持",
+                    analysis = stringResource(R.string.ai_metric_normal_keep),
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
         }
 
-        // 5. AI 健康建议
+        // 5. AI 健康建议 (alerts)
+        if (assessment.alerts.isNotEmpty()) {
+            item {
+                Text(
+                    text = stringResource(R.string.ai_health_alerts),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.onBackground,
+                )
+                Spacer(modifier = Modifier.height(AppSpacing.sm))
+
+                assessment.alerts.forEach { alert ->
+                    AlertCard(alert)
+                    Spacer(modifier = Modifier.height(AppSpacing.sm))
+                }
+            }
+        }
+
+        // 6. AI 健康建议
         item {
             Text(
-                text = "AI 健康建议",
+                text = stringResource(R.string.ai_health_suggestions_title),
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onBackground,
             )
             Spacer(modifier = Modifier.height(AppSpacing.sm))
 
-            val suggestions =
-                listOf(
-                    GradientItem("适量运动", "建议每天步行 30 分钟，有助于心血管健康", Icons.Default.Favorite, CardGradientGreen),
-                    GradientItem("规律作息", "保持每天 7-8 小时睡眠，有助于身体恢复", Icons.Default.HealthAndSafety, CardGradientBlue),
-                    GradientItem("均衡饮食", "多吃蔬菜水果，减少高盐高脂食物", Icons.Default.Lightbulb, CardGradientOrange),
-                )
+            val suggestions = mutableListOf<GradientItem>()
+
+            if (assessment.level == RiskLevel.NORMAL) {
+                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_keep_good), stringResource(R.string.ai_suggestion_keep_good_desc), Icons.Default.Favorite, cardGradientGreen()))
+            }
+            if (assessment.missingToday.isNotEmpty()) {
+                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_complete_today), stringResource(R.string.ai_suggestion_complete_today_desc), Icons.Default.MonitorHeart, cardGradientBlue()))
+            }
+            if (assessment.alerts.any { it.level == RiskLevel.WARNING || it.level == RiskLevel.CRITICAL }) {
+                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_watch_alerts), stringResource(R.string.ai_suggestion_watch_alerts_desc), Icons.Default.Lightbulb, cardGradientOrange()))
+            }
 
             suggestions.forEach { (title, desc, icon, gradient) ->
                 SuggestionCard(
@@ -273,12 +299,12 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
             }
         }
 
-        // 6. 趋势预测
+        // 7. 趋势预测
         item {
             GradientBanner(
-                title = "健康趋势预测",
-                subtitle = "基于历史数据，AI 预测未来 7 天健康趋势",
-                gradientColors = CardGradientBlue,
+                title = stringResource(R.string.ai_trend_prediction_title),
+                subtitle = stringResource(R.string.ai_trend_prediction_subtitle),
+                gradientColors = cardGradientBlue(),
                 icon = Icons.Default.TrendingUp,
             )
         }
@@ -391,6 +417,67 @@ private fun SuggestionCard(
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
             }
+        }
+    }
+}
+
+/**
+ * 预警卡片组件。
+ */
+@Composable
+private fun AlertCard(alert: AlertItem) {
+    GlassCard {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .size(12.dp)
+                            .clip(CircleShape)
+                            .background(riskColor(alert.level)),
+                    )
+                    Text(
+                        text = alert.metric,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Bold,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                }
+                Text(
+                    text = alert.level.label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = riskColor(alert.level),
+                    fontWeight = FontWeight.Bold,
+                )
+            }
+            Text(
+                text = alert.problem,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+            Text(
+                text = alert.why,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+            )
+            Text(
+                text = alert.action,
+                style = MaterialTheme.typography.bodySmall,
+                color = BrandGreen,
+                fontWeight = FontWeight.Medium,
+            )
         }
     }
 }

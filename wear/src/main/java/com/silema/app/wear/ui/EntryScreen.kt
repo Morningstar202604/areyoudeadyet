@@ -1,5 +1,6 @@
 package com.silema.app.wear.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -11,6 +12,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.MaterialTheme
@@ -26,7 +28,7 @@ import com.silema.app.wear.Screen
 import com.silema.app.wear.data.WearStore
 
 @Composable
-fun EntryScreen(onNavigate: (Screen) -> Unit) {
+fun EntryScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
     val types = listOf(
         VitalType.HEART_RATE, VitalType.SYSTOLIC, VitalType.DIASTOLIC,
         VitalType.SPO2, VitalType.TEMPERATURE, VitalType.STEPS
@@ -52,7 +54,7 @@ fun EntryScreen(onNavigate: (Screen) -> Unit) {
         initiallySelectedOption = selected - range.first
     )
 
-    ScalingLazyColumn(modifier = Modifier.fillMaxSize()) {
+    ScalingLazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 32.dp)) {
         item {
             Text(
                 text = stringResource(R.string.entry_title),

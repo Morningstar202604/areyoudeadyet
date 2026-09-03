@@ -26,7 +26,7 @@ import com.silema.app.wear.R
 import com.silema.app.wear.Screen
 
 @Composable
-fun SosScreen(onNavigate: (Screen) -> Unit) {
+fun SosScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
     var triggered by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {

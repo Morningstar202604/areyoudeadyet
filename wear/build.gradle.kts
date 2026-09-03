@@ -104,6 +104,19 @@ dependencies {
     // ---------- Timber 日志 ----------
     implementation("com.jakewharton.timber:timber:5.0.1")
 
+    // ---------- Health Connect ----------
+    implementation("androidx.health.connect:connect-client:1.1.0-alpha07")
+
+    // ---------- Wear OS Data Layer ----------
+    implementation("com.google.android.gms:play-services-wearable:18.2.0")
+    compileOnly("com.google.android.wearable:wearable:2.9.0")
+    implementation("com.google.android.support:wearable:2.9.0")
+    implementation("androidx.core:core-ktx:1.13.1")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.8.1")
+
+    // ---------- DataStore ----------
+    implementation("androidx.datastore:datastore-preferences:1.1.1")
+
     // ---------- 单元测试 ----------
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.8.1")

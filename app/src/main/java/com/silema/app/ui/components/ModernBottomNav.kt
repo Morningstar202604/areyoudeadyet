@@ -27,7 +27,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.silema.app.ui.theme.AppShapes
 
 /**
@@ -93,7 +92,7 @@ fun ModernBottomNav(
                         Box(
                             modifier =
                                 Modifier
-                                    .size(40.dp)
+                                    .size(48.dp)
                                     .clip(CircleShape)
                                     .background(
                                         Brush.horizontalGradient(
@@ -109,7 +108,7 @@ fun ModernBottomNav(
                                 imageVector = item.icon,
                                 contentDescription = item.label,
                                 tint = iconColor,
-                                modifier = Modifier.size(22.dp),
+                                modifier = Modifier.size(24.dp),
                             )
                         }
                     } else {
@@ -123,10 +122,9 @@ fun ModernBottomNav(
 
                     Text(
                         text = item.label,
-                        style = MaterialTheme.typography.labelMedium,
+                        style = MaterialTheme.typography.labelSmall,
                         color = textColor,
                         fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = 12.sp,
                     )
                 }
             }

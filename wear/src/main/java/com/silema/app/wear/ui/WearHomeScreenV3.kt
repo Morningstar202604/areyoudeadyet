@@ -9,13 +9,17 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AutoAwesome
+import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.HealthAndSafety
 import androidx.compose.material.icons.filled.MonitorHeart
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sos
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -33,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Card
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
+import androidx.wear.compose.material.ScalingLazyColumn
 import androidx.wear.compose.material.Text
 import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalType
@@ -59,6 +64,9 @@ fun WearHomeScreenV3(
     onGoSos: () -> Unit = {},
     onGoMeasure: () -> Unit = {},
     onGoWorkout: () -> Unit = {},
+    onGoSettings: () -> Unit = {},
+    onGoAi: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
     val records by WearStore.records.collectAsState(initial = emptyList())
     val assessment = remember(records) { RiskEngine.evaluate(records) }
@@ -91,117 +99,188 @@ fun WearHomeScreenV3(
                 ),
         contentAlignment = Alignment.Center,
     ) {
-        Column(
+        ScalingLazyColumn(
             modifier =
                 Modifier
                     .fillMaxSize()
                     .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+            contentPadding = PaddingValues(vertical = 32.dp),
         ) {
-            // 1. 风险等级指示（顶部小条）
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically,
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(8.dp)
-                            .clip(CircleShape)
-                            .background(riskColor),
-                )
-                Spacer(modifier = Modifier.size(6.dp))
-                Text(
-                    text = assessment.level.label,
-                    style = MaterialTheme.typography.caption2,
-                    color = riskColor,
-                    fontWeight = FontWeight.Bold,
-                )
-            }
-
-            // 2. 心率大数字（核心展示）
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(2.dp),
-            ) {
-                Icon(
-                    imageVector = Icons.Default.Favorite,
-                    contentDescription = null,
-                    tint = Color(0xFFE91E63),
-                    modifier = Modifier.size(20.dp),
-                )
-                Text(
-                    text = heartRate.toString(),
-                    style = MaterialTheme.typography.display1,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    textAlign = TextAlign.Center,
-                )
-                Text(
-                    text = "次/分",
-                    style = MaterialTheme.typography.caption2,
-                    color = Color.White.copy(alpha = 0.7f),
-                )
-            }
-
-            // 3. 血氧/步数 小数据行
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceEvenly,
-            ) {
-                MiniDataItem(
-                    icon = Icons.Default.HealthAndSafety,
-                    value = latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
-                    unit = "%",
-                    label = "血氧",
-                    color = Color(0xFF00BCD4),
-                )
-                MiniDataItem(
-                    icon = Icons.Default.MonitorHeart,
-                    value = latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
-                    unit = "步",
-                    label = "步数",
-                    color = Color(0xFF8BC34A),
-                )
-            }
-
-            // 4. SOS 大按钮
-            Card(
-                onClick = onGoSos,
-                modifier =
-                    Modifier
-                        .fillMaxWidth()
-                        .height(48.dp),
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.horizontalGradient(
-                                    listOf(Color(0xFFE53935), Color(0xFFB71C1C)),
-                                ),
-                            ),
-                    contentAlignment = Alignment.Center,
+            item {
+                // 1. 风险等级指示（顶部小条）
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Row(
-                        horizontalArrangement = Arrangement.spacedBy(6.dp),
-                        verticalAlignment = Alignment.CenterVertically,
+                    Box(
+                        modifier =
+                            Modifier
+                                .size(8.dp)
+                                .clip(CircleShape)
+                                .background(riskColor),
+                    )
+                    Spacer(modifier = Modifier.size(6.dp))
+                    Text(
+                        text = assessment.level.label,
+                        style = MaterialTheme.typography.caption2,
+                        color = riskColor,
+                        fontWeight = FontWeight.Bold,
+                    )
+                }
+            }
+
+            item {
+                // 2. 心率大数字（核心展示）
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.spacedBy(2.dp),
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Favorite,
+                        contentDescription = null,
+                        tint = Color(0xFFE91E63),
+                        modifier = Modifier.size(20.dp),
+                    )
+                    Text(
+                        text = heartRate.toString(),
+                        style = MaterialTheme.typography.display1,
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                    )
+                    Text(
+                        text = "次/分",
+                        style = MaterialTheme.typography.caption2,
+                        color = Color.White.copy(alpha = 0.7f),
+                    )
+                }
+            }
+
+            item {
+                // 3. 血氧/步数 小数据行
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    MiniDataItem(
+                        icon = Icons.Default.HealthAndSafety,
+                        value = latest[VitalType.SPO2.id]?.value?.toInt()?.toString() ?: "--",
+                        unit = "%",
+                        label = "血氧",
+                        color = Color(0xFF00BCD4),
+                    )
+                    MiniDataItem(
+                        icon = Icons.Default.MonitorHeart,
+                        value = latest[VitalType.STEPS.id]?.value?.toInt()?.toString() ?: "0",
+                        unit = "步",
+                        label = "步数",
+                        color = Color(0xFF8BC34A),
+                    )
+                }
+            }
+
+            item {
+                // 4. SOS 大按钮
+                Card(
+                    onClick = onGoSos,
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(48.dp),
+                ) {
+                    Box(
+                        modifier =
+                            Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.horizontalGradient(
+                                        listOf(Color(0xFFE53935), Color(0xFFB71C1C)),
+                                    ),
+                                ),
+                        contentAlignment = Alignment.Center,
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Sos,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp),
-                        )
-                        Text(
-                            text = "紧急呼救",
-                            style = MaterialTheme.typography.button,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                        )
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(6.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Sos,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp),
+                            )
+                            Text(
+                                text = "紧急呼救",
+                                style = MaterialTheme.typography.button,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                            )
+                        }
+                    }
+                }
+            }
+
+            item {
+                // 5. 功能导航行
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                ) {
+                    Card(
+                        onClick = onGoAi,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF7C4DFF).copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.AutoAwesome,
+                                contentDescription = "AI",
+                                tint = Color(0xFF7C4DFF),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    Card(
+                        onClick = onGoWorkout,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF8BC34A).copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.DirectionsWalk,
+                                contentDescription = "运动",
+                                tint = Color(0xFF8BC34A),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
+                    }
+                    Card(
+                        onClick = onGoSettings,
+                        modifier = Modifier.size(48.dp),
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(Color(0xFF9E9E9E).copy(alpha = 0.3f)),
+                            contentAlignment = Alignment.Center,
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Settings,
+                                contentDescription = "设置",
+                                tint = Color(0xFF9E9E9E),
+                                modifier = Modifier.size(20.dp),
+                            )
+                        }
                     }
                 }
             }

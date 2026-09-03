@@ -41,9 +41,10 @@ import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.ProgressRing
 import com.silema.app.ui.theme.AppSpacing
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
 import com.silema.app.ui.theme.DataHeart
 import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
@@ -61,6 +62,7 @@ import java.util.Locale
  */
 @Composable
 fun ReportScreenV3(records: List<VitalRecord>) {
+    val themeColors = LocalSilemaThemeColors.current
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val latest =
         remember(records) {
@@ -80,9 +82,7 @@ fun ReportScreenV3(records: List<VitalRecord>) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -220,7 +220,7 @@ fun ReportScreenV3(records: List<VitalRecord>) {
                     value = data.first,
                     unit = data.second,
                     label = data.third,
-                    status = "正常",
+                    status = assessment.level.label,
                 )
                 Spacer(modifier = Modifier.height(AppSpacing.sm))
             }
@@ -231,7 +231,7 @@ fun ReportScreenV3(records: List<VitalRecord>) {
             GradientBanner(
                 title = "导出健康报告",
                 subtitle = "导出 PDF / JSON 格式，方便就医时提供给医生",
-                gradientColors = CardGradientGreen,
+                gradientColors = cardGradientGreen(),
                 icon = Icons.Default.Download,
             )
         }
@@ -241,7 +241,7 @@ fun ReportScreenV3(records: List<VitalRecord>) {
             GradientBanner(
                 title = "AI 健康分析",
                 subtitle = "智能分析健康趋势，提供个性化建议",
-                gradientColors = CardGradientOrange,
+                gradientColors = cardGradientOrange(),
                 icon = Icons.Default.TrendingUp,
             )
         }
