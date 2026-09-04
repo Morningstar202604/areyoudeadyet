@@ -16,7 +16,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Call
-import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Message
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Warning
@@ -25,8 +24,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -51,15 +48,17 @@ fun SosScreenV3(
     val themeColors = LocalSilemaThemeColors.current
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(themeColors.backgroundGradient))
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(themeColors.backgroundGradient))
+                .padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            top = AppSpacing.xxl,
-            bottom = 100.dp
-        ),
+        contentPadding =
+            androidx.compose.foundation.layout.PaddingValues(
+                top = AppSpacing.xxl,
+                bottom = 100.dp,
+            ),
     ) {
         item {
             Column {
@@ -79,11 +78,12 @@ fun SosScreenV3(
 
         item {
             Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(200.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .background(Brush.verticalGradient(CardGradientRed)),
+                modifier =
+                    Modifier
+                        .fillMaxWidth()
+                        .height(200.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .background(Brush.verticalGradient(CardGradientRed)),
                 contentAlignment = Alignment.Center,
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -107,9 +107,10 @@ fun SosScreenV3(
         item {
             GlassCard {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly,
                 ) {
                     SosButton(
@@ -137,9 +138,10 @@ fun SosScreenV3(
         item {
             GlassCard {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
@@ -160,9 +162,10 @@ fun SosScreenV3(
         item {
             GlassCard {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(16.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp),
                 ) {
                     Text(
@@ -191,10 +194,11 @@ private fun SosButton(
 ) {
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         Box(
-            modifier = Modifier
-                .size(64.dp)
-                .clip(CircleShape)
-                .background(Brush.verticalGradient(gradient)),
+            modifier =
+                Modifier
+                    .size(64.dp)
+                    .clip(CircleShape)
+                    .background(Brush.verticalGradient(gradient)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(icon, contentDescription = label, tint = Color.White, modifier = Modifier.size(32.dp))

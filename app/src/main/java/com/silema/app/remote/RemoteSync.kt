@@ -11,7 +11,10 @@ interface RemoteSync {
     suspend fun isAvailable(): Boolean
 
     /** Authenticate with remote backend (phone/email/token) */
-    suspend fun login(credential: String, password: String): Result<AuthResult>
+    suspend fun login(
+        credential: String,
+        password: String,
+    ): Result<AuthResult>
 
     /** Push local records to remote. Returns number of records synced. */
     suspend fun pushRecords(records: List<VitalRecord>): Result<Int>
@@ -23,10 +26,16 @@ interface RemoteSync {
     suspend fun getFamilyMembers(): Result<List<FamilyMember>>
 
     /** Get remote vital data for a specific family member */
-    suspend fun getFamilyVitals(memberId: String, sinceTimestamp: Long): Result<List<VitalRecord>>
+    suspend fun getFamilyVitals(
+        memberId: String,
+        sinceTimestamp: Long,
+    ): Result<List<VitalRecord>>
 
     /** Push alert notification to family members */
-    suspend fun pushAlert(memberId: String, alert: AlertItem): Result<Unit>
+    suspend fun pushAlert(
+        memberId: String,
+        alert: AlertItem,
+    ): Result<Unit>
 
     /** Logout */
     suspend fun logout()
@@ -39,20 +48,21 @@ data class AuthResult(
     val userId: String,
     val token: String,
     val displayName: String,
-    val expiresAt: Long
+    val expiresAt: Long,
 )
 
 data class FamilyMember(
     val id: String,
     val name: String,
-    val relationship: String, // "父亲", "母亲", "配偶", "子女"
+    // "父亲", "母亲", "配偶", "子女"
+    val relationship: String,
     val avatarUrl: String?,
-    val lastOnline: Long
+    val lastOnline: Long,
 )
 
 data class SyncStatus(
     val lastSyncTime: Long,
     val pendingUploads: Int,
     val isSyncing: Boolean,
-    val error: String?
+    val error: String?,
 )

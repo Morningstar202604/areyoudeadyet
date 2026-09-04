@@ -19,8 +19,9 @@ import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 
-class WearDataLayerClient(private val context: Context) {
-
+class WearDataLayerClient(
+    private val context: Context,
+) {
     companion object {
         const val PATH_VITAL_RECORDS = "/vital_records"
         const val PATH_HEART_RATE = "/heart_rate"
@@ -45,73 +46,87 @@ class WearDataLayerClient(private val context: Context) {
 
     sealed class SyncState {
         data object Idle : SyncState()
+
         data object Syncing : SyncState()
-        data class Success(val recordsCount: Int) : SyncState()
-        data class Error(val message: String) : SyncState()
+
+        data class Success(
+            val recordsCount: Int,
+        ) : SyncState()
+
+        data class Error(
+            val message: String,
+        ) : SyncState()
     }
 
     private fun recordsToJson(records: List<VitalRecord>): String {
         val jsonArray = JSONArray()
         for (record in records) {
-            val obj = JSONObject().apply {
-                put("typeId", record.typeId)
-                put("value", record.value)
-                put("timestamp", record.timestampMillis)
-                put("source", record.source)
-            }
+            val obj =
+                JSONObject().apply {
+                    put("typeId", record.typeId)
+                    put("value", record.value)
+                    put("timestamp", record.timestampMillis)
+                    put("source", record.source)
+                }
             jsonArray.put(obj)
         }
         return jsonArray.toString()
     }
 
-    suspend fun sendVitalRecords(records: List<VitalRecord>): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val putRequest = PutDataMapRequest.create(PATH_VITAL_RECORDS).apply {
-                dataMap.putString(KEY_RECORDS_JSON, recordsToJson(records))
-                dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+    suspend fun sendVitalRecords(records: List<VitalRecord>): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val putRequest =
+                    PutDataMapRequest.create(PATH_VITAL_RECORDS).apply {
+                        dataMap.putString(KEY_RECORDS_JSON, recordsToJson(records))
+                        dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+                    }
+
+                val request = putRequest.asPutDataRequest().setUrgent()
+                dataClient.putDataItem(request).await()
+                _syncStateFlow.tryEmit(SyncState.Success(records.size))
+                true
+            } catch (e: Exception) {
+                _syncStateFlow.tryEmit(SyncState.Error(e.message ?: "Unknown error"))
+                false
             }
-
-            val request = putRequest.asPutDataRequest().setUrgent()
-            dataClient.putDataItem(request).await()
-            _syncStateFlow.tryEmit(SyncState.Success(records.size))
-            true
-        } catch (e: Exception) {
-            _syncStateFlow.tryEmit(SyncState.Error(e.message ?: "Unknown error"))
-            false
         }
-    }
 
-    suspend fun sendHeartRate(heartRate: Double): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val putRequest = PutDataMapRequest.create(PATH_HEART_RATE).apply {
-                dataMap.putDouble(KEY_HEART_RATE, heartRate)
-                dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+    suspend fun sendHeartRate(heartRate: Double): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val putRequest =
+                    PutDataMapRequest.create(PATH_HEART_RATE).apply {
+                        dataMap.putDouble(KEY_HEART_RATE, heartRate)
+                        dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+                    }
+
+                val request = putRequest.asPutDataRequest().setUrgent()
+                dataClient.putDataItem(request).await()
+                _heartRateFlow.tryEmit(heartRate)
+                true
+            } catch (e: Exception) {
+                false
             }
-
-            val request = putRequest.asPutDataRequest().setUrgent()
-            dataClient.putDataItem(request).await()
-            _heartRateFlow.tryEmit(heartRate)
-            true
-        } catch (e: Exception) {
-            false
         }
-    }
 
-    suspend fun requestSync(): Boolean = withContext(Dispatchers.IO) {
-        try {
-            val putRequest = PutDataMapRequest.create(PATH_SYNC_REQUEST).apply {
-                dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+    suspend fun requestSync(): Boolean =
+        withContext(Dispatchers.IO) {
+            try {
+                val putRequest =
+                    PutDataMapRequest.create(PATH_SYNC_REQUEST).apply {
+                        dataMap.putLong(KEY_TIMESTAMP, System.currentTimeMillis())
+                    }
+
+                val request = putRequest.asPutDataRequest().setUrgent()
+                dataClient.putDataItem(request).await()
+                _syncStateFlow.tryEmit(SyncState.Syncing)
+                true
+            } catch (e: Exception) {
+                _syncStateFlow.tryEmit(SyncState.Error(e.message ?: "Sync request failed"))
+                false
             }
-
-            val request = putRequest.asPutDataRequest().setUrgent()
-            dataClient.putDataItem(request).await()
-            _syncStateFlow.tryEmit(SyncState.Syncing)
-            true
-        } catch (e: Exception) {
-            _syncStateFlow.tryEmit(SyncState.Error(e.message ?: "Sync request failed"))
-            false
         }
-    }
 
     fun onDataChanged(dataEvents: DataEventBuffer) {
         for (event in dataEvents) {
@@ -129,31 +144,32 @@ class WearDataLayerClient(private val context: Context) {
         }
     }
 
-    suspend fun getSyncedRecords(): List<VitalRecord> = withContext(Dispatchers.IO) {
-        val records = mutableListOf<VitalRecord>()
-        try {
-            val dataItems = dataClient.getDataItems(URI_VITAL_RECORDS).await()
-            for (item in dataItems) {
-                val dataMapItem = DataMapItem.fromDataItem(item)
-                val jsonStr = dataMapItem.dataMap.getString(KEY_RECORDS_JSON) ?: continue
-                val jsonArray = JSONArray(jsonStr)
-                for (i in 0 until jsonArray.length()) {
-                    val obj = jsonArray.getJSONObject(i)
-                    val typeId = obj.getString("typeId")
-                    val value = obj.getDouble("value")
-                    val timestamp = obj.getLong("timestamp")
-                    val source = obj.optString("source", VitalSource.MANUAL)
+    suspend fun getSyncedRecords(): List<VitalRecord> =
+        withContext(Dispatchers.IO) {
+            val records = mutableListOf<VitalRecord>()
+            try {
+                val dataItems = dataClient.getDataItems(URI_VITAL_RECORDS).await()
+                for (item in dataItems) {
+                    val dataMapItem = DataMapItem.fromDataItem(item)
+                    val jsonStr = dataMapItem.dataMap.getString(KEY_RECORDS_JSON) ?: continue
+                    val jsonArray = JSONArray(jsonStr)
+                    for (i in 0 until jsonArray.length()) {
+                        val obj = jsonArray.getJSONObject(i)
+                        val typeId = obj.getString("typeId")
+                        val value = obj.getDouble("value")
+                        val timestamp = obj.getLong("timestamp")
+                        val source = obj.optString("source", VitalSource.MANUAL)
 
-                    VitalType.fromId(typeId)?.let {
-                        records.add(VitalRecord(typeId, value, timestamp, source))
+                        VitalType.fromId(typeId)?.let {
+                            records.add(VitalRecord(typeId, value, timestamp, source))
+                        }
                     }
                 }
+            } catch (_: Exception) {
+                // silent
             }
-        } catch (_: Exception) {
-            // silent
+            records
         }
-        records
-    }
 
     fun disconnect() {
         // Data Client does not need explicit disconnect

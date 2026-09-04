@@ -12,7 +12,6 @@ import kotlinx.coroutines.cancel
  * 接收来自手机的数据更新
  */
 class WearDataLayerService : WearableListenerService() {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private lateinit var dataLayerClient: WearDataLayerClient
 

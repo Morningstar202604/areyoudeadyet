@@ -19,11 +19,11 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -55,12 +55,14 @@ fun WearWorkoutScreenV3(
 ) {
     var isRunning by remember { mutableStateOf(false) }
     val records by WearStore.records.collectAsState(initial = emptyList())
-    val steps = records
-        .filter { it.typeId == VitalType.STEPS.id }
-        .maxByOrNull { it.timestampMillis }?.value?.toInt() ?: 0
-    val heartRate = records
-        .filter { it.typeId == VitalType.HEART_RATE.id }
-        .maxByOrNull { it.timestampMillis }?.value?.toInt() ?: 0
+    val steps =
+        records
+            .filter { it.typeId == VitalType.STEPS.id }
+            .maxByOrNull { it.timestampMillis }?.value?.toInt() ?: 0
+    val heartRate =
+        records
+            .filter { it.typeId == VitalType.HEART_RATE.id }
+            .maxByOrNull { it.timestampMillis }?.value?.toInt() ?: 0
 
     Box(
         modifier =

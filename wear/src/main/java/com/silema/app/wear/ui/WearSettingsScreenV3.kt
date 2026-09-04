@@ -36,16 +36,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
-import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material.ScalingLazyColumn
+import androidx.wear.compose.material.Switch
 import androidx.wear.compose.material.Text
 import com.silema.app.wear.data.WearSettings
 import kotlinx.coroutines.launch
 
 @Composable
-fun WearSettingsScreenV3(
-    onBack: () -> Unit = {},
-) {
+fun WearSettingsScreenV3(onBack: () -> Unit = {}) {
     val context = LocalContext.current
     val settings = remember { WearSettings(context) }
     val scope = rememberCoroutineScope()
@@ -55,14 +53,16 @@ fun WearSettingsScreenV3(
     val healthTracking by settings.healthTracking.collectAsState()
 
     Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color(0xFF121212)),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Color(0xFF121212)),
     ) {
         ScalingLazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 8.dp),
+            modifier =
+                Modifier
+                    .fillMaxSize()
+                    .padding(horizontal = 12.dp, vertical = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             contentPadding = PaddingValues(vertical = 32.dp),
         ) {
@@ -123,19 +123,21 @@ fun WearSettingsScreenV3(
 
             item {
                 Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .clip(RoundedCornerShape(10.dp))
-                        .background(Color.White.copy(alpha = 0.1f))
-                        .padding(10.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(Color.White.copy(alpha = 0.1f))
+                            .padding(10.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .clip(CircleShape)
-                            .background(Brush.horizontalGradient(listOf(Color(0xFF00A86B), Color(0xFF66BB6A)))),
+                        modifier =
+                            Modifier
+                                .size(28.dp)
+                                .clip(CircleShape)
+                                .background(Brush.horizontalGradient(listOf(Color(0xFF00A86B), Color(0xFF66BB6A)))),
                         contentAlignment = Alignment.Center,
                     ) {
                         Icon(
@@ -173,19 +175,21 @@ private fun SettingItem(
     onCheckedChange: (Boolean) -> Unit,
 ) {
     Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White.copy(alpha = 0.1f))
-            .padding(10.dp),
+        modifier =
+            Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(10.dp))
+                .background(Color.White.copy(alpha = 0.1f))
+                .padding(10.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment = Alignment.CenterVertically,
     ) {
         Box(
-            modifier = Modifier
-                .size(28.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.15f)),
+            modifier =
+                Modifier
+                    .size(28.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.15f)),
             contentAlignment = Alignment.Center,
         ) {
             Icon(

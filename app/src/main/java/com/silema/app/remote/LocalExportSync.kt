@@ -14,8 +14,9 @@ import java.io.File
  * 使「家人健康数据导出分享」在本地构建下即为真实可用能力。
  * 真正的「远程实时监护」（云端拉取家人数据）需要企业部署后端服务，超出本地构建范围。
  */
-class LocalExportSync(private val context: Context) : RemoteSync {
-
+class LocalExportSync(
+    private val context: Context,
+) : RemoteSync {
     private var lastExportTime = 0L
 
     override fun init(config: RemoteConfig) {
@@ -24,14 +25,17 @@ class LocalExportSync(private val context: Context) : RemoteSync {
 
     override suspend fun isAvailable(): Boolean = true
 
-    override suspend fun login(credential: String, password: String): Result<AuthResult> =
+    override suspend fun login(
+        credential: String,
+        password: String,
+    ): Result<AuthResult> =
         Result.success(
             AuthResult(
                 userId = "local_user",
                 token = "local_token",
                 displayName = "本机用户",
-                expiresAt = System.currentTimeMillis() + 86_400_000L
-            )
+                expiresAt = System.currentTimeMillis() + 86_400_000L,
+            ),
         )
 
     /** 真实写入：把体征序列化为 FHIR R4 Bundle 落盘，返回实际导出条数。 */
@@ -50,17 +54,23 @@ class LocalExportSync(private val context: Context) : RemoteSync {
     /** 本地模式无云端家人体系，返回空列表（诚实，不伪造数据）。 */
     override suspend fun getFamilyMembers(): Result<List<FamilyMember>> = Result.success(emptyList())
 
-    override suspend fun getFamilyVitals(memberId: String, sinceTimestamp: Long): Result<List<VitalRecord>> =
-        Result.success(emptyList())
+    override suspend fun getFamilyVitals(
+        memberId: String,
+        sinceTimestamp: Long,
+    ): Result<List<VitalRecord>> = Result.success(emptyList())
 
-    override suspend fun pushAlert(memberId: String, alert: AlertItem): Result<Unit> = Result.success(Unit)
+    override suspend fun pushAlert(
+        memberId: String,
+        alert: AlertItem,
+    ): Result<Unit> = Result.success(Unit)
 
     override suspend fun logout() {}
 
-    override fun getSyncStatus() = SyncStatus(
-        lastSyncTime = lastExportTime,
-        pendingUploads = 0,
-        isSyncing = false,
-        error = null
-    )
+    override fun getSyncStatus() =
+        SyncStatus(
+            lastSyncTime = lastExportTime,
+            pendingUploads = 0,
+            isSyncing = false,
+            error = null,
+        )
 }

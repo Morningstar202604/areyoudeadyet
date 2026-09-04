@@ -12,7 +12,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
@@ -20,7 +19,6 @@ import androidx.compose.material.icons.filled.DirectionsWalk
 import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.LocalFireDepartment
 import androidx.compose.material.icons.filled.Map
-import androidx.compose.material.icons.filled.Pause
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Speed
 import androidx.compose.material.icons.filled.Stop
@@ -28,7 +26,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -83,15 +80,17 @@ fun WorkoutScreenV3(
     val steps = (elapsedMs / 1000L) * 2
 
     LazyColumn(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Brush.verticalGradient(themeColors.backgroundGradient))
-            .padding(horizontal = AppSpacing.screenPad),
+        modifier =
+            Modifier
+                .fillMaxSize()
+                .background(Brush.verticalGradient(themeColors.backgroundGradient))
+                .padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
-        contentPadding = androidx.compose.foundation.layout.PaddingValues(
-            top = AppSpacing.xxl,
-            bottom = 100.dp
-        ),
+        contentPadding =
+            androidx.compose.foundation.layout.PaddingValues(
+                top = AppSpacing.xxl,
+                bottom = 100.dp,
+            ),
     ) {
         item {
             Column {
@@ -112,9 +111,10 @@ fun WorkoutScreenV3(
         item {
             GlassCard {
                 Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp),
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .padding(24.dp),
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.spacedBy(16.dp),
                 ) {
@@ -160,20 +160,21 @@ fun WorkoutScreenV3(
                         horizontalArrangement = Arrangement.SpaceEvenly,
                     ) {
                         Box(
-                            modifier = Modifier
-                                .size(64.dp)
-                                .clip(CircleShape)
-                                .background(if (isRunning) Color(0xFFE53935) else BrandGreen)
-                                .then(
-                                    Modifier.clickable {
-                                        if (isRunning) {
-                                            onStopWorkout()
-                                        } else {
-                                            onStartWorkout()
-                                        }
-                                        isRunning = !isRunning
-                                    }
-                                ),
+                            modifier =
+                                Modifier
+                                    .size(64.dp)
+                                    .clip(CircleShape)
+                                    .background(if (isRunning) Color(0xFFE53935) else BrandGreen)
+                                    .then(
+                                        Modifier.clickable {
+                                            if (isRunning) {
+                                                onStopWorkout()
+                                            } else {
+                                                onStartWorkout()
+                                            }
+                                            isRunning = !isRunning
+                                        },
+                                    ),
                             contentAlignment = Alignment.Center,
                         ) {
                             Icon(
@@ -203,9 +204,10 @@ fun WorkoutScreenV3(
                 val workout = workouts[index]
                 GlassCard {
                     Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp),
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
                         horizontalArrangement = Arrangement.SpaceBetween,
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
@@ -284,18 +286,20 @@ private fun GradientBanner(
 ) {
     GlassCard {
         Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Brush.horizontalGradient(gradientColors))
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .background(Brush.horizontalGradient(gradientColors))
+                    .padding(16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Box(
-                modifier = Modifier
-                    .size(48.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.2f)),
+                modifier =
+                    Modifier
+                        .size(48.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.2f)),
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(icon, contentDescription = null, tint = Color.White, modifier = Modifier.size(24.dp))

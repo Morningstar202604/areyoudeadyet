@@ -90,16 +90,22 @@ val SosGradientDark = listOf(Color(0xFFC62828), Color(0xFF8E0000))
 
 @Composable
 fun cardGradientGreen(): List<Color> = if (isSystemInDarkTheme()) CardGradientGreenDark else CardGradientGreen
+
 @Composable
 fun cardGradientOrange(): List<Color> = if (isSystemInDarkTheme()) CardGradientOrangeDark else CardGradientOrange
+
 @Composable
 fun cardGradientBlue(): List<Color> = if (isSystemInDarkTheme()) CardGradientBlueDark else CardGradientBlue
+
 @Composable
 fun cardGradientRed(): List<Color> = if (isSystemInDarkTheme()) CardGradientRedDark else CardGradientRed
+
 @Composable
 fun cardGradientPurple(): List<Color> = if (isSystemInDarkTheme()) CardGradientPurpleDark else CardGradientPurple
+
 @Composable
 fun cardGradientTeal(): List<Color> = if (isSystemInDarkTheme()) CardGradientTealDark else CardGradientTeal
+
 @Composable
 fun sosGradient(): List<Color> = if (isSystemInDarkTheme()) SosGradientDark else SosGradient
 
@@ -112,31 +118,33 @@ data class SilemaThemeColors(
     val cardBackground: Color,
 )
 
-val LocalSilemaThemeColors = staticCompositionLocalOf {
-    SilemaThemeColors(
-        isDark = false,
-        backgroundGradient = listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color.White),
-        surfaceGlass = Color.White,
-        cardBackground = Color.White,
-    )
-}
+val LocalSilemaThemeColors =
+    staticCompositionLocalOf {
+        SilemaThemeColors(
+            isDark = false,
+            backgroundGradient = listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color.White),
+            surfaceGlass = Color.White,
+            cardBackground = Color.White,
+        )
+    }
 
 @Composable
-fun rememberSilemaThemeColors(isDark: Boolean): SilemaThemeColors = if (isDark) {
-    SilemaThemeColors(
-        isDark = true,
-        backgroundGradient = listOf(Color(0xFF121212), Color(0xFF1A1A1A), Color(0xFF1E1E1E)),
-        surfaceGlass = Color(0xFF2D2D2D),
-        cardBackground = Color(0xFF1E1E1E),
-    )
-} else {
-    SilemaThemeColors(
-        isDark = false,
-        backgroundGradient = listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color.White),
-        surfaceGlass = Color.White,
-        cardBackground = Color.White,
-    )
-}
+fun rememberSilemaThemeColors(isDark: Boolean): SilemaThemeColors =
+    if (isDark) {
+        SilemaThemeColors(
+            isDark = true,
+            backgroundGradient = listOf(Color(0xFF121212), Color(0xFF1A1A1A), Color(0xFF1E1E1E)),
+            surfaceGlass = Color(0xFF2D2D2D),
+            cardBackground = Color(0xFF1E1E1E),
+        )
+    } else {
+        SilemaThemeColors(
+            isDark = false,
+            backgroundGradient = listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color.White),
+            surfaceGlass = Color.White,
+            cardBackground = Color.White,
+        )
+    }
 
 // ── 尺寸令牌 ──
 object AppShapes {
@@ -177,81 +185,96 @@ object AppElevation {
 }
 
 // ── 适老化排版 ──
-private val ElderTypography = Typography(
-    displayLarge = TextStyle(fontSize = 36.sp, fontWeight = FontWeight.Bold, lineHeight = 44.sp, letterSpacing = (-0.5).sp),
-    headlineLarge = TextStyle(fontSize = 30.sp, fontWeight = FontWeight.Bold, lineHeight = 38.sp, letterSpacing = (-0.5).sp),
-    headlineMedium = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp),
-    headlineSmall = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.SemiBold, lineHeight = 30.sp),
-    titleLarge = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold, lineHeight = 28.sp),
-    titleMedium = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, lineHeight = 26.sp),
-    titleSmall = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
-    bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 26.sp),
-    bodyMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
-    bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-    labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, lineHeight = 22.sp),
-    labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
-    labelSmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
-)
+private val ElderTypography =
+    Typography(
+        displayLarge =
+            TextStyle(
+                fontSize = 36.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 44.sp,
+                letterSpacing = (-0.5).sp,
+            ),
+        headlineLarge =
+            TextStyle(
+                fontSize = 30.sp,
+                fontWeight = FontWeight.Bold,
+                lineHeight = 38.sp,
+                letterSpacing = (-0.5).sp,
+            ),
+        headlineMedium = TextStyle(fontSize = 24.sp, fontWeight = FontWeight.Bold, lineHeight = 32.sp),
+        headlineSmall = TextStyle(fontSize = 22.sp, fontWeight = FontWeight.SemiBold, lineHeight = 30.sp),
+        titleLarge = TextStyle(fontSize = 20.sp, fontWeight = FontWeight.SemiBold, lineHeight = 28.sp),
+        titleMedium = TextStyle(fontSize = 18.sp, fontWeight = FontWeight.SemiBold, lineHeight = 26.sp),
+        titleSmall = TextStyle(fontSize = 17.sp, fontWeight = FontWeight.Medium, lineHeight = 24.sp),
+        bodyLarge = TextStyle(fontSize = 17.sp, lineHeight = 26.sp),
+        bodyMedium = TextStyle(fontSize = 16.sp, lineHeight = 24.sp),
+        bodySmall = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
+        labelLarge = TextStyle(fontSize = 16.sp, fontWeight = FontWeight.Medium, lineHeight = 22.sp),
+        labelMedium = TextStyle(fontSize = 14.sp, lineHeight = 20.sp),
+        labelSmall = TextStyle(fontSize = 13.sp, lineHeight = 18.sp),
+    )
 
-private val LightColors: ColorScheme = lightColorScheme(
-    primary = BrandGreen,
-    onPrimary = Color.White,
-    primaryContainer = Color(0xFFE0F2F1),
-    onPrimaryContainer = Color(0xFF004D40),
-    secondary = BrandWarm,
-    onSecondary = Color.White,
-    secondaryContainer = Color(0xFFFFF3E0),
-    onSecondaryContainer = Color(0xFFE65100),
-    tertiary = BrandBlue,
-    onTertiary = Color.White,
-    tertiaryContainer = Color(0xFFE8EAF6),
-    onTertiaryContainer = Color(0xFF1A237E),
-    background = Color(0xFFF1F8E9),
-    onBackground = Color(0xFF1B1B1B),
-    surface = Color.White,
-    onSurface = Color(0xFF1B1B1B),
-    surfaceVariant = Color(0xFFF5F5F5),
-    onSurfaceVariant = Color(0xFF49454F),
-    outline = Color(0xFF79747E),
-    outlineVariant = Color(0xFFCAC4D0),
-    error = BrandSoftRed,
-    onError = Color.White,
-    errorContainer = Color(0xFFFFEBEE),
-    onErrorContainer = Color(0xFFB71C1C),
-    inverseSurface = Color(0xFF313033),
-    inverseOnSurface = Color(0xFFF3EFF4),
-    inversePrimary = Color(0xFF69F0AE),
-)
+private val LightColors: ColorScheme =
+    lightColorScheme(
+        primary = BrandGreen,
+        onPrimary = Color.White,
+        primaryContainer = Color(0xFFE0F2F1),
+        onPrimaryContainer = Color(0xFF004D40),
+        secondary = BrandWarm,
+        onSecondary = Color.White,
+        secondaryContainer = Color(0xFFFFF3E0),
+        onSecondaryContainer = Color(0xFFE65100),
+        tertiary = BrandBlue,
+        onTertiary = Color.White,
+        tertiaryContainer = Color(0xFFE8EAF6),
+        onTertiaryContainer = Color(0xFF1A237E),
+        background = Color(0xFFF1F8E9),
+        onBackground = Color(0xFF1B1B1B),
+        surface = Color.White,
+        onSurface = Color(0xFF1B1B1B),
+        surfaceVariant = Color(0xFFF5F5F5),
+        onSurfaceVariant = Color(0xFF49454F),
+        outline = Color(0xFF79747E),
+        outlineVariant = Color(0xFFCAC4D0),
+        error = BrandSoftRed,
+        onError = Color.White,
+        errorContainer = Color(0xFFFFEBEE),
+        onErrorContainer = Color(0xFFB71C1C),
+        inverseSurface = Color(0xFF313033),
+        inverseOnSurface = Color(0xFFF3EFF4),
+        inversePrimary = Color(0xFF69F0AE),
+    )
 
-private val DarkColors: ColorScheme = darkColorScheme(
-    primary = Color(0xFF69F0AE),
-    onPrimary = Color(0xFF004D40),
-    primaryContainer = Color(0xFF00695C),
-    onPrimaryContainer = Color(0xFFB2DFDB),
-    secondary = Color(0xFFFFAB40),
-    onSecondary = Color(0xFFE65100),
-    secondaryContainer = Color(0xFFBF360C),
-    onSecondaryContainer = Color(0xFFFFE0B2),
-    tertiary = Color(0xFF9FA8DA),
-    onTertiary = Color(0xFF1A237E),
-    tertiaryContainer = Color(0xFF283593),
-    onTertiaryContainer = Color(0xFFC5CAE9),
-    background = Color(0xFF121212),
-    onBackground = Color(0xFFE0E0E0),
-    surface = Color(0xFF1E1E1E),
-    onSurface = Color(0xFFE0E0E0),
-    surfaceVariant = Color(0xFF2D2D2D),
-    onSurfaceVariant = Color(0xFFBDBDBD),
-    outline = Color(0xFF757575),
-    outlineVariant = Color(0xFF424242),
-    error = Color(0xFFEF5350),
-    onError = Color(0xFF690005),
-    errorContainer = Color(0xFF93000A),
-    onErrorContainer = Color(0xFFFFDAD6),
-    inverseSurface = Color(0xFFE0E0E0),
-    inverseOnSurface = Color(0xFF121212),
-    inversePrimary = Color(0xFF00695C),
-)
+private val DarkColors: ColorScheme =
+    darkColorScheme(
+        primary = Color(0xFF69F0AE),
+        onPrimary = Color(0xFF004D40),
+        primaryContainer = Color(0xFF00695C),
+        onPrimaryContainer = Color(0xFFB2DFDB),
+        secondary = Color(0xFFFFAB40),
+        onSecondary = Color(0xFFE65100),
+        secondaryContainer = Color(0xFFBF360C),
+        onSecondaryContainer = Color(0xFFFFE0B2),
+        tertiary = Color(0xFF9FA8DA),
+        onTertiary = Color(0xFF1A237E),
+        tertiaryContainer = Color(0xFF283593),
+        onTertiaryContainer = Color(0xFFC5CAE9),
+        background = Color(0xFF121212),
+        onBackground = Color(0xFFE0E0E0),
+        surface = Color(0xFF1E1E1E),
+        onSurface = Color(0xFFE0E0E0),
+        surfaceVariant = Color(0xFF2D2D2D),
+        onSurfaceVariant = Color(0xFFBDBDBD),
+        outline = Color(0xFF757575),
+        outlineVariant = Color(0xFF424242),
+        error = Color(0xFFEF5350),
+        onError = Color(0xFF690005),
+        errorContainer = Color(0xFF93000A),
+        onErrorContainer = Color(0xFFFFDAD6),
+        inverseSurface = Color(0xFFE0E0E0),
+        inverseOnSurface = Color(0xFF121212),
+        inversePrimary = Color(0xFF00695C),
+    )
 
 @Composable
 fun SilemaTheme(
@@ -263,13 +286,14 @@ fun SilemaTheme(
         MaterialTheme(
             colorScheme = if (darkTheme) DarkColors else LightColors,
             typography = ElderTypography,
-            shapes = Shapes(
-                extraSmall = AppShapes.small,
-                small = AppShapes.small,
-                medium = AppShapes.chip,
-                large = AppShapes.card,
-                extraLarge = AppShapes.banner,
-            ),
+            shapes =
+                Shapes(
+                    extraSmall = AppShapes.small,
+                    small = AppShapes.small,
+                    medium = AppShapes.chip,
+                    large = AppShapes.card,
+                    extraLarge = AppShapes.banner,
+                ),
             content = content,
         )
     }

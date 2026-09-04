@@ -37,27 +37,27 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.R
 import com.silema.app.data.VitalType
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.IconItem
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
-import com.silema.app.ui.theme.cardGradientBlue
-import com.silema.app.ui.theme.cardGradientGreen
-import com.silema.app.ui.theme.cardGradientOrange
 import com.silema.app.ui.theme.DataHeart
 import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
-import androidx.compose.ui.res.stringResource
-import com.silema.app.R
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
 
 /**
  * 设备屏幕 V3 — 现代健康活力风。
@@ -196,9 +196,24 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
 
             val connectedDevices =
                 listOf(
-                    GradientItem(stringResource(R.string.devices_connected_ppg), stringResource(R.string.devices_connected_ppg_desc), Icons.Default.CameraAlt, cardGradientOrange()),
-                    GradientItem(stringResource(R.string.devices_connected_health_connect), stringResource(R.string.devices_connected_health_connect_desc), Icons.Default.Sync, cardGradientBlue()),
-                    GradientItem(stringResource(R.string.devices_connected_manual), stringResource(R.string.devices_connected_manual_desc), Icons.Default.Edit, cardGradientGreen()),
+                    GradientItem(
+                        stringResource(R.string.devices_connected_ppg),
+                        stringResource(R.string.devices_connected_ppg_desc),
+                        Icons.Default.CameraAlt,
+                        cardGradientOrange(),
+                    ),
+                    GradientItem(
+                        stringResource(R.string.devices_connected_health_connect),
+                        stringResource(R.string.devices_connected_health_connect_desc),
+                        Icons.Default.Sync,
+                        cardGradientBlue(),
+                    ),
+                    GradientItem(
+                        stringResource(R.string.devices_connected_manual),
+                        stringResource(R.string.devices_connected_manual_desc),
+                        Icons.Default.Edit,
+                        cardGradientGreen(),
+                    ),
                 )
 
             connectedDevices.forEach { (name, desc, icon, gradient) ->
@@ -225,9 +240,24 @@ fun DevicesScreenV3(onClose: () -> Unit = {}) {
 
             val availableDevices =
                 listOf(
-                    IconItem(stringResource(R.string.devices_available_bluetooth_hr), stringResource(R.string.devices_available_bluetooth_hr_desc), Icons.Default.Bluetooth, BrandBlue),
-                    IconItem(stringResource(R.string.devices_available_bluetooth_bp), stringResource(R.string.devices_available_bluetooth_bp_desc), Icons.Default.MonitorHeart, BrandPurple),
-                    IconItem(stringResource(R.string.devices_available_bluetooth_spo2), stringResource(R.string.devices_available_bluetooth_spo2_desc), Icons.Default.HealthAndSafety, BrandWarm),
+                    IconItem(
+                        stringResource(R.string.devices_available_bluetooth_hr),
+                        stringResource(R.string.devices_available_bluetooth_hr_desc),
+                        Icons.Default.Bluetooth,
+                        BrandBlue,
+                    ),
+                    IconItem(
+                        stringResource(R.string.devices_available_bluetooth_bp),
+                        stringResource(R.string.devices_available_bluetooth_bp_desc),
+                        Icons.Default.MonitorHeart,
+                        BrandPurple,
+                    ),
+                    IconItem(
+                        stringResource(R.string.devices_available_bluetooth_spo2),
+                        stringResource(R.string.devices_available_bluetooth_spo2_desc),
+                        Icons.Default.HealthAndSafety,
+                        BrandWarm,
+                    ),
                 )
 
             availableDevices.forEach { (name, desc, icon, color) ->

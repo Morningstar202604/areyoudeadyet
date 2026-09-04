@@ -19,7 +19,6 @@ import kotlinx.coroutines.launch
  * 持续监听心率传感器数据并推送到手机
  */
 class HeartRateSyncService : Service() {
-
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.Main)
     private var syncJob: Job? = null
 
@@ -40,7 +39,11 @@ class HeartRateSyncService : Service() {
         bleVitals = BleVitals(applicationContext)
     }
 
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
+    override fun onStartCommand(
+        intent: Intent?,
+        flags: Int,
+        startId: Int,
+    ): Int {
         startHeartRateSync()
         return START_STICKY
     }
@@ -50,21 +53,22 @@ class HeartRateSyncService : Service() {
      */
     fun startHeartRateSync() {
         syncJob?.cancel()
-        syncJob = scope.launch {
-            try {
-                // 启动 BLE 心率监测
-                bleVitals.startHeartRateMonitoring()
+        syncJob =
+            scope.launch {
+                try {
+                    // 启动 BLE 心率监测
+                    bleVitals.startHeartRateMonitoring()
 
-                // 收集心率数据并推送到手机
-                bleVitals.heartRate.collectLatest { heartRate ->
-                    if (heartRate > 0) {
-                        dataLayerClient.sendHeartRate(heartRate)
+                    // 收集心率数据并推送到手机
+                    bleVitals.heartRate.collectLatest { heartRate ->
+                        if (heartRate > 0) {
+                            dataLayerClient.sendHeartRate(heartRate)
+                        }
                     }
+                } catch (e: Exception) {
+                    // 记录错误但不崩溃
                 }
-            } catch (e: Exception) {
-                // 记录错误但不崩溃
             }
-        }
     }
 
     /**
@@ -78,16 +82,12 @@ class HeartRateSyncService : Service() {
     /**
      * 获取当前心率
      */
-    fun getCurrentHeartRate(): Double {
-        return bleVitals.getCurrentHeartRate()
-    }
+    fun getCurrentHeartRate(): Double = bleVitals.getCurrentHeartRate()
 
     /**
      * 检查同步状态
      */
-    fun isSyncing(): Boolean {
-        return syncJob?.isActive == true
-    }
+    fun isSyncing(): Boolean = syncJob?.isActive == true
 
     override fun onDestroy() {
         super.onDestroy()

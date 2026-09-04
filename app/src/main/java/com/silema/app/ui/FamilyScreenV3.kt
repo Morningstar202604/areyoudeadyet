@@ -1,6 +1,5 @@
 package com.silema.app.ui
 
-import com.silema.app.R
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -34,18 +33,19 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.R
 import com.silema.app.data.Contact
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandWarm
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.cardGradientBlue
 import com.silema.app.ui.theme.cardGradientGreen
 import com.silema.app.ui.theme.cardGradientOrange
@@ -96,7 +96,11 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
                 }
                 OutlinedButton(onClick = { /* 添加家人 */ }) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Text(stringResource(R.string.family_button_add), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 4.dp))
+                    Text(
+                        stringResource(R.string.family_button_add),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
                 }
             }
         }

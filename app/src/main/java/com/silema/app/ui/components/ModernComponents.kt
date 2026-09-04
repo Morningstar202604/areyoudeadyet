@@ -105,11 +105,12 @@ fun GlassCard(
     content: @Composable () -> Unit,
 ) {
     val themeColors = LocalSilemaThemeColors.current
-    val bgColor = if (backgroundColor == Color.Unspecified) {
-        themeColors.surfaceGlass
-    } else {
-        backgroundColor
-    }
+    val bgColor =
+        if (backgroundColor == Color.Unspecified) {
+            themeColors.surfaceGlass
+        } else {
+            backgroundColor
+        }
     Card(
         modifier = modifier,
         shape = AppShapes.card,
@@ -316,9 +317,10 @@ fun MiniTrendChart(
     if (data.isEmpty()) {
         // 空数据时显示占位线
         Canvas(
-            modifier = modifier
-                .fillMaxWidth()
-                .height(height),
+            modifier =
+                modifier
+                    .fillMaxWidth()
+                    .height(height),
         ) {
             drawLine(
                 color = color.copy(alpha = 0.2f),

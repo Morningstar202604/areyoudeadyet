@@ -23,8 +23,9 @@ private val Context.dataStore: DataStore<Preferences> by preferencesDataStore(na
  * 手表端设置持久化
  * 使用 DataStore 存储用户设置
  */
-class WearSettings(private val context: Context) {
-
+class WearSettings(
+    private val context: Context,
+) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
     companion object {

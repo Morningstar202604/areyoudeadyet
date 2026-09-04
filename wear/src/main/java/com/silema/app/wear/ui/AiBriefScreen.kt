@@ -23,13 +23,17 @@ import com.silema.app.wear.data.WearStore
 import com.silema.app.wear.theme.riskColor
 
 @Composable
-fun AiBriefScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
+fun AiBriefScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
     val records by WearStore.records.collectAsState()
     val workouts by WearStore.workouts.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
-    val weekly = remember(records, workouts) {
-        HealthReport.weekly(records, workouts, System.currentTimeMillis(), assessment.alerts.size)
-    }
+    val weekly =
+        remember(records, workouts) {
+            HealthReport.weekly(records, workouts, System.currentTimeMillis(), assessment.alerts.size)
+        }
 
     ScalingLazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 32.dp)) {
         item {
@@ -37,7 +41,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                 text = stringResource(R.string.ai_title),
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         if (records.isEmpty()) {
@@ -46,7 +50,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                     text = stringResource(R.string.home_no_data),
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         } else {
@@ -56,7 +60,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                         text = weekly.summary[i],
                         style = MaterialTheme.typography.body1,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -66,7 +70,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                     color = riskColor(assessment.level),
                     style = MaterialTheme.typography.title2,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }

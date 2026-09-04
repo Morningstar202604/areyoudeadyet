@@ -42,11 +42,11 @@ import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.IconItem
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
+import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.cardGradientBlue
 import com.silema.app.ui.theme.cardGradientGreen
 import com.silema.app.ui.theme.cardGradientRed

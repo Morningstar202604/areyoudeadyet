@@ -54,7 +54,8 @@ object BleVitals {
     data class FoundDevice(
         val name: String,
         val address: String,
-        val kind: String, // "心率" | "血压计" | "血氧仪"
+        // "心率" | "血压计" | "血氧仪"
+        val kind: String,
     )
 
     private val _scanning = MutableStateFlow(false)
@@ -79,6 +80,7 @@ object BleVitals {
         return adapter != null
     }
 
+    @SuppressLint("MissingPermission")
     fun startScan(context: Context): String {
         if (!hasBluetooth(context)) return "此设备没有蓝牙"
         if (adapter?.isEnabled != true) return "请先打开手机蓝牙开关"

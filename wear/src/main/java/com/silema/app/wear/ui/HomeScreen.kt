@@ -23,7 +23,10 @@ import com.silema.app.wear.data.WearStore
 import com.silema.app.wear.theme.riskColor
 
 @Composable
-fun HomeScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
+fun HomeScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
     val records by WearStore.records.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val hasData = records.isNotEmpty()
@@ -34,7 +37,7 @@ fun HomeScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                 text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
@@ -43,24 +46,25 @@ fun HomeScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                 color = if (hasData) riskColor(assessment.level) else MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.display1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
-            val statusText = if (hasData) {
-                if (assessment.alerts.isNotEmpty()) {
-                    stringResource(R.string.home_alerts_count, assessment.alerts.size)
+            val statusText =
+                if (hasData) {
+                    if (assessment.alerts.isNotEmpty()) {
+                        stringResource(R.string.home_alerts_count, assessment.alerts.size)
+                    } else {
+                        stringResource(R.string.home_all_normal)
+                    }
                 } else {
-                    stringResource(R.string.home_all_normal)
+                    stringResource(R.string.home_tap_to_enter)
                 }
-            } else {
-                stringResource(R.string.home_tap_to_enter)
-            }
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.body1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -71,7 +75,7 @@ fun HomeScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                 Chip(
                     onClick = { onNavigate(Screen.Entry) },
                     label = { Text(rec.type?.displayName ?: rec.typeId) },
-                    secondaryLabel = { Text("${rec.value.toInt()} ${rec.type?.unit ?: ""}") }
+                    secondaryLabel = { Text("${rec.value.toInt()} ${rec.type?.unit ?: ""}") },
                 )
             }
         }

@@ -70,7 +70,12 @@ fun ModernBottomNav(
                     label = "navIconColor",
                 )
                 val textColor by animateColorAsState(
-                    targetValue = if (isSelected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                    targetValue =
+                        if (isSelected) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.onSurfaceVariant
+                        },
                     animationSpec = tween(durationMillis = 300),
                     label = "navTextColor",
                 )

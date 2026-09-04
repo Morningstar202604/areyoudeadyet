@@ -10,10 +10,10 @@ import androidx.wear.compose.material.VignettePosition
 import com.silema.app.wear.theme.WearTheme
 import com.silema.app.wear.ui.AiBriefScreen
 import com.silema.app.wear.ui.EntryScreen
+import com.silema.app.wear.ui.WearHomeScreenV3
 import com.silema.app.wear.ui.WearSettingsScreenV3
 import com.silema.app.wear.ui.WearSosScreenV3
 import com.silema.app.wear.ui.WearWorkoutScreenV3
-import com.silema.app.wear.ui.WearHomeScreenV3
 
 enum class Screen { Home, Entry, Sos, Workout, Ai, Settings }
 
@@ -39,34 +39,40 @@ fun WearApp() {
             timeText = { TimeText() },
             vignette = {
                 Vignette(vignettePosition = VignettePosition.TopAndBottom)
-            }
+            },
         ) {
             when (currentScreen) {
-                Screen.Home -> WearHomeScreenV3(
-                    onGoMeasure = { navigate(Screen.Entry) },
-                    onGoWorkout = { navigate(Screen.Workout) },
-                    onGoSos = { navigate(Screen.Sos) },
-                    onGoSettings = { navigate(Screen.Settings) },
-                    onGoAi = { navigate(Screen.Ai) },
-                )
-                Screen.Entry -> EntryScreen(
-                    onNavigate = { navigate(it) },
-                    onBack = { popBack() }
-                )
-                Screen.Sos -> WearSosScreenV3(
-                    onSosTriggered = { /* SOS triggered */ },
-                    onBack = { popBack() }
-                )
-                Screen.Workout -> WearWorkoutScreenV3(
-                    onBack = { popBack() }
-                )
-                Screen.Ai -> AiBriefScreen(
-                    onNavigate = { navigate(it) },
-                    onBack = { popBack() }
-                )
-                Screen.Settings -> WearSettingsScreenV3(
-                    onBack = { popBack() }
-                )
+                Screen.Home ->
+                    WearHomeScreenV3(
+                        onGoMeasure = { navigate(Screen.Entry) },
+                        onGoWorkout = { navigate(Screen.Workout) },
+                        onGoSos = { navigate(Screen.Sos) },
+                        onGoSettings = { navigate(Screen.Settings) },
+                        onGoAi = { navigate(Screen.Ai) },
+                    )
+                Screen.Entry ->
+                    EntryScreen(
+                        onNavigate = { navigate(it) },
+                        onBack = { popBack() },
+                    )
+                Screen.Sos ->
+                    WearSosScreenV3(
+                        onSosTriggered = { /* SOS triggered */ },
+                        onBack = { popBack() },
+                    )
+                Screen.Workout ->
+                    WearWorkoutScreenV3(
+                        onBack = { popBack() },
+                    )
+                Screen.Ai ->
+                    AiBriefScreen(
+                        onNavigate = { navigate(it) },
+                        onBack = { popBack() },
+                    )
+                Screen.Settings ->
+                    WearSettingsScreenV3(
+                        onBack = { popBack() },
+                    )
             }
         }
     }

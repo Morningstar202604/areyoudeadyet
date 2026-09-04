@@ -28,31 +28,41 @@ import com.silema.app.wear.Screen
 import com.silema.app.wear.data.WearStore
 
 @Composable
-fun EntryScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
-    val types = listOf(
-        VitalType.HEART_RATE, VitalType.SYSTOLIC, VitalType.DIASTOLIC,
-        VitalType.SPO2, VitalType.TEMPERATURE, VitalType.STEPS
-    )
+fun EntryScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
+    val types =
+        listOf(
+            VitalType.HEART_RATE,
+            VitalType.SYSTOLIC,
+            VitalType.DIASTOLIC,
+            VitalType.SPO2,
+            VitalType.TEMPERATURE,
+            VitalType.STEPS,
+        )
     var typeIndex by remember { mutableStateOf(0) }
     val type = types[typeIndex]
 
-    val range = when (type) {
-        VitalType.HEART_RATE -> 40..200
-        VitalType.SYSTOLIC -> 70..220
-        VitalType.DIASTOLIC -> 40..140
-        VitalType.SPO2 -> 70..100
-        VitalType.TEMPERATURE -> 35..42
-        VitalType.STEPS -> 0..30000
-        else -> 0..300
-    }
+    val range =
+        when (type) {
+            VitalType.HEART_RATE -> 40..200
+            VitalType.SYSTOLIC -> 70..220
+            VitalType.DIASTOLIC -> 40..140
+            VitalType.SPO2 -> 70..100
+            VitalType.TEMPERATURE -> 35..42
+            VitalType.STEPS -> 0..30000
+            else -> 0..300
+        }
 
     var selected by remember { mutableStateOf(range.first + (range.last - range.first) / 2) }
     LaunchedEffect(typeIndex) { selected = range.first + (range.last - range.first) / 2 }
 
-    val pickerState = rememberPickerState(
-        initialNumberOfOptions = range.last - range.first + 1,
-        initiallySelectedOption = selected - range.first
-    )
+    val pickerState =
+        rememberPickerState(
+            initialNumberOfOptions = range.last - range.first + 1,
+            initiallySelectedOption = selected - range.first,
+        )
 
     ScalingLazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 32.dp)) {
         item {
@@ -60,21 +70,21 @@ fun EntryScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
                 text = stringResource(R.string.entry_title),
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
             Chip(
                 onClick = { typeIndex = (typeIndex + 1) % types.size },
                 label = { Text(type.displayName) },
-                secondaryLabel = { Text(stringResource(android.R.string.ok)) }
+                secondaryLabel = { Text(stringResource(android.R.string.ok)) },
             )
         }
         item {
             Picker(
                 state = pickerState,
                 modifier = Modifier.fillMaxWidth(),
-                contentDescription = type.displayName
+                contentDescription = type.displayName,
             ) { opt ->
                 Text(text = (range.first + opt).toString(), style = MaterialTheme.typography.display1)
             }
@@ -83,7 +93,7 @@ fun EntryScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
             Button(onClick = {
                 val v = (range.first + pickerState.selectedOption).toDouble()
                 WearStore.addRecord(
-                    VitalRecord.of(type, v, System.currentTimeMillis(), VitalSource.MANUAL)
+                    VitalRecord.of(type, v, System.currentTimeMillis(), VitalSource.MANUAL),
                 )
                 onNavigate(Screen.Home)
             }) { Text(stringResource(R.string.common_confirm)) }

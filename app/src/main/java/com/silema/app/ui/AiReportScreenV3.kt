@@ -34,8 +34,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.R
 import com.silema.app.data.AlertItem
 import com.silema.app.data.RiskLevel
 import com.silema.app.data.VitalRecord
@@ -46,20 +48,18 @@ import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.ProgressRing
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.cardGradientBlue
-import com.silema.app.ui.theme.cardGradientGreen
-import com.silema.app.ui.theme.cardGradientOrange
-import com.silema.app.ui.theme.cardGradientPurple
 import com.silema.app.ui.theme.DataHeart
 import com.silema.app.ui.theme.DataOxygen
 import com.silema.app.ui.theme.DataPressure
 import com.silema.app.ui.theme.DataSteps
 import com.silema.app.ui.theme.HealthGradientSteps
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
+import com.silema.app.ui.theme.cardGradientPurple
 import com.silema.app.ui.theme.riskColor
-import androidx.compose.ui.res.stringResource
-import com.silema.app.R
 
 /**
  * AI 健康分析屏幕 V3 — 现代健康活力风。
@@ -117,7 +117,11 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
                 }
                 OutlinedButton(onClick = { /* 重新分析 */ }) {
                     Icon(Icons.Default.Refresh, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Text(stringResource(R.string.ai_refresh), style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 4.dp))
+                    Text(
+                        stringResource(R.string.ai_refresh),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
                 }
             }
         }
@@ -279,13 +283,34 @@ fun AiReportScreenV3(records: List<VitalRecord>) {
             val suggestions = mutableListOf<GradientItem>()
 
             if (assessment.level == RiskLevel.NORMAL) {
-                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_keep_good), stringResource(R.string.ai_suggestion_keep_good_desc), Icons.Default.Favorite, cardGradientGreen()))
+                suggestions.add(
+                    GradientItem(
+                        stringResource(R.string.ai_suggestion_keep_good),
+                        stringResource(R.string.ai_suggestion_keep_good_desc),
+                        Icons.Default.Favorite,
+                        cardGradientGreen(),
+                    ),
+                )
             }
             if (assessment.missingToday.isNotEmpty()) {
-                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_complete_today), stringResource(R.string.ai_suggestion_complete_today_desc), Icons.Default.MonitorHeart, cardGradientBlue()))
+                suggestions.add(
+                    GradientItem(
+                        stringResource(R.string.ai_suggestion_complete_today),
+                        stringResource(R.string.ai_suggestion_complete_today_desc),
+                        Icons.Default.MonitorHeart,
+                        cardGradientBlue(),
+                    ),
+                )
             }
             if (assessment.alerts.any { it.level == RiskLevel.WARNING || it.level == RiskLevel.CRITICAL }) {
-                suggestions.add(GradientItem(stringResource(R.string.ai_suggestion_watch_alerts), stringResource(R.string.ai_suggestion_watch_alerts_desc), Icons.Default.Lightbulb, cardGradientOrange()))
+                suggestions.add(
+                    GradientItem(
+                        stringResource(R.string.ai_suggestion_watch_alerts),
+                        stringResource(R.string.ai_suggestion_watch_alerts_desc),
+                        Icons.Default.Lightbulb,
+                        cardGradientOrange(),
+                    ),
+                )
             }
 
             suggestions.forEach { (title, desc, icon, gradient) ->
@@ -428,9 +453,10 @@ private fun SuggestionCard(
 private fun AlertCard(alert: AlertItem) {
     GlassCard {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
+            modifier =
+                Modifier
+                    .fillMaxWidth()
+                    .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
             Row(
@@ -443,10 +469,11 @@ private fun AlertCard(alert: AlertItem) {
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Box(
-                        modifier = Modifier
-                            .size(12.dp)
-                            .clip(CircleShape)
-                            .background(riskColor(alert.level)),
+                        modifier =
+                            Modifier
+                                .size(12.dp)
+                                .clip(CircleShape)
+                                .background(riskColor(alert.level)),
                     )
                     Text(
                         text = alert.metric,

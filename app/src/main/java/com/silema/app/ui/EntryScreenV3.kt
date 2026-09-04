@@ -32,25 +32,25 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.R
 import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.MeasureTypeItem
 import com.silema.app.ui.theme.AppSpacing
+import com.silema.app.ui.theme.DataHeart
+import com.silema.app.ui.theme.DataOxygen
+import com.silema.app.ui.theme.DataPressure
+import com.silema.app.ui.theme.DataTemp
 import com.silema.app.ui.theme.LocalSilemaThemeColors
 import com.silema.app.ui.theme.cardGradientBlue
 import com.silema.app.ui.theme.cardGradientGreen
 import com.silema.app.ui.theme.cardGradientOrange
 import com.silema.app.ui.theme.cardGradientPurple
 import com.silema.app.ui.theme.cardGradientRed
-import com.silema.app.ui.theme.DataHeart
-import com.silema.app.ui.theme.DataOxygen
-import com.silema.app.ui.theme.DataPressure
-import com.silema.app.ui.theme.DataTemp
-import androidx.compose.ui.res.stringResource
-import com.silema.app.R
 
 /**
  * 测量入口屏幕 V3 — 现代健康活力风。
@@ -109,10 +109,34 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
 
             val measureTypes =
                 listOf(
-                    MeasureTypeItem(stringResource(R.string.entry_type_hr_name), stringResource(R.string.entry_type_hr_desc), Icons.Default.Favorite, DataHeart, cardGradientRed()),
-                    MeasureTypeItem(stringResource(R.string.entry_type_bp_name), stringResource(R.string.entry_type_bp_desc), Icons.Default.MonitorHeart, DataPressure, cardGradientBlue()),
-                    MeasureTypeItem(stringResource(R.string.entry_type_spo2_name), stringResource(R.string.entry_type_spo2_desc), Icons.Default.HealthAndSafety, DataOxygen, cardGradientGreen()),
-                    MeasureTypeItem(stringResource(R.string.entry_type_temp_name), stringResource(R.string.entry_type_temp_desc), Icons.Default.Thermostat, DataTemp, cardGradientOrange()),
+                    MeasureTypeItem(
+                        stringResource(R.string.entry_type_hr_name),
+                        stringResource(R.string.entry_type_hr_desc),
+                        Icons.Default.Favorite,
+                        DataHeart,
+                        cardGradientRed(),
+                    ),
+                    MeasureTypeItem(
+                        stringResource(R.string.entry_type_bp_name),
+                        stringResource(R.string.entry_type_bp_desc),
+                        Icons.Default.MonitorHeart,
+                        DataPressure,
+                        cardGradientBlue(),
+                    ),
+                    MeasureTypeItem(
+                        stringResource(R.string.entry_type_spo2_name),
+                        stringResource(R.string.entry_type_spo2_desc),
+                        Icons.Default.HealthAndSafety,
+                        DataOxygen,
+                        cardGradientGreen(),
+                    ),
+                    MeasureTypeItem(
+                        stringResource(R.string.entry_type_temp_name),
+                        stringResource(R.string.entry_type_temp_desc),
+                        Icons.Default.Thermostat,
+                        DataTemp,
+                        cardGradientOrange(),
+                    ),
                 )
 
             measureTypes.forEach { (name, desc, icon, color, gradient) ->
@@ -139,10 +163,30 @@ fun EntryScreenV3(onClose: () -> Unit = {}) {
 
             val sources =
                 listOf(
-                    GradientItem(stringResource(R.string.entry_source_ppg), stringResource(R.string.entry_source_ppg_desc), Icons.Default.CameraAlt, cardGradientRed()),
-                    GradientItem(stringResource(R.string.entry_source_manual), stringResource(R.string.entry_source_manual_desc), Icons.Default.Edit, cardGradientOrange()),
-                    GradientItem(stringResource(R.string.entry_source_bluetooth), stringResource(R.string.entry_source_bluetooth_desc), Icons.Default.MonitorHeart, cardGradientBlue()),
-                    GradientItem(stringResource(R.string.entry_source_health_connect), stringResource(R.string.entry_source_health_connect_desc), Icons.Default.Sync, cardGradientGreen()),
+                    GradientItem(
+                        stringResource(R.string.entry_source_ppg),
+                        stringResource(R.string.entry_source_ppg_desc),
+                        Icons.Default.CameraAlt,
+                        cardGradientRed(),
+                    ),
+                    GradientItem(
+                        stringResource(R.string.entry_source_manual),
+                        stringResource(R.string.entry_source_manual_desc),
+                        Icons.Default.Edit,
+                        cardGradientOrange(),
+                    ),
+                    GradientItem(
+                        stringResource(R.string.entry_source_bluetooth),
+                        stringResource(R.string.entry_source_bluetooth_desc),
+                        Icons.Default.MonitorHeart,
+                        cardGradientBlue(),
+                    ),
+                    GradientItem(
+                        stringResource(R.string.entry_source_health_connect),
+                        stringResource(R.string.entry_source_health_connect_desc),
+                        Icons.Default.Sync,
+                        cardGradientGreen(),
+                    ),
                 )
 
             sources.forEach { (name, desc, icon, gradient) ->

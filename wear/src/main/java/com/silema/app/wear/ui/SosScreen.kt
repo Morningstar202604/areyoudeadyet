@@ -26,7 +26,10 @@ import com.silema.app.wear.R
 import com.silema.app.wear.Screen
 
 @Composable
-fun SosScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
+fun SosScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
     var triggered by remember { mutableStateOf(false) }
 
     Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
@@ -34,16 +37,24 @@ fun SosScreen(onNavigate: (Screen) -> Unit, onBack: () -> Unit = {}) {
             Button(
                 onClick = { triggered = true },
                 modifier = Modifier.size(120.dp),
-                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828))
+                colors = ButtonDefaults.buttonColors(backgroundColor = Color(0xFFC62828)),
             ) {
-                Text(stringResource(R.string.sos_button), textAlign = TextAlign.Center, style = MaterialTheme.typography.button)
+                Text(
+                    stringResource(R.string.sos_button),
+                    textAlign = TextAlign.Center,
+                    style = MaterialTheme.typography.button,
+                )
             }
         } else {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                verticalArrangement = Arrangement.Center,
             ) {
-                Text(stringResource(R.string.sos_confirmed), color = Color(0xFFC62828), style = MaterialTheme.typography.display1)
+                Text(
+                    stringResource(R.string.sos_confirmed),
+                    color = Color(0xFFC62828),
+                    style = MaterialTheme.typography.display1,
+                )
                 Spacer(Modifier.height(8.dp))
                 Text(stringResource(R.string.sos_notifying), style = MaterialTheme.typography.body1)
                 Spacer(Modifier.height(12.dp))

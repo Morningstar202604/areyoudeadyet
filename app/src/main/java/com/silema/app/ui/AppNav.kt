@@ -1,7 +1,6 @@
 package com.silema.app.ui
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Build
@@ -11,11 +10,11 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -25,6 +24,7 @@ import com.silema.app.data.VitalRecord
 import com.silema.app.ui.components.BottomNavItem
 import com.silema.app.ui.components.ModernBottomNav
 import com.silema.app.util.TtsController
+import com.silema.app.vm.DashboardViewModel
 
 object Routes {
     const val HOME = "home"
@@ -88,9 +88,11 @@ fun AppRoot(
             modifier = Modifier.padding(innerPadding),
         ) {
             composable(Routes.HOME) {
+                val viewModel: DashboardViewModel = hiltViewModel()
                 DashboardScreenV3(
                     records = records,
                     tts = tts,
+                    viewModel = viewModel,
                     onGoSos = { navController.navigate(Routes.SOS) { launchSingleTop = true } },
                     onGoEntry = { navController.navigate(Routes.ENTRY) { launchSingleTop = true } },
                     onGoDevices = { navController.navigate(Routes.DEVICES) { launchSingleTop = true } },

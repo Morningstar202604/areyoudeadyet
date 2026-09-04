@@ -8,7 +8,6 @@ import com.silema.app.data.VitalType
 import com.silema.app.engine.RiskEngine
 
 object Emergency {
-
     const val MEDICAL_NUMBER = "120"
 
     /** 拨号盘（无需权限，用户按一下拨出）。 */
@@ -22,7 +21,10 @@ object Emergency {
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
     /** 打开短信应用并预填收件人与正文（无需 SEND_SMS 权限，由用户确认发送）。 */
-    fun smsIntent(phone: String, body: String): Intent =
+    fun smsIntent(
+        phone: String,
+        body: String,
+    ): Intent =
         Intent(Intent.ACTION_SENDTO, Uri.parse("smsto:$phone"))
             .putExtra("sms_body", body)
             .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -55,12 +57,13 @@ object Emergency {
     fun primaryContactPhone(contacts: List<com.silema.app.data.Contact>): String? =
         contacts.firstOrNull()?.phone?.takeIf { it.isNotBlank() }
 
-    fun levelLabel(level: RiskLevel): String = when (level) {
-        RiskLevel.NORMAL -> "正常"
-        RiskLevel.WATCH -> "注意"
-        RiskLevel.WARNING -> "警告"
-        RiskLevel.CRITICAL -> "危险"
-    }
+    fun levelLabel(level: RiskLevel): String =
+        when (level) {
+            RiskLevel.NORMAL -> "正常"
+            RiskLevel.WATCH -> "注意"
+            RiskLevel.WARNING -> "警告"
+            RiskLevel.CRITICAL -> "危险"
+        }
 
     fun typeOf(type: VitalType): String = type.displayName.substringBefore("(")
 }
