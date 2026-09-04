@@ -27,6 +27,7 @@ import java.time.LocalDate
 import java.time.LocalDateTime
 import java.time.LocalTime
 import java.time.ZoneId
+import java.time.format.DateTimeFormatter
 import java.util.concurrent.TimeUnit
 
 /**
@@ -34,6 +35,9 @@ import java.util.concurrent.TimeUnit
  * 基于 WorkManager 周期任务，系统重启后自动恢复。
  */
 object Reminders {
+    /** 「MM-dd」日期格式，用于判断步数记录是否为今天。 */
+    private val DATE_FMT = DateTimeFormatter.ofPattern("MM-dd")
+
     /** 通过 Hilt EntryPoint 获取 AppRepository 单例（v0.6.0 起 AppRepository 改为 @Singleton 类）。 */
     private fun repo(context: Context): AppRepository = appRepositoryFrom(context)
 
@@ -164,9 +168,7 @@ object Reminders {
                         .filter {
                             it.typeId == VitalType.STEPS.id &&
                                 RiskEngine.clockText(it.timestampMillis).startsWith(
-                                    java.time.format.DateTimeFormatter
-                                        .ofPattern("MM-dd")
-                                        .format(java.time.LocalDate.now()),
+                                    DATE_FMT.format(java.time.LocalDate.now()),
                                 )
                         }.maxOfOrNull { it.value } ?: 0.0
                 val notif =

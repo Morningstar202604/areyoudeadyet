@@ -1,10 +1,8 @@
 package com.silema.app.wear
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.wear.compose.material.Scaffold
 import androidx.wear.compose.material.TimeText
 import androidx.wear.compose.material.Vignette
@@ -12,27 +10,69 @@ import androidx.wear.compose.material.VignettePosition
 import com.silema.app.wear.theme.WearTheme
 import com.silema.app.wear.ui.AiBriefScreen
 import com.silema.app.wear.ui.EntryScreen
-import com.silema.app.wear.ui.HomeScreen
-import com.silema.app.wear.ui.SosScreen
-import com.silema.app.wear.ui.WorkoutScreen
+import com.silema.app.wear.ui.WearHomeScreenV3
+import com.silema.app.wear.ui.WearSettingsScreenV3
+import com.silema.app.wear.ui.WearSosScreenV3
+import com.silema.app.wear.ui.WearWorkoutScreenV3
 
-enum class Screen { Home, Entry, Sos, Workout, Ai }
+enum class Screen { Home, Entry, Sos, Workout, Ai, Settings }
 
 @Composable
 fun WearApp() {
     WearTheme {
-        // 手表端屏幕少、切换直接，用最简化的状态机导航（不引 wear-navigation）。
-        var screen by remember { mutableStateOf(Screen.Home) }
+        val navStack = remember { mutableStateListOf(Screen.Home) }
+        val currentScreen = navStack.lastOrNull() ?: Screen.Home
+
+        fun navigate(screen: Screen) {
+            navStack.add(screen)
+        }
+
+        fun popBack(): Boolean {
+            if (navStack.size > 1) {
+                navStack.removeLast()
+                return true
+            }
+            return false
+        }
+
         Scaffold(
             timeText = { TimeText() },
-            vignette = { Vignette(vignettePosition = VignettePosition.TopAndBottom) }
+            vignette = {
+                Vignette(vignettePosition = VignettePosition.TopAndBottom)
+            },
         ) {
-            when (screen) {
-                Screen.Home -> HomeScreen(onNavigate = { screen = it })
-                Screen.Entry -> EntryScreen(onNavigate = { screen = it })
-                Screen.Sos -> SosScreen(onNavigate = { screen = it })
-                Screen.Workout -> WorkoutScreen(onNavigate = { screen = it })
-                Screen.Ai -> AiBriefScreen(onNavigate = { screen = it })
+            when (currentScreen) {
+                Screen.Home ->
+                    WearHomeScreenV3(
+                        onGoMeasure = { navigate(Screen.Entry) },
+                        onGoWorkout = { navigate(Screen.Workout) },
+                        onGoSos = { navigate(Screen.Sos) },
+                        onGoSettings = { navigate(Screen.Settings) },
+                        onGoAi = { navigate(Screen.Ai) },
+                    )
+                Screen.Entry ->
+                    EntryScreen(
+                        onNavigate = { navigate(it) },
+                        onBack = { popBack() },
+                    )
+                Screen.Sos ->
+                    WearSosScreenV3(
+                        onSosTriggered = { /* SOS triggered */ },
+                        onBack = { popBack() },
+                    )
+                Screen.Workout ->
+                    WearWorkoutScreenV3(
+                        onBack = { popBack() },
+                    )
+                Screen.Ai ->
+                    AiBriefScreen(
+                        onNavigate = { navigate(it) },
+                        onBack = { popBack() },
+                    )
+                Screen.Settings ->
+                    WearSettingsScreenV3(
+                        onBack = { popBack() },
+                    )
             }
         }
     }

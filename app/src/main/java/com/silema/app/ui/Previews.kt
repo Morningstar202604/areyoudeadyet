@@ -1,65 +1,69 @@
 package com.silema.app.ui
 
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import com.silema.app.data.VitalRecord
 import com.silema.app.ui.theme.SilemaTheme
-import com.silema.app.util.TtsController
 
-// 设计系统 v2 的预览入口：每个主屏在 SilemaTheme 下渲染，
-// 便于在 Android Studio 中直接核对「温暖医疗专业风」的配色、对比度与间距令牌。
-// 这些预览不参与 release 产物，仅开发期使用。
-
-@Preview(name = "首页 Dashboard", showBackground = true)
+@Preview(name = "Report V3", showBackground = true)
 @Composable
-private fun PreviewDashboard() {
+private fun PreviewReport() {
     SilemaTheme {
-        DashboardScreen(
-            records = emptyList(),
-            tts = TtsController(LocalContext.current),
-            onGoSos = {},
-            onGoEntry = {},
-            onGoDevices = {},
-            onGoWorkout = {},
-            onGoGuardian = {},
-        )
+        ReportScreenV3(records = emptyList())
     }
 }
 
-@Preview(name = "健康报告 Report", showBackground = true)
-@Composable
-private fun PreviewReport() {
-    SilemaTheme { ReportScreen(emptyList()) }
-}
-
-@Preview(name = "家人监护 Family", showBackground = true)
+@Preview(name = "Family V3", showBackground = true)
 @Composable
 private fun PreviewFamily() {
-    SilemaTheme { FamilyScreen() }
+    SilemaTheme {
+        FamilyScreenV3()
+    }
 }
 
-@Preview(name = "守护设置 Guardian", showBackground = true)
+@Preview(name = "Guardian V3", showBackground = true)
 @Composable
 private fun PreviewGuardian() {
-    SilemaTheme { GuardianScreen(emptyList()) }
+    SilemaTheme {
+        GuardianScreenV3(contacts = emptyList())
+    }
 }
 
-@Preview(name = "医疗对接 Medical", showBackground = true)
+@Preview(name = "Medical V3", showBackground = true)
 @Composable
 private fun PreviewMedical() {
-    SilemaTheme { MedicalScreen(emptyList()) }
+    SilemaTheme {
+        MedicalScreenV3()
+    }
 }
 
-@Preview(name = "设备 Devices", showBackground = true)
+@Preview(name = "Devices V3", showBackground = true)
 @Composable
 private fun PreviewDevices() {
-    SilemaTheme { DevicesScreen(onClose = {}) }
+    SilemaTheme {
+        DevicesScreenV3()
+    }
 }
 
-@Preview(name = "AI 分析 AiReport", showBackground = true)
+@Preview(name = "AI Report V3", showBackground = true)
 @Composable
 private fun PreviewAiReport() {
-    SilemaTheme { AiReportScreen(emptyList<VitalRecord>()) }
+    SilemaTheme {
+        AiReportScreenV3(records = emptyList())
+    }
 }
 
+@Preview(name = "Workout V3", showBackground = true)
+@Composable
+private fun PreviewWorkout() {
+    SilemaTheme {
+        WorkoutScreenV3()
+    }
+}
+
+@Preview(name = "SOS V3", showBackground = true)
+@Composable
+private fun PreviewSos() {
+    SilemaTheme {
+        SosScreenV3()
+    }
+}

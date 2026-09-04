@@ -1,5 +1,6 @@
 package com.silema.app.wear.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.Chip
 import androidx.wear.compose.material.MaterialTheme
@@ -21,18 +23,21 @@ import com.silema.app.wear.data.WearStore
 import com.silema.app.wear.theme.riskColor
 
 @Composable
-fun HomeScreen(onNavigate: (Screen) -> Unit) {
+fun HomeScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
     val records by WearStore.records.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
     val hasData = records.isNotEmpty()
 
-    ScalingLazyColumn(modifier = Modifier.fillMaxSize()) {
+    ScalingLazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 32.dp)) {
         item {
             Text(
                 text = stringResource(R.string.home_title),
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
@@ -41,24 +46,25 @@ fun HomeScreen(onNavigate: (Screen) -> Unit) {
                 color = if (hasData) riskColor(assessment.level) else MaterialTheme.colors.onBackground,
                 style = MaterialTheme.typography.display1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         item {
-            val statusText = if (hasData) {
-                if (assessment.alerts.isNotEmpty()) {
-                    stringResource(R.string.home_alerts_count, assessment.alerts.size)
+            val statusText =
+                if (hasData) {
+                    if (assessment.alerts.isNotEmpty()) {
+                        stringResource(R.string.home_alerts_count, assessment.alerts.size)
+                    } else {
+                        stringResource(R.string.home_all_normal)
+                    }
                 } else {
-                    stringResource(R.string.home_all_normal)
+                    stringResource(R.string.home_tap_to_enter)
                 }
-            } else {
-                stringResource(R.string.home_tap_to_enter)
-            }
             Text(
                 text = statusText,
                 style = MaterialTheme.typography.body1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
 
@@ -67,9 +73,9 @@ fun HomeScreen(onNavigate: (Screen) -> Unit) {
             val rec = recent[i]
             item {
                 Chip(
-                    onClick = { },
+                    onClick = { onNavigate(Screen.Entry) },
                     label = { Text(rec.type?.displayName ?: rec.typeId) },
-                    secondaryLabel = { Text("${rec.value.toInt()} ${rec.type?.unit ?: ""}") }
+                    secondaryLabel = { Text("${rec.value.toInt()} ${rec.type?.unit ?: ""}") },
                 )
             }
         }

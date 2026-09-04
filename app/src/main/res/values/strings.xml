@@ -130,4 +130,342 @@
     <string name="common_error">Error</string>
     <string name="common_success">Success</string>
     <string name="common_retry">Retry</string>
+
+    <!-- Dashboard V3 -->
+    <string name="dashboard_greeting_late_night">It\'s late</string>
+    <string name="dashboard_greeting_morning">Good morning</string>
+    <string name="dashboard_greeting_morning_early">Good morning</string>
+    <string name="dashboard_greeting_noon">Good afternoon</string>
+    <string name="dashboard_greeting_evening">Good evening</string>
+    <string name="dashboard_greeting_night">Good night</string>
+    <string name="dashboard_core_data">Core Data</string>
+    <string name="dashboard_heart_rate">Heart Rate</string>
+    <string name="dashboard_blood_pressure">Blood Pressure</string>
+    <string name="dashboard_blood_oxygen">Blood Oxygen</string>
+    <string name="dashboard_steps">Steps</string>
+    <string name="dashboard_sleep">Sleep</string>
+    <string name="dashboard_temperature">Temperature</string>
+    <string name="dashboard_no_data_hint">Tap \"Measure\" to start</string>
+    <string name="dashboard_recent_records">Recent Records</string>
+    <string name="dashboard_emergency_sos">Emergency SOS</string>
+    <string name="dashboard_emergency_subtitle">One-tap call to emergency contacts</string>
+    <string name="dashboard_unit_steps">steps</string>
+    <string name="dashboard_unit_hours">hours</string>
+    <string name="dashboard_health_status">Health Status: %s</string>
+    <string name="dashboard_all_normal_continue">All indicators normal, keep it up</string>
+    <string name="dashboard_emergency_subtitle_full">One-tap call to emergency contacts, also sends location</string>
+
+    <!-- Quick Actions V3 -->
+    <string name="action_measure_hr">Measure HR</string>
+    <string name="action_devices">Devices</string>
+    <string name="action_workout">Workout</string>
+    <string name="action_family">Family</string>
+    <string name="action_report">Report</string>
+    <string name="action_ai_analysis">AI Analysis</string>
+    <string name="action_guardian">Guardian</string>
+    <string name="action_sos">SOS</string>
+
+    <!-- AI Report V3 -->
+    <string name="ai_health_score">Health Score</string>
+    <string name="ai_metric_analysis">Metric Analysis</string>
+    <string name="ai_health_suggestions">Health Suggestions</string>
+    <string name="ai_trend_prediction">Trend Prediction</string>
+    <string name="ai_refresh">Refresh</string>
+
+    <!-- Devices V3 -->
+    <string name="devices_connected">Connected Devices</string>
+    <string name="devices_available">Available Devices</string>
+    <string name="devices_ppg_camera">PPG Camera</string>
+    <string name="devices_health_connect">Health Connect</string>
+    <string name="devices_manual_entry">Manual Entry</string>
+
+    <!-- Entry V3 -->
+    <string name="entry_ppg_banner">Camera PPG Measurement</string>
+    <string name="entry_ppg_subtitle">Use camera to measure heart rate and SpO2</string>
+    <string name="entry_tips">Tips</string>
+    <string name="entry_tip_1">Keep finger steady on camera</string>
+    <string name="entry_tip_2">In good lighting environment</string>
+    <string name="entry_tip_3">Measurement takes 30 seconds</string>
+
+    <!-- Family V3 -->
+    <string name="family_health_sharing">Health Sharing</string>
+    <string name="family_quick_contacts">Quick Contacts</string>
+    <string name="family_member_list">Family Members</string>
+    <string name="family_call">Call</string>
+    <string name="family_message">Message</string>
+
+    <!-- Guardian V3 -->
+    <string name="guardian_sos_settings">SOS Settings</string>
+    <string name="guardian_feature_settings">Feature Settings</string>
+    <string name="guardian_notification_methods">Notification Methods</string>
+    <string name="guardian_abnormal_hr">Abnormal Heart Rate Alert</string>
+    <string name="guardian_location_sharing">Location Sharing</string>
+    <string name="guardian_fall_detection">Fall Detection</string>
+    <string name="guardian_medication_reminder">Medication Reminder</string>
+
+    <!-- Medical V3 -->
+    <string name="medical_todays_medication">Today\'s Medication</string>
+    <string name="medical_medication_list">Medication List</string>
+    <string name="medical_quick_features">Quick Features</string>
+    <string name="medical_add">Add</string>
+    <string name="medical_take">Take</string>
+
+    <!-- Report V3 -->
+    <string name="report_health_score">Health Score</string>
+    <string name="report_metric_status">Status</string>
+    <string name="report_export">Export Health Report</string>
+    <string name="report_ai_analysis">AI Health Analysis</string>
+
+    <!-- More V3 -->
+    <string name="more_data_management">Data Management</string>
+    <string name="more_settings_group">Settings</string>
+    <string name="more_dark_mode">Dark Mode</string>
+    <string name="more_notifications">Notifications</string>
+    <string name="more_theme">Theme</string>
+    <string name="more_language">Language</string>
+    <string name="more_security">Security</string>
+    <string name="more_privacy">Privacy Settings</string>
+    <string name="more_app_lock">App Lock</string>
+    <string name="more_about">About</string>
+    <string name="more_version">Version</string>
+    <string name="more_logout">Logout</string>
+
+    <!-- AI Report V3 - Extended -->
+    <string name="ai_subtitle">Smart health data analysis, personalized suggestions</string>
+    <string name="ai_analysis_banner_title">AI Smart Analysis</string>
+    <string name="ai_analysis_banner_subtitle">Based on your health data, AI generates personalized health report</string>
+    <string name="ai_comprehensive_score">Comprehensive Health Score</string>
+    <string name="ai_metric_normal_keep">Metric normal, keep it up</string>
+    <string name="ai_health_alerts">Health Alerts</string>
+    <string name="ai_health_suggestions_title">AI Health Suggestions</string>
+    <string name="ai_suggestion_keep_good">Maintain Good Status</string>
+    <string name="ai_suggestion_keep_good_desc">Your health indicators are normal, keep current lifestyle</string>
+    <string name="ai_suggestion_complete_today">Complete Today\'s Measurement</string>
+    <string name="ai_suggestion_complete_today_desc">Complete today\'s blood pressure and heart rate measurement for accurate assessment</string>
+    <string name="ai_suggestion_watch_alerts">Watch Health Alerts</string>
+    <string name="ai_suggestion_watch_alerts_desc">Some indicators are abnormal, please handle promptly or seek medical attention</string>
+    <string name="ai_trend_prediction_title">Health Trend Prediction</string>
+    <string name="ai_trend_prediction_subtitle">Based on historical data, AI predicts health trends for the next 7 days</string>
+
+    <!-- Devices V3 - Extended -->
+    <string name="devices_title_management">Device Management</string>
+    <string name="devices_subtitle">Connect health devices, auto-sync measurement data</string>
+    <string name="devices_recent_measurements">Recent Measurements</string>
+    <string name="devices_connected_ppg">PPG Camera Measurement</string>
+    <string name="devices_connected_ppg_desc">Phone camera</string>
+    <string name="devices_connected_health_connect">Health Connect</string>
+    <string name="devices_connected_health_connect_desc">System health service</string>
+    <string name="devices_connected_manual">Manual Entry</string>
+    <string name="devices_connected_manual_desc">Manual data input</string>
+    <string name="devices_available_bluetooth_hr">Bluetooth HR Monitor</string>
+    <string name="devices_available_bluetooth_hr_desc">BLE heart rate monitoring</string>
+    <string name="devices_available_bluetooth_bp">Bluetooth BP Monitor</string>
+    <string name="devices_available_bluetooth_bp_desc">BLE blood pressure monitoring</string>
+    <string name="devices_available_bluetooth_spo2">Bluetooth SpO2 Monitor</string>
+    <string name="devices_available_bluetooth_spo2_desc">BLE blood oxygen monitoring</string>
+    <string name="devices_status_connected">Connected</string>
+    <string name="devices_button_connect">Connect</string>
+
+    <!-- Entry V3 - Extended -->
+    <string name="entry_title_measure">Measurement Data</string>
+    <string name="entry_subtitle">Select measurement method, record health data</string>
+    <string name="entry_ppg_banner_title">PPG Camera Measurement</string>
+    <string name="entry_ppg_banner_subtitle">Use phone camera to measure heart rate and SpO2</string>
+    <string name="entry_measure_type">Measurement Type</string>
+    <string name="entry_type_hr_name">Heart Rate</string>
+    <string name="entry_type_hr_desc">Measure heart rate (bpm)</string>
+    <string name="entry_type_bp_name">Blood Pressure</string>
+    <string name="entry_type_bp_desc">Record systolic/diastolic pressure</string>
+    <string name="entry_type_spo2_name">Blood Oxygen</string>
+    <string name="entry_type_spo2_desc">Measure SpO2 saturation (%)</string>
+    <string name="entry_type_temp_name">Temperature</string>
+    <string name="entry_type_temp_desc">Record temperature (°C)</string>
+    <string name="entry_data_source">Data Source</string>
+    <string name="entry_source_ppg">PPG Camera Measurement</string>
+    <string name="entry_source_ppg_desc">Measure using phone camera</string>
+    <string name="entry_source_manual">Manual Entry</string>
+    <string name="entry_source_manual_desc">Manually input measurement data</string>
+    <string name="entry_source_bluetooth">Bluetooth Devices</string>
+    <string name="entry_source_bluetooth_desc">Connect Bluetooth health devices</string>
+    <string name="entry_source_health_connect">Health Connect</string>
+    <string name="entry_source_health_connect_desc">Sync from system health service</string>
+    <string name="entry_tips_banner">Measurement Tips</string>
+    <string name="entry_tips_banner_desc">Rest quietly for 5 minutes before measurement, sit upright, keep arm at heart level</string>
+    <string name="entry_button_start">Start</string>
+
+    <!-- Family V3 - Extended -->
+    <string name="family_title_family">Family</string>
+    <string name="family_subtitle">Contact family, share health data</string>
+    <string name="family_button_add">Add</string>
+    <string name="family_quick_contacts_title">Quick Contacts</string>
+    <string name="family_voice_call">Voice Call</string>
+    <string name="family_video_call">Video Call</string>
+    <string name="family_send_message">Send Message</string>
+    <string name="family_list_title">Family List</string>
+    <string name="family_empty_title">No Family Members</string>
+    <string name="family_empty_desc">Tap top-right to add family members for easy contact</string>
+    <string name="family_health_share_title">Family Health Sharing</string>
+    <string name="family_health_share_desc">Invite family to join, share health data, protect elderly health together</string>
+
+    <!-- Guardian V3 - Extended -->
+    <string name="guardian_title_settings">Guardian Settings</string>
+    <string name="guardian_subtitle">Set emergency contacts and guardian features, protect elderly safety</string>
+    <string name="guardian_sos_banner_title">SOS Emergency Call</string>
+    <string name="guardian_sos_banner_desc">One-tap call to emergency contacts, also sends location</string>
+    <string name="guardian_features_title">Guardian Features</string>
+    <string name="guardian_feature_abnormal_hr">Abnormal Heart Rate Alert</string>
+    <string name="guardian_feature_abnormal_hr_desc">Auto-notify family when heart rate is abnormal</string>
+    <string name="guardian_feature_location">Location Sharing</string>
+    <string name="guardian_feature_location_desc">Real-time location sharing with emergency contacts</string>
+    <string name="guardian_feature_fall">Fall Detection</string>
+    <string name="guardian_feature_fall_desc">Auto-call for help when fall is detected</string>
+    <string name="guardian_feature_medication">Medication Reminder</string>
+    <string name="guardian_feature_medication_desc">Timely reminders for elderly to take medication</string>
+    <string name="guardian_contacts_title">Emergency Contacts</string>
+    <string name="guardian_contacts_empty_title">No Emergency Contacts</string>
+    <string name="guardian_contacts_empty_desc">Tap top-right to add emergency contacts</string>
+    <string name="guardian_contacts_role">Emergency Contact</string>
+    <string name="guardian_notify_title">Notification Methods</string>
+    <string name="guardian_notify_phone">Phone Call</string>
+    <string name="guardian_notify_phone_desc">Direct phone call for emergencies</string>
+    <string name="guardian_notify_sms">SMS Notification</string>
+    <string name="guardian_notify_sms_desc">Send SMS to emergency contacts</string>
+    <string name="guardian_notify_app">APP Push</string>
+    <string name="guardian_notify_app_desc">Push notification via APP</string>
+
+    <!-- Medical V3 - Extended -->
+    <string name="medical_title_health">Medical Health</string>
+    <string name="medical_subtitle">Medication reminders, visit records, health knowledge</string>
+    <string name="medical_today_taken">2/3 Taken</string>
+    <string name="medical_reminders_title">Medication Reminders</string>
+    <string name="medical_button_add">Add</string>
+    <string name="medical_features_title">Quick Features</string>
+    <string name="medical_feature_visits">Visit Records</string>
+    <string name="medical_feature_visits_desc">View historical visit records</string>
+    <string name="medical_feature_records">Medical Records</string>
+    <string name="medical_feature_records_desc">Manage personal medical records</string>
+    <string name="medical_feature_knowledge">Health Knowledge</string>
+    <string name="medical_feature_knowledge_desc">Learn health and wellness knowledge</string>
+    <string name="medical_feature_followup">Follow-up Reminder</string>
+    <string name="medical_feature_followup_desc">Set follow-up visit reminders</string>
+    <string name="medical_taken">Taken</string>
+    <string name="medical_button_take">Take</string>
+    <string name="medical_safety_tip">Medication Safety Tip</string>
+    <string name="medical_safety_tip_desc">Take medication on time as prescribed, seek medical attention if feeling unwell</string>
+
+    <!-- Workout V3 - Extended -->
+    <string name="workout_subtitle">Record exercise data, stay healthy and active</string>
+    <string name="workout_unit_steps">steps</string>
+    <string name="workout_unit_minutes">minutes</string>
+    <string name="workout_recent_title">Recent Workouts</string>
+    <string name="workout_goal_title">Exercise Goal</string>
+    <string name="workout_goal_desc">Exercise 30 minutes daily, stay healthy and active</string>
+    <string name="workout_button_stop">Stop</string>
+    <string name="workout_button_start">Start</string>
+
+    <!-- SOS V3 - Extended -->
+    <string name="sos_subtitle_one_tap">One-tap call to emergency contacts</string>
+    <string name="sos_button_call_120">Call 120</string>
+    <string name="sos_button_call_family">Call Family</string>
+    <string name="sos_button_send_sms">Send SMS</string>
+    <string name="sos_contacts_title">Emergency Contacts</string>
+    <string name="sos_contacts_empty">No emergency contacts, please add in settings</string>
+    <string name="sos_notes_title">Important Notes</string>
+    <string name="sos_notes_content">• Stay calm in emergencies\n• State your location and situation when calling\n• Do not move around while waiting for rescue</string>
+
+    <!-- PPG Measure - Extended -->
+    <string name="ppg_title">Camera Pulse Measurement (PPG Photoplethysmography)</string>
+    <string name="ppg_description">Principle: Cover the rear camera with fingertip, flashlight shines through fingertip; each heartbeat slightly changes light transmission. Extract red channel signal frame by frame, use detrending filter, adaptive peak detection and heartbeat interval statistics to calculate heart rate and HRV(RMSSD). This is real optical measurement, not simulation.</string>
+    <string name="ppg_button_start">Start %d second measurement</string>
+    <string name="ppg_measuring">Collecting</string>
+    <string name="ppg_guide_finger">Cover the rear camera\nwith your fingertip</string>
+    <string name="ppg_guide_flashlight">Flashlight on · Stay still</string>
+    <string name="ppg_countdown">%d seconds to auto-result · %s</string>
+    <string name="ppg_error_no_permission">Camera permission not granted, cannot perform optical measurement. Please allow this app to use camera in system settings.</string>
+    <string name="ppg_error_no_back_camera">No rear camera available</string>
+    <string name="ppg_error_config_failed">Camera session configuration failed</string>
+    <string name="ppg_error_session_failed">Session creation failed: %s</string>
+    <string name="ppg_error_camera_code">Camera error (code=%d)</string>
+    <string name="ppg_error_open_failed">Camera open failed: %s</string>
+    <string name="ppg_result_insufficient">Insufficient signal, cannot give result. Please confirm fingertip fully covers lens (no light leakage), keep hand steady, then retry.</string>
+    <string name="ppg_result_low_confidence">Confidence only %d%% (%d beats detected), not reliable enough. Please re-measure and stay still throughout.</string>
+    <string name="ppg_result_format">Measured heart rate %d bpm · %d beats detected · Confidence %d%% · HRV(RMSSD) %d ms · Stress estimate %d (%s)</string>
+    <string name="ppg_result_saved">Auto-saved to heart rate and stress records, homepage risk assessment updated</string>
+
+    <!-- New i18n strings -->
+    <string name="dashboard_content_description_health_safety">Health Safety</string>
+    <string name="ai_unit_steps">steps</string>
+    <string name="report_title_health">Health Report</string>
+    <string name="report_overall_health">Overall health status is good, keep it up</string>
+    <string name="report_overview">Overview</string>
+    <string name="report_export_subtitle">Export PDF / JSON format, convenient for doctor visits</string>
+    <string name="report_ai_analysis_subtitle">Smart health trend analysis, personalized suggestions</string>
+    <string name="workout_title_tracking">Activity Tracking</string>
+    <string name="workout_subtitle_record">Record exercise data, stay healthy and active</string>
+    <string name="workout_unit_minutes_count">%d minutes</string>
+    <string name="workout_content_description_stop">Stop</string>
+    <string name="workout_content_description_start">Start</string>
+    <string name="workout_recent_workouts">Recent Workouts</string>
+    <string name="workout_goal_activity">Daily 30-minute exercise, stay healthy and active</string>
+    <string name="sos_title_emergency">Emergency SOS</string>
+    <string name="sos_notes_important">Important Notes</string>
+    <string name="sos_notes_detail">Stay calm in emergencies\nState your location and situation when calling\nDo not move around while waiting for rescue</string>
+    <string name="medical_name_aspirin">Aspirin</string>
+    <string name="medical_dosage_100mg">100mg</string>
+    <string name="medical_time_morning_8">Every day 8:00 AM</string>
+    <string name="medical_taken_status">2/3 Taken</string>
+    <string name="medical_name_blood_pressure">Blood Pressure Med</string>
+    <string name="medical_dosage_5mg">5mg</string>
+    <string name="medical_time_evening_8">Every day 8:00 PM</string>
+    <string name="medical_name_calcium">Calcium</string>
+    <string name="medical_dosage_500mg">500mg</string>
+    <string name="medical_time_noon_12">Every day 12:00 PM</string>
+    <string name="medical_feature_visit_records">Visit Records</string>
+    <string name="medical_feature_visit_records_desc">View historical visit records</string>
+    <string name="medical_feature_medical_records">Medical Records</string>
+    <string name="medical_feature_medical_records_desc">Manage personal medical records</string>
+    <string name="medical_feature_health_knowledge">Health Knowledge</string>
+    <string name="medical_feature_health_knowledge_desc">Learn health and wellness knowledge</string>
+    <string name="medical_feature_followup_reminder">Follow-up Reminder</string>
+    <string name="medical_feature_followup_reminder_desc">Set follow-up visit reminders</string>
+    <string name="medical_taken_label">Taken</string>
+    <string name="medical_take_label">Take</string>
+    <string name="more_title_functions">More Functions</string>
+    <string name="more_subtitle_desc">Settings, data management, about app</string>
+    <string name="more_data_export">Export Data</string>
+    <string name="more_data_export_desc">Export health data as JSON/PDF</string>
+    <string name="more_data_import">Import Data</string>
+    <string name="more_data_import_desc">Import health data from backup file</string>
+    <string name="more_personalization">Personalization</string>
+    <string name="more_dark_mode_desc">Switch dark/light theme</string>
+    <string name="more_notifications_desc">Receive health reminders and notifications</string>
+    <string name="more_theme_desc">Choose favorite theme color scheme</string>
+    <string name="more_language_desc">Select app display language</string>
+    <string name="more_security_privacy">Security &amp; Privacy</string>
+    <string name="more_privacy_desc">Manage data collection and usage permissions</string>
+    <string name="more_app_lock_desc">Set app launch password protection</string>
+    <string name="more_about_title">About</string>
+    <string name="more_about_app">About App</string>
+    <string name="more_about_app_desc">Silema · Are You Dead Yet? v3.0</string>
+    <string name="more_rate_us">Rate Us</string>
+    <string name="more_rate_us_desc">Rate us in the app store</string>
+    <string name="more_logout_subtitle">Log out of current account, clear local cache</string>
+    <string name="family_member_default_relation">Family</string>
+    <string name="guardian_default_relation">Emergency Contact</string>
+    <string name="common_step">steps</string>
+    <string name="common_minutes_format">%d minutes</string>
+    <string name="ppg_title_camera">Camera Pulse Measurement (PPG Photoplethysmography)</string>
+    <string name="ppg_guide_finger_cover">Cover the rear camera\nwith your fingertip</string>
+    <string name="ppg_guide_flashlight_on">Flashlight on · Stay still</string>
+    <string name="ppg_countdown_format">%d seconds to auto-result · %s</string>
+    <string name="ppg_error_no_permission_msg">Camera permission not granted, cannot perform optical measurement. Please allow this app to use camera in system settings.</string>
+    <string name="ppg_error_no_back_camera_msg">No rear camera available</string>
+    <string name="ppg_error_config_failed_msg">Camera session configuration failed</string>
+    <string name="ppg_error_session_failed_msg">Session creation failed: %s</string>
+    <string name="ppg_error_camera_code_msg">Camera error (code=%d)</string>
+    <string name="ppg_error_open_failed_msg">Camera open failed: %s</string>
+    <string name="ppg_result_insufficient_msg">Insufficient signal, cannot give result. Please confirm fingertip fully covers lens (no light leakage), keep hand steady, then retry.</string>
+    <string name="ppg_result_low_confidence_msg">Confidence only %d%% (%d beats detected), not reliable enough. Please re-measure and stay still throughout.</string>
+    <string name="ppg_result_format_detail">Measured heart rate %d bpm · %d beats detected · Confidence %d%% · HRV(RMSSD) %d ms · Stress estimate %d (%s)</string>
+    <string name="ppg_result_saved_msg">Auto-saved to heart rate and stress records, homepage risk assessment updated</string>
 </resources>

@@ -1,5 +1,6 @@
 package com.silema.app.wear.ui
 
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.runtime.Composable
@@ -9,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import androidx.wear.compose.material.Button
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.ScalingLazyColumn
@@ -21,21 +23,25 @@ import com.silema.app.wear.data.WearStore
 import com.silema.app.wear.theme.riskColor
 
 @Composable
-fun AiBriefScreen(onNavigate: (Screen) -> Unit) {
+fun AiBriefScreen(
+    onNavigate: (Screen) -> Unit,
+    onBack: () -> Unit = {},
+) {
     val records by WearStore.records.collectAsState()
     val workouts by WearStore.workouts.collectAsState()
     val assessment = remember(records) { RiskEngine.evaluate(records) }
-    val weekly = remember(records, workouts) {
-        HealthReport.weekly(records, workouts, System.currentTimeMillis(), assessment.alerts.size)
-    }
+    val weekly =
+        remember(records, workouts) {
+            HealthReport.weekly(records, workouts, System.currentTimeMillis(), assessment.alerts.size)
+        }
 
-    ScalingLazyColumn(modifier = Modifier.fillMaxSize()) {
+    ScalingLazyColumn(modifier = Modifier.fillMaxSize(), contentPadding = PaddingValues(vertical = 32.dp)) {
         item {
             Text(
                 text = stringResource(R.string.ai_title),
                 style = MaterialTheme.typography.title1,
                 textAlign = TextAlign.Center,
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
             )
         }
         if (records.isEmpty()) {
@@ -44,7 +50,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit) {
                     text = stringResource(R.string.home_no_data),
                     style = MaterialTheme.typography.body1,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         } else {
@@ -54,7 +60,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit) {
                         text = weekly.summary[i],
                         style = MaterialTheme.typography.body1,
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     )
                 }
             }
@@ -64,7 +70,7 @@ fun AiBriefScreen(onNavigate: (Screen) -> Unit) {
                     color = riskColor(assessment.level),
                     style = MaterialTheme.typography.title2,
                     textAlign = TextAlign.Center,
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier.fillMaxWidth(),
                 )
             }
         }

@@ -6,7 +6,6 @@ import kotlin.math.pow
  * 蓝牙标准协议解析器 —— 纯函数、零 Android 依赖，可直接在 JVM 上单测。
  */
 object BleCodec {
-
     /** Heart Rate Measurement 0x2A37：flags 决定 uint8 / uint16 LE。 */
     fun parseHeartRate(b: ByteArray): Double? {
         if (b.size < 2) return null
@@ -41,7 +40,10 @@ object BleCodec {
      * 低 12 位为二进制补码尾数 m，高 4 位为二进制补码指数 e，
      * 实际值 = m × 10^e。保留特殊值（NaN/-∞/+∞/NRes）返回 null。
      */
-    fun sfloat(b: ByteArray, offset: Int): Double? {
+    fun sfloat(
+        b: ByteArray,
+        offset: Int,
+    ): Double? {
         if (b.size < offset + 2) return null
         val raw = u16Le(b, offset)
         var mantissa = raw and 0x0FFF
@@ -52,6 +54,8 @@ object BleCodec {
         return mantissa.toDouble() * 10.0.pow(exponent.toDouble())
     }
 
-    private fun u16Le(b: ByteArray, off: Int): Int =
-        (b[off].toInt() and 0xFF) or ((b[off + 1].toInt() and 0xFF) shl 8)
+    private fun u16Le(
+        b: ByteArray,
+        off: Int,
+    ): Int = (b[off].toInt() and 0xFF) or ((b[off + 1].toInt() and 0xFF) shl 8)
 }

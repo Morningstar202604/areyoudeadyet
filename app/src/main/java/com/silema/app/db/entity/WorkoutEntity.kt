@@ -17,5 +17,6 @@ data class WorkoutEntity(
     val durationMillis: Long,
     val distanceMeters: Double,
     val caloriesKcal: Double,
-    val track: String, // JSON: List<List<Double>>
+    // JSON: List<List<Double>>
+    val track: String,
 )

@@ -24,6 +24,9 @@ import com.silema.app.data.Workout
 import com.silema.app.engine.Stats
 import com.silema.app.store.AppRepository
 import com.silema.app.store.appRepositoryFrom
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -38,6 +41,8 @@ import java.util.UUID
 class WorkoutService : android.app.Service() {
     /** AppRepository 单例（v0.6.0 起通过 Hilt EntryPoint 获取）。 */
     private lateinit var repo: AppRepository
+    private val serviceJob = SupervisorJob()
+    private val serviceScope = CoroutineScope(serviceJob + Dispatchers.IO)
 
     data class Live(
         val type: String,
@@ -247,6 +252,7 @@ class WorkoutService : android.app.Service() {
     }
 
     override fun onDestroy() {
+        serviceJob.cancel()
         runCatching { (getSystemService(Context.LOCATION_SERVICE) as LocationManager).removeUpdates(locationListener) }
         handlerThread?.quitSafely()
         super.onDestroy()

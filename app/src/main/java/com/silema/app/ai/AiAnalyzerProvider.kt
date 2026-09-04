@@ -17,23 +17,24 @@ object AiAnalyzerProvider {
         context: Context,
         apiKey: String? = null,
         baseUrl: String = "https://api.hcnsec.cn/v1",
-        model: String = "qwen-plus"
+        model: String = "qwen-plus",
     ): AiAnalyzer {
         // 如果 API Key 变化了，重建实例
         if (apiKey != lastApiKey) {
             instance = null
             lastApiKey = apiKey
         }
-        
+
         instance?.let { return it }
 
-        val impl: AiAnalyzer = if (!apiKey.isNullOrEmpty()) {
-            // 尝试云端模式
-            CloudAiAnalyzer(baseUrl = baseUrl, apiKey = apiKey, model = model)
-        } else {
-            // 本地备用模式
-            LocalAiAnalyzer()
-        }
+        val impl: AiAnalyzer =
+            if (!apiKey.isNullOrEmpty()) {
+                // 尝试云端模式
+                CloudAiAnalyzer(baseUrl = baseUrl, apiKey = apiKey, model = model)
+            } else {
+                // 本地备用模式
+                LocalAiAnalyzer()
+            }
         instance = impl
         return impl
     }

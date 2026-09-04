@@ -277,7 +277,8 @@ class AppRepository
                         sedentaryReminderOn = s.sedentaryReminderOn
                     }
                     Timber.i(
-                        "importFromJson: records=${data.records.size} contacts=${data.contacts.size} workouts=${data.workouts.size}",
+                        "importFromJson: records=${data.records.size} " +
+                            "contacts=${data.contacts.size} workouts=${data.workouts.size}",
                     )
                     true
                 }.recoverCatching {
@@ -307,10 +308,10 @@ class AppRepository
                 prefs.edit().putInt("sleep_goal_h", v).apply()
             }
 
-        var weightKg: Int
-            get() = prefs.getInt("weight_kg", 65)
+        var weightKg: Float
+            get() = prefs.getFloat("weight_kg", 65f)
             set(v) {
-                prefs.edit().putInt("weight_kg", v).apply()
+                prefs.edit().putFloat("weight_kg", v).apply()
             }
 
         var measureReminderOn: Boolean
@@ -412,7 +413,7 @@ class AppRepository
         internal data class ExportSettings(
             val stepsGoal: Int,
             val sleepGoalHours: Int,
-            val weightKg: Int,
+            val weightKg: Float,
             val measureReminderOn: Boolean,
             val measureReminderHour: Int,
             val measureReminderMinute: Int,

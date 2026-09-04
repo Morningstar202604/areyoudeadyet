@@ -17,6 +17,8 @@ enum class VitalType(
     STRESS("stress", "压力指数", "分"),
     ;
 
+    val shortName: String get() = displayName.substringBefore("(").trim()
+
     companion object {
         fun fromId(id: String): VitalType? = entries.firstOrNull { it.id == id }
     }

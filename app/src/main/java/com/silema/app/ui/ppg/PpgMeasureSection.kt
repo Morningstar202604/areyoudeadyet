@@ -188,7 +188,9 @@ fun PpgMeasureSection() {
     Column {
         Text("摄像头脉搏实测（PPG 光电容积波）", style = MaterialTheme.typography.titleMedium)
         Text(
-            text = "原理：指尖盖住后置摄像头，闪光灯穿透指尖；每次心跳都会微弱改变透光强度。逐帧提取红色通道信号，经去趋势滤波、自适应峰值检测与心跳间期统计，算出心率与 HRV(RMSSD)。这是真实的光学测量，不是模拟。",
+            text =
+                "原理：指尖盖住后置摄像头，闪光灯穿透指尖；每次心跳都会微弱改变透光强度。逐帧提取红色通道信号，" +
+                    "经去趋势滤波、自适应峰值检测与心跳间期统计，算出心率与 HRV(RMSSD)。这是真实的光学测量，不是模拟。",
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(vertical = 6.dp),
@@ -299,10 +301,10 @@ private fun stopAndEvaluate(
             repository.addRecord(
                 VitalRecord.of(VitalType.STRESS, stress, System.currentTimeMillis(), VitalSource.PPG_CAMERA),
             )
+            val stressLabel = StressMath.label(stress.toInt())
             onDone(
-                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · HRV(RMSSD) ${r.rmssdMs} ms · 压力估算 ${stress.toInt()} 分（${StressMath.label(
-                    stress.toInt(),
-                )}）",
+                "实测心率 ${r.bpm.toInt()} 次/分 · 检出 ${r.beatCount} 拍 · 置信度 ${(r.confidence * 100).toInt()}% · " +
+                    "HRV(RMSSD) ${r.rmssdMs} ms · 压力估算 ${stress.toInt()} 分（$stressLabel）",
                 "已自动保存到心率与压力记录，首页风险评估随之更新",
             )
         }
