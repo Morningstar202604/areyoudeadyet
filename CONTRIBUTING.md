@@ -148,7 +148,10 @@ We're actively seeking contributions for:
    ```
 5. Sign APKs with release keystore
 6. Create GitHub release with changelog
-7. Push to all three remotes (GitHub, Gitee, GitLab)
+7. Push the release tag to GitHub:
+   ```bash
+   git push origin main --tags
+   ```
 
 ## 📝 Commit Message Guidelines
 

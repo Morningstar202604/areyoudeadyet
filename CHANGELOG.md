@@ -13,7 +13,7 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/), and this
 - Multi-language support: English, 简体中文, 日本語
 - Wear OS main product with 5 screens (Home, Entry, SOS, Workout, AI Brief)
 - Phone guardian app modernized (removed elderly self-use screens)
-- Three-platform deployment: GitHub, Gitee, GitCode
+- GitHub-only hosting with automated CI (build + test) on every push and PR
 - CONTRIBUTING.md with detailed guidelines
 - ISSUE_TEMPLATE for bugs and features
 - PULL_REQUEST_TEMPLATE
