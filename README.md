@@ -1,11 +1,12 @@
+[English](README.md) · [简体中文](README.zh-CN.md) · [日本語](README.ja-JP.md)
+
 <div align="center">
 
 <img src="docs/images/logo.png" width="120" alt="Silema Are You Dead Yet? Logo"/>
 
-# Silema · Are You Dead Yet? (死了吗？)
+# Silema · Are You Dead Yet?
 
-**Elderly Health Guardian · Life Risk Warning · One-Tap SOS**  
-**老人健康监测 · 生命风险预警 · 一键 SOS**
+**Elderly Health Guardian · Life Risk Warning · One-Tap SOS**
 
 [![CI](https://github.com/Morningstar202604/areyoudeadyet/actions/workflows/ci.yml/badge.svg)](https://github.com/Morningstar202604/areyoudeadyet/actions/workflows/ci.yml)
 [![Release](https://img.shields.io/github/v/release/Morningstar202604/areyoudeadyet?color=B71C1C&label=Release)](https://github.com/Morningstar202604/areyoudeadyet/releases)
@@ -16,22 +17,13 @@
 [![License](https://img.shields.io/github/license/Morningstar202604/areyoudeadyet?color=blue)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/Morningstar202604/areyoudeadyet?style=social)](https://github.com/Morningstar202604/areyoudeadyet/stargazers)
 
-*No more vague "drink water, sleep early" advice — we warn you when it's dangerous and tell you exactly what to do.*  
-*拒绝「多喝水早睡觉」式空泛建议 —— 有危险就大声警告，并告诉你现在该做什么。*
+*No more vague "drink water, sleep early" advice — we warn you when it's dangerous and tell you exactly what to do.*
 
-**[Download Latest APK](https://github.com/Morningstar202604/areyoudeadyet/releases/latest)** · [中文文档](#chinese) · [日本語](#japanese) · [Algorithm Details](#algorithms--models--算法与模型) · [Remote Setup](docs/remote-setup.md) · [Contribute](#contributing)
+**[Download Latest APK](https://github.com/Morningstar202604/areyoudeadyet/releases/latest)** · [Algorithm Details](#algorithms--models) · [Remote Setup](docs/remote-setup.md) · [Contribute](#contributing)
 
 <img src="docs/images/banner.png" width="720" alt="Silema Banner"/>
 
 </div>
-
----
-
-## 🌍 Multi-Language Support / 多语言支持 / マルチ言語対応
-
-This app supports **English**, **简体中文**, and **日本語**. Switch language in your Android system settings.  
-本应用支持**英文**、**简体中文**和**日本語**。在 Android 系统设置中切换语言即可。  
-このアプリは**英語**、**簡体字中国語**、**日本語**をサポートしています。Android システム設定で言語を切り替えてください。
 
 ---
 
@@ -42,14 +34,9 @@ Most elderly health apps suffer from the same flaw: **no sense of crisis**. When
 > Every alert must answer three questions: **What's wrong? Why is it dangerous? What to do NOW?**  
 > Better over-warn than pretend everything's fine.
 
-市面上的老人健康 App 有个通病：**没有危机意识**。数据超标了只会说「注意休息、多喝水」，从不告诉你危险不危险、该干什么。这个 App 反过来：
-
-> 每条预警强制回答三个问题：**是什么问题 / 为什么危险 / 现在就做什么。**  
-> 宁可多提醒，绝不装没事。
-
 ---
 
-## Core Features / 核心能力
+## Core Features
 
 | Feature | Description |
 |---------|-------------|
@@ -70,7 +57,7 @@ Most elderly health apps suffer from the same flaw: **no sense of crisis**. When
 | 🗣️ **Elderly-First UI** | Large fonts, high contrast, 76dp+ big buttons, auto voice announcements for danger levels. |
 | 🔒 **Offline-First** | Fully functional offline; remote sync is optional. User controls data privacy. |
 
-### Dual-End Architecture / 双端架构
+### Dual-End Architecture
 
 | End | Role | Target User | Module | minSdk | Status |
 |-----|------|-------------|--------|--------|--------|
@@ -81,7 +68,7 @@ Shared: `com.silema.app.core` (Kotlin-JVM pure library) — `RiskEngine` / `Stat
 
 ---
 
-## Pluggable Backend Architecture / 可插拔后端架构
+## Pluggable Backend Architecture
 
 Designed for enterprise deployment:
 
@@ -104,14 +91,12 @@ Designed for enterprise deployment:
 - Enterprises integrate their own backend (Alibaba Cloud, Tencent Cloud, or self-hosted).
 - See [Remote Sync Setup Guide](docs/remote-setup.md).
 
-**我们不提供服务器**，只提供 App + 接口规范 + 配置文档。企业自行对接阿里云/腾讯云/自建后端。
-
 ---
 
-## Algorithms & Models / 算法与模型
+## Algorithms & Models
 
 ```
-Rule Layer    Medical threshold判定 + combo rules + auto-escalation after 3 consecutive breaches
+Rule Layer    Medical threshold rules + combo rules + auto-escalation after 3 consecutive breaches
 Stat Layer    z-score = (x-μ)/σ          Personal baseline anomaly (14-day window)
               Least-squares regression slope   Trend warning (21-day daily average)
               MAP = DBP + (SBP-DBP)/3     <65 organ hypoperfusion
@@ -124,7 +109,7 @@ Protocol      IEEE-11073 16-bit SFLOAT: value = m(12-bit two's complement) × 10
 
 ---
 
-## Quick Start / 快速开始
+## Quick Start
 
 ### Prerequisites
 - Android Studio Hedgehog (2023.1.1) or later
@@ -147,11 +132,9 @@ cd areyoudeadyet
 2. For Huawei/Xiaomi bands: Enable Health Connect sync in their Sports Health app, then pull data on the Guardian screen.
 3. For remote sync: Edit `app/src/main/assets/remote_config.json`, see [Setup Guide](docs/remote-setup.md).
 
-首次打开点「**加载 7 天演示数据**」体验全部功能（守护页可一键清空）。华为/小米手环：在运动健康 App 开启 Health Connect 同步后，到守护页拉取。远程同步：编辑 `app/src/main/assets/remote_config.json`，详见[配置指南](docs/remote-setup.md)。
-
 ---
 
-## Project Structure / 项目结构
+## Project Structure
 
 ```
 ├── app/                    # Phone guardian app (Android 8.0+)
@@ -199,7 +182,7 @@ cd areyoudeadyet
 
 ---
 
-## Contributing / 参与贡献
+## Contributing
 
 PRs welcome! Especially looking for:
 - More device protocol support (glucose meters, thermometers, smart scales)
@@ -210,154 +193,11 @@ PRs welcome! Especially looking for:
 
 Small steps: Fork → Branch → Changes (pass `test/` algorithm tests) → PR.
 
-欢迎 PR！特别是：更多设备协议适配（血糖仪、体温计、体重秤）、跌倒检测算法、多语言支持、鸿蒙 ArkTS 版、各云厂商 RemoteSync 实现。小步骤：Fork → 分支 → 改动（跑通 `test/` 下算法测试）→ PR。
-
 ---
 
-## Disclaimer / 免责声明
+## Disclaimer
 
 This app provides health-management reference based on publicly available medical consensus thresholds. **It cannot replace professional medical diagnosis or certified medical devices.** In emergencies, always prioritize calling local emergency services (120 in China, 911 in US, 119 in Japan, etc.).
-
-本应用基于公开医学共识阈值做健康管理参考，**不能替代医生诊断和正规医疗设备**。紧急情况永远优先拨打当地急救电话（中国 120，美国 911，日本 119 等）。
-
----
-
-<div id="chinese"></div>
-
-## 中文完整文档
-
-以上已包含完整的中文说明。如需更详细的中文技术文档，请查看：
-- [远程同步配置指南](docs/remote-setup.md)
-- [算法详细说明](#algorithms--models)
-- [项目结构](#project-structure--项目结构)
-
----
-
-<div id="japanese"></div>
-
-## 日本語ドキュメント
-
-**Silema · Are You Dead Yet? (死んだ？)** は、Android 向けの老人健康ガードアプリで、**プラグイン可能なリモートバックエンドアーキテクチャ**を採用しています。「もっと水を飲んで」「早く寝て」といった曖昧なアドバイスではなく、すべてのアラートが3つの質問に答えます：*何が問題か、なぜ危険か、今すぐ何をすべきか*。
-
-### 主な機能
-
-- **リスクエンジン** — 医療閾値による4段階トリアージ（正常/注意/警告/危険）、複合ルール（例：低血圧＋頻脈＝ショック代償）、連続超過による自動エスカレーション
-- **統計レイヤー** — 個人ベースライン z-score 異常検出、最小二乗法トレンド回帰、平均動脈圧（MAP）、ショック指数（SI）、脈圧（PP）
-- **ローカルデータエクスポート** — バイタルを FHIR R4 健康記録ファイルとしてエクスポートし、家族や医師と共有（LocalExportSync 経由）。リアルタイム遠隔監視にはエンタープライズバックエンドが必要
-- **オンデバイス AI 分析** — RiskEngine ルールベース推論により完全オフラインで実行（リスクスコア/所見/推奨事項）。クラウドモデル不要（LocalAiAnalyzer で実装）
-- **FHIR R4 エクスポート** — 病院の HIS/EHR システムと互換性のある標準医療記録形式
-- **カメラ PPG** — 指先＋フラッシュで 30 秒間の実際の光学式心拍数＆HRV（RMSSD）測定。信号品質が低い場合は数値を出さない
-- **Bluetooth LE** — 標準プロファイルの心拍数ベルト（0x180D）、血圧計（0x1810）、パルスオキシメーター（0x1822）
-- **Health Connect** — 華為/Xiaomi ウェアラブルデータを同期
-- **SOS** — フルスクリーン緊急呼出：119番通報／家族連絡／バイタル付き SMS 送信
-- **高齢者優先 UI** — 大きなフォント、高コントラスト、76dp 以上の大きなボタン、危険レベルの自動音声アナウンス
-- **オフラインファースト** — オフラインでも完全機能。リモート同期はオプション
-
-### プラグイン可能アーキテクチャ
-
-**サーバーは提供しません**。アプリには `RemoteSync` インターフェースと設定システムが付属しています。企業は独自のバックエンド（Alibaba Cloud、Tencent Cloud、または自社ホスト）を接続できます。詳細は[リモートセットアップガイド](docs/remote-setup.md)をご覧ください。
-
-**ダウンロード:** [最新リリース APK](https://github.com/Morningstar202604/areyoudeadyet/releases/latest) · Android 8.0+ · MIT ライセンス
-
-> 健康管理の参考情報のみ — 医療機器ではありません。緊急時には必ず現地の救急サービスに連絡してください。
-
----
-
-## 🎨 UI 设计系统 v3（2026-09 更新）
-
-### 设计理念
-参考 Keep 等运动应用和现代养生应用，采用**清新健康活力风**设计语言，兼顾美观与适老化。
-
-### 配色系统
-| 角色 | 颜色 | 用途 |
-|------|------|------|
-| **主品牌色** | 薄荷绿 `#00A86B` | 健康/自然/活力，主按钮、选中态 |
-| **强调色** | 活力橙 `#FF6D00` | 温暖/能量/CTA，重要操作、提醒 |
-| **辅助色** | 深邃蓝 `#1A237E` | 专业/信任/医疗，次要信息、设备 |
-| **危险色** | 珊瑚红 `#E53935` | SOS、风险警告、错误 |
-| **背景** | 浅薄荷绿渐变 `#F1F8E9 → #E8F5E9` | 页面背景，清新自然 |
-
-### 数据可视化色板
-- 心率：粉红 `#E91E63`
-- 血压：靛蓝 `#3F51B5`
-- 血氧：青色 `#00BCD4`
-- 体温：橙红 `#FF5722`
-- 步数：浅绿 `#8BC34A`
-- 睡眠：蓝紫 `#7986CB`
-
-### 核心组件
-- **ProgressRing** — 渐变进度环（带动画）
-- **GlassCard** — 玻璃拟态卡片
-- **DataTile** — 数据块（图标+数值+单位+标签+趋势）
-- **GradientBanner** — 渐变横幅
-- **QuickActionButton** — 快速操作按钮
-- **TrendChart** — 趋势图（折线+渐变填充）
-- **BarChart** — 柱状图（带动画）
-- **ModernBottomNav** — 浮动卡片式底部导航
-
-### 适老化规范
-- 正文字号 16-17sp，标题 20-30sp
-- 对比度 ≥ 4.5:1（WCAG AA）
-- 点击区域 ≥ 48dp
-- 大按钮、大图标、清晰视觉层次
-
----
-
-## 工程化改进
-
-### 架构升级
-- **Room 数据库** — 替代 JSON 文件存储，类型安全、查询高效
-- **Hilt 依赖注入** — AppRepository 改为 @Singleton 类，构造函数注入
-- **ViewModel 架构** — Dashboard/Devices/Family/Medical/Report 5 个 ViewModel
-- **Timber 日志框架** — 替代 System.out.println，Release 自动关闭
-
-### 测试体系
-- **JUnit 4** — 替代 main 方法测试，3 个引擎测试类
-- **Room 数据库测试** — 16 个 DAO 测试用例
-- **Repository 集成测试** — 8 个端到端测试
-- **JaCoCo 覆盖率报告** — CI 自动生成
-
-### 构建与 CI
-- **R8 混淆** — Release 构建开启代码压缩和优化
-- **ktlint 代码检查** — 12.1.1，非阻塞模式
-- **CI 流水线** — 编译检查+测试+Debug+Release混淆验证+Lint+ktlint+产物上传
-- **Gradle 缓存优化** — wrapper/依赖/构建三层缓存
-
-### 数据管理
-- **数据导出** — JSON 格式导出健康数据
-- **数据导入** — 从备份文件恢复数据
-- **Wear 端数据层** — 完善删除/清空/导出/导入功能
-
----
-
-## 📱 功能模块
-
-### 手机端（守护端）
-| 模块 | 功能 |
-|------|------|
-| **Dashboard 首页** | 健康概览、风险评估、核心数据、快速操作、SOS |
-| **Devices 设备** | PPG相机测量、蓝牙设备连接、Health Connect同步 |
-| **Report 报告** | 健康评分、指标分析、导出PDF/JSON、AI分析 |
-| **Guardian 守护** | SOS设置、守护功能开关、紧急联系人、通知方式 |
-| **Family 家人** | 快捷联系、家人列表、家庭健康共享 |
-| **Medical 医疗** | 用药提醒、就诊记录、医疗档案、健康知识 |
-| **More 更多** | 数据管理、个性化设置、安全隐私、关于 |
-| **AiReport AI分析** | AI智能分析、健康建议、趋势预测 |
-| **Entry 测量入口** | 心率/血压/血氧/体温测量、数据来源选择 |
-
-### 手表端（Wear OS）
-| 模块 | 功能 |
-|------|------|
-| **WearHome 首页** | 心率大数字、风险等级、血氧/步数、SOS按钮 |
-| **WearSos 紧急呼救** | 倒计时防误触、一键呼救、发送位置 |
-| **WearWorkout 运动** | 步数/心率/卡路里/时长、开始/暂停 |
-| **WearSettings 设置** | 通知、深色模式、健康追踪、关于 |
-
-### 华为手表适配
-- 支持圆形屏幕（Watch GT 系列）和方形屏幕（Watch Fit 系列）
-- 华为 BLE 设备过滤（血压表、手环、体脂秤）
-- Wear OS 版本可在华为 Wear OS 手表上运行
-- HarmonyOS 版本需单独 ArkTS 项目开发
 
 ---
 
