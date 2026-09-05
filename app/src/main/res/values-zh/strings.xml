@@ -130,4 +130,342 @@
     <string name="common_error">错误</string>
     <string name="common_success">成功</string>
     <string name="common_retry">重试</string>
+
+    <!-- Dashboard V3 -->
+    <string name="dashboard_greeting_late_night">夜深了</string>
+    <string name="dashboard_greeting_morning">早上好</string>
+    <string name="dashboard_greeting_morning_early">上午好</string>
+    <string name="dashboard_greeting_noon">中午好</string>
+    <string name="dashboard_greeting_evening">下午好</string>
+    <string name="dashboard_greeting_night">晚上好</string>
+    <string name="dashboard_core_data">核心数据</string>
+    <string name="dashboard_heart_rate">心率</string>
+    <string name="dashboard_blood_pressure">血压</string>
+    <string name="dashboard_blood_oxygen">血氧</string>
+    <string name="dashboard_steps">步数</string>
+    <string name="dashboard_sleep">睡眠</string>
+    <string name="dashboard_temperature">体温</string>
+    <string name="dashboard_no_data_hint">点击「测心率」开始第一次测量</string>
+    <string name="dashboard_recent_records">最近记录</string>
+    <string name="dashboard_emergency_sos">紧急呼救</string>
+    <string name="dashboard_emergency_subtitle">一键呼叫紧急联系人</string>
+    <string name="dashboard_unit_steps">步</string>
+    <string name="dashboard_unit_hours">小时</string>
+    <string name="dashboard_health_status">健康状态：%s</string>
+    <string name="dashboard_all_normal_continue">各项指标正常，继续保持</string>
+    <string name="dashboard_emergency_subtitle_full">一键呼叫紧急联系人，同时发送位置信息</string>
+
+    <!-- Quick Actions -->
+    <string name="action_measure_hr">测心率</string>
+    <string name="action_devices">设备</string>
+    <string name="action_workout">运动</string>
+    <string name="action_family">家人</string>
+    <string name="action_report">报告</string>
+    <string name="action_ai_analysis">AI 分析</string>
+    <string name="action_guardian">守护</string>
+    <string name="action_sos">SOS</string>
+
+    <!-- AI Report V3 -->
+    <string name="ai_health_score">健康评分</string>
+    <string name="ai_metric_analysis">指标分析</string>
+    <string name="ai_health_suggestions">健康建议</string>
+    <string name="ai_trend_prediction">趋势预测</string>
+    <string name="ai_refresh">重新分析</string>
+
+    <!-- Devices V3 -->
+    <string name="devices_connected">已连接设备</string>
+    <string name="devices_available">可用设备</string>
+    <string name="devices_ppg_camera">PPG 相机测量</string>
+    <string name="devices_health_connect">Health Connect</string>
+    <string name="devices_manual_entry">手动记录</string>
+
+    <!-- Entry V3 -->
+    <string name="entry_ppg_banner">摄像头 PPG 测量</string>
+    <string name="entry_ppg_subtitle">使用摄像头测量心率和血氧</string>
+    <string name="entry_tips">测量提示</string>
+    <string name="entry_tip_1">保持手指稳定放在摄像头上</string>
+    <string name="entry_tip_2">在光线充足的环境下测量</string>
+    <string name="entry_tip_3">测量需要约 30 秒</string>
+
+    <!-- Family V3 -->
+    <string name="family_health_sharing">健康共享</string>
+    <string name="family_quick_contacts">快捷联系</string>
+    <string name="family_member_list">家庭成员</string>
+    <string name="family_call">呼叫</string>
+    <string name="family_message">消息</string>
+
+    <!-- Guardian V3 -->
+    <string name="guardian_sos_settings">SOS 设置</string>
+    <string name="guardian_feature_settings">功能设置</string>
+    <string name="guardian_notification_methods">通知方式</string>
+    <string name="guardian_abnormal_hr">异常心率提醒</string>
+    <string name="guardian_location_sharing">位置共享</string>
+    <string name="guardian_fall_detection">跌倒检测</string>
+    <string name="guardian_medication_reminder">用药提醒</string>
+
+    <!-- Medical V3 -->
+    <string name="medical_todays_medication">今日用药</string>
+    <string name="medical_medication_list">用药列表</string>
+    <string name="medical_quick_features">快捷功能</string>
+    <string name="medical_add">添加</string>
+    <string name="medical_take">服用</string>
+
+    <!-- Report V3 -->
+    <string name="report_health_score">健康评分</string>
+    <string name="report_metric_status">状态</string>
+    <string name="report_export">导出健康报告</string>
+    <string name="report_ai_analysis">AI 健康分析</string>
+
+    <!-- More V3 -->
+    <string name="more_data_management">数据管理</string>
+    <string name="more_settings_group">设置</string>
+    <string name="more_dark_mode">深色模式</string>
+    <string name="more_notifications">消息通知</string>
+    <string name="more_theme">主题配色</string>
+    <string name="more_language">语言设置</string>
+    <string name="more_security">安全</string>
+    <string name="more_privacy">隐私设置</string>
+    <string name="more_app_lock">应用锁</string>
+    <string name="more_about">关于</string>
+    <string name="more_version">版本</string>
+    <string name="more_logout">退出登录</string>
+
+    <!-- AI Report V3 - Extended -->
+    <string name="ai_subtitle">智能分析健康数据，提供个性化建议</string>
+    <string name="ai_analysis_banner_title">AI 智能分析</string>
+    <string name="ai_analysis_banner_subtitle">基于您的健康数据，AI 为您生成个性化健康报告</string>
+    <string name="ai_comprehensive_score">综合健康评分</string>
+    <string name="ai_metric_normal_keep">指标正常，继续保持</string>
+    <string name="ai_health_alerts">健康预警</string>
+    <string name="ai_health_suggestions_title">AI 健康建议</string>
+    <string name="ai_suggestion_keep_good">保持良好状态</string>
+    <string name="ai_suggestion_keep_good_desc">您的健康指标正常，继续保持当前的生活方式</string>
+    <string name="ai_suggestion_complete_today">完成今日测量</string>
+    <string name="ai_suggestion_complete_today_desc">建议完成今日的血压、心率测量，以便更准确评估</string>
+    <string name="ai_suggestion_watch_alerts">关注健康预警</string>
+    <string name="ai_suggestion_watch_alerts_desc">部分指标存在异常，请及时处理或就医</string>
+    <string name="ai_trend_prediction_title">健康趋势预测</string>
+    <string name="ai_trend_prediction_subtitle">基于历史数据，AI 预测未来 7 天健康趋势</string>
+
+    <!-- Devices V3 - Extended -->
+    <string name="devices_title_management">设备管理</string>
+    <string name="devices_subtitle">连接健康设备，自动同步测量数据</string>
+    <string name="devices_recent_measurements">最近测量</string>
+    <string name="devices_connected_ppg">PPG 相机测量</string>
+    <string name="devices_connected_ppg_desc">手机摄像头</string>
+    <string name="devices_connected_health_connect">Health Connect</string>
+    <string name="devices_connected_health_connect_desc">系统健康服务</string>
+    <string name="devices_connected_manual">手动记录</string>
+    <string name="devices_connected_manual_desc">手动输入数据</string>
+    <string name="devices_available_bluetooth_hr">蓝牙心率带</string>
+    <string name="devices_available_bluetooth_hr_desc">BLE 心率监测</string>
+    <string name="devices_available_bluetooth_bp">蓝牙血压计</string>
+    <string name="devices_available_bluetooth_bp_desc">BLE 血压监测</string>
+    <string name="devices_available_bluetooth_spo2">蓝牙血氧仪</string>
+    <string name="devices_available_bluetooth_spo2_desc">BLE 血氧监测</string>
+    <string name="devices_status_connected">已连接</string>
+    <string name="devices_button_connect">连接</string>
+
+    <!-- Entry V3 - Extended -->
+    <string name="entry_title_measure">测量数据</string>
+    <string name="entry_subtitle">选择测量方式，记录健康数据</string>
+    <string name="entry_ppg_banner_title">PPG 相机测量</string>
+    <string name="entry_ppg_banner_subtitle">使用手机摄像头测量心率和血氧</string>
+    <string name="entry_measure_type">测量类型</string>
+    <string name="entry_type_hr_name">心率</string>
+    <string name="entry_type_hr_desc">测量心率（次/分）</string>
+    <string name="entry_type_bp_name">血压</string>
+    <string name="entry_type_bp_desc">记录收缩压/舒张压</string>
+    <string name="entry_type_spo2_name">血氧</string>
+    <string name="entry_type_spo2_desc">测量血氧饱和度（%）</string>
+    <string name="entry_type_temp_name">体温</string>
+    <string name="entry_type_temp_desc">记录体温（℃）</string>
+    <string name="entry_data_source">数据来源</string>
+    <string name="entry_source_ppg">PPG 相机测量</string>
+    <string name="entry_source_ppg_desc">使用手机摄像头测量</string>
+    <string name="entry_source_manual">手动记录</string>
+    <string name="entry_source_manual_desc">手动输入测量数据</string>
+    <string name="entry_source_bluetooth">蓝牙设备</string>
+    <string name="entry_source_bluetooth_desc">连接蓝牙健康设备</string>
+    <string name="entry_source_health_connect">Health Connect</string>
+    <string name="entry_source_health_connect_desc">从系统健康服务同步</string>
+    <string name="entry_tips_banner">测量小贴士</string>
+    <string name="entry_tips_banner_desc">测量前保持安静 5 分钟，坐姿端正，手臂与心脏同高</string>
+    <string name="entry_button_start">开始</string>
+
+    <!-- Family V3 - Extended -->
+    <string name="family_title_family">家人</string>
+    <string name="family_subtitle">联系家人，共享健康数据</string>
+    <string name="family_button_add">添加</string>
+    <string name="family_quick_contacts_title">快捷联系</string>
+    <string name="family_voice_call">语音通话</string>
+    <string name="family_video_call">视频通话</string>
+    <string name="family_send_message">发送消息</string>
+    <string name="family_list_title">家人列表</string>
+    <string name="family_empty_title">暂无家人</string>
+    <string name="family_empty_desc">点击右上角添加家人，方便随时联系</string>
+    <string name="family_health_share_title">家庭健康共享</string>
+    <string name="family_health_share_desc">邀请家人加入，共享健康数据，一起守护老人健康</string>
+
+    <!-- Guardian V3 - Extended -->
+    <string name="guardian_title_settings">守护设置</string>
+    <string name="guardian_subtitle">设置紧急联系人和守护功能，保障老人安全</string>
+    <string name="guardian_sos_banner_title">SOS 紧急呼救</string>
+    <string name="guardian_sos_banner_desc">一键呼叫紧急联系人，同时发送位置信息</string>
+    <string name="guardian_features_title">守护功能</string>
+    <string name="guardian_feature_abnormal_hr">异常心率提醒</string>
+    <string name="guardian_feature_abnormal_hr_desc">心率异常时自动通知家人</string>
+    <string name="guardian_feature_location">位置共享</string>
+    <string name="guardian_feature_location_desc">实时共享位置给紧急联系人</string>
+    <string name="guardian_feature_fall">跌倒检测</string>
+    <string name="guardian_feature_fall_desc">检测到跌倒时自动呼救</string>
+    <string name="guardian_feature_medication">用药提醒</string>
+    <string name="guardian_feature_medication_desc">定时提醒老人服药</string>
+    <string name="guardian_contacts_title">紧急联系人</string>
+    <string name="guardian_contacts_empty_title">暂无紧急联系人</string>
+    <string name="guardian_contacts_empty_desc">点击右上角添加紧急联系人</string>
+    <string name="guardian_contacts_role">紧急联系人</string>
+    <string name="guardian_notify_title">通知方式</string>
+    <string name="guardian_notify_phone">电话通知</string>
+    <string name="guardian_notify_phone_desc">紧急情况直接拨打电话</string>
+    <string name="guardian_notify_sms">短信通知</string>
+    <string name="guardian_notify_sms_desc">发送短信通知紧急联系人</string>
+    <string name="guardian_notify_app">APP 推送</string>
+    <string name="guardian_notify_app_desc">通过 APP 推送通知</string>
+
+    <!-- Medical V3 - Extended -->
+    <string name="medical_title_health">医疗健康</string>
+    <string name="medical_subtitle">用药提醒、就诊记录、健康知识</string>
+    <string name="medical_today_taken">2/3 已服用</string>
+    <string name="medical_reminders_title">用药提醒</string>
+    <string name="medical_button_add">添加</string>
+    <string name="medical_features_title">快捷功能</string>
+    <string name="medical_feature_visits">就诊记录</string>
+    <string name="medical_feature_visits_desc">查看历史就诊记录</string>
+    <string name="medical_feature_records">医疗档案</string>
+    <string name="medical_feature_records_desc">管理个人医疗档案</string>
+    <string name="medical_feature_knowledge">健康知识</string>
+    <string name="medical_feature_knowledge_desc">学习健康养生知识</string>
+    <string name="medical_feature_followup">复诊提醒</string>
+    <string name="medical_feature_followup_desc">设置复诊提醒</string>
+    <string name="medical_taken">已服用</string>
+    <string name="medical_button_take">服用</string>
+    <string name="medical_safety_tip">用药安全提示</string>
+    <string name="medical_safety_tip_desc">请遵医嘱按时服药，如有不适请及时就医</string>
+
+    <!-- Workout V3 - Extended -->
+    <string name="workout_subtitle">记录运动数据，保持健康活力</string>
+    <string name="workout_unit_steps">步</string>
+    <string name="workout_unit_minutes">分钟</string>
+    <string name="workout_recent_title">最近运动</string>
+    <string name="workout_goal_title">运动目标</string>
+    <string name="workout_goal_desc">每天运动 30 分钟，保持健康活力</string>
+    <string name="workout_button_stop">停止</string>
+    <string name="workout_button_start">开始</string>
+
+    <!-- SOS V3 - Extended -->
+    <string name="sos_subtitle_one_tap">一键呼叫紧急联系人</string>
+    <string name="sos_button_call_120">拨打 120</string>
+    <string name="sos_button_call_family">联系家人</string>
+    <string name="sos_button_send_sms">发送短信</string>
+    <string name="sos_contacts_title">紧急联系人</string>
+    <string name="sos_contacts_empty">暂无紧急联系人，请在设置中添加</string>
+    <string name="sos_notes_title">注意事项</string>
+    <string name="sos_notes_content">• 紧急情况下请保持冷静\n• 呼救时说明位置和情况\n• 等待救援时不要随意移动</string>
+
+    <!-- PPG Measure - Extended -->
+    <string name="ppg_title">摄像头脉搏实测（PPG 光电容积波）</string>
+    <string name="ppg_description">原理：指尖盖住后置摄像头，闪光灯穿透指尖；每次心跳都会微弱改变透光强度。逐帧提取红色通道信号，经去趋势滤波、自适应峰值检测与心跳间期统计，算出心率与 HRV(RMSSD)。这是真实的光学测量，不是模拟。</string>
+    <string name="ppg_button_start">开始 %d 秒实测</string>
+    <string name="ppg_measuring">采集中</string>
+    <string name="ppg_guide_finger">指尖完全盖住\n后置摄像头</string>
+    <string name="ppg_guide_flashlight">闪光灯已点亮 · 保持不动</string>
+    <string name="ppg_countdown">%d 秒后自动出结果 · %s</string>
+    <string name="ppg_error_no_permission">未授予相机权限，无法进行光学测量。请到系统设置里允许本应用使用相机。</string>
+    <string name="ppg_error_no_back_camera">没有后置摄像头</string>
+    <string name="ppg_error_config_failed">相机会话配置失败</string>
+    <string name="ppg_error_session_failed">会话创建失败：%s</string>
+    <string name="ppg_error_camera_code">相机错误(code=%d)</string>
+    <string name="ppg_error_open_failed">相机打开失败：%s</string>
+    <string name="ppg_result_insufficient">信号不足，无法给出结果。请确认指尖完全盖住镜头（不要漏光）、手不要抖，然后重试。</string>
+    <string name="ppg_result_low_confidence">本次置信度只有 %d%%（检出 %d 拍），不足以采信，请重测一次并保持全程静止。</string>
+    <string name="ppg_result_format">实测心率 %d 次/分 · 检出 %d 拍 · 置信度 %d%% · HRV(RMSSD) %d ms · 压力估算 %d 分（%s）</string>
+    <string name="ppg_result_saved">已自动保存到心率与压力记录，首页风险评估随之更新</string>
+
+    <!-- 新增 i18n 字符串 -->
+    <string name="dashboard_content_description_health_safety">健康安全</string>
+    <string name="ai_unit_steps">步</string>
+    <string name="report_title_health">健康报告</string>
+    <string name="report_overall_health">整体健康状况良好，继续保持</string>
+    <string name="report_overview">指标概览</string>
+    <string name="report_export_subtitle">导出 PDF / JSON 格式，方便就医时提供给医生</string>
+    <string name="report_ai_analysis_subtitle">智能分析健康趋势，提供个性化建议</string>
+    <string name="workout_title_tracking">运动追踪</string>
+    <string name="workout_subtitle_record">记录运动数据，保持健康活力</string>
+    <string name="workout_unit_minutes_count">%d分钟</string>
+    <string name="workout_content_description_stop">停止</string>
+    <string name="workout_content_description_start">开始</string>
+    <string name="workout_recent_workouts">最近运动</string>
+    <string name="workout_goal_activity">每天运动 30 分钟，保持健康活力</string>
+    <string name="sos_title_emergency">紧急呼救</string>
+    <string name="sos_notes_important">注意事项</string>
+    <string name="sos_notes_detail">• 紧急情况下请保持冷静\n• 呼救时说明位置和情况\n• 等待救援时不要随意移动</string>
+    <string name="medical_name_aspirin">阿司匹林</string>
+    <string name="medical_dosage_100mg">100mg</string>
+    <string name="medical_time_morning_8">每天早上 8:00</string>
+    <string name="medical_taken_status">2/3 已服用</string>
+    <string name="medical_name_blood_pressure">降压药</string>
+    <string name="medical_dosage_5mg">5mg</string>
+    <string name="medical_time_evening_8">每天晚上 20:00</string>
+    <string name="medical_name_calcium">钙片</string>
+    <string name="medical_dosage_500mg">500mg</string>
+    <string name="medical_time_noon_12">每天中午 12:00</string>
+    <string name="medical_feature_visit_records">就诊记录</string>
+    <string name="medical_feature_visit_records_desc">查看历史就诊记录</string>
+    <string name="medical_feature_medical_records">医疗档案</string>
+    <string name="medical_feature_medical_records_desc">管理个人医疗档案</string>
+    <string name="medical_feature_health_knowledge">健康知识</string>
+    <string name="medical_feature_health_knowledge_desc">学习健康养生知识</string>
+    <string name="medical_feature_followup_reminder">复诊提醒</string>
+    <string name="medical_feature_followup_reminder_desc">设置复诊提醒</string>
+    <string name="medical_taken_label">已服用</string>
+    <string name="medical_take_label">服用</string>
+    <string name="more_title_functions">更多功能</string>
+    <string name="more_subtitle_desc">设置、数据管理、关于应用</string>
+    <string name="more_data_export">导出数据</string>
+    <string name="more_data_export_desc">导出健康数据为 JSON/PDF</string>
+    <string name="more_data_import">导入数据</string>
+    <string name="more_data_import_desc">从备份文件导入健康数据</string>
+    <string name="more_personalization">个性化</string>
+    <string name="more_dark_mode_desc">切换深色/浅色主题</string>
+    <string name="more_notifications_desc">接收健康提醒和通知</string>
+    <string name="more_theme_desc">选择喜欢的主题配色方案</string>
+    <string name="more_language_desc">选择应用显示语言</string>
+    <string name="more_security_privacy">安全与隐私</string>
+    <string name="more_privacy_desc">管理数据收集和使用权限</string>
+    <string name="more_app_lock_desc">设置应用启动密码保护</string>
+    <string name="more_about_title">关于</string>
+    <string name="more_about_app">关于应用</string>
+    <string name="more_about_app_desc">Silema · Are You Dead Yet? v3.0</string>
+    <string name="more_rate_us">给我们评分</string>
+    <string name="more_rate_us_desc">在应用商店评价我们</string>
+    <string name="more_logout_subtitle">退出当前账号，清除本地缓存</string>
+    <string name="family_member_default_relation">家人</string>
+    <string name="guardian_default_relation">紧急联系人</string>
+    <string name="common_step">步</string>
+    <string name="common_minutes_format">%d分钟</string>
+    <string name="ppg_title_camera">摄像头脉搏实测（PPG 光电容积波）</string>
+    <string name="ppg_guide_finger_cover">指尖完全盖住\n后置摄像头</string>
+    <string name="ppg_guide_flashlight_on">闪光灯已点亮 · 保持不动</string>
+    <string name="ppg_countdown_format">%d 秒后自动出结果 · %s</string>
+    <string name="ppg_error_no_permission_msg">未授予相机权限，无法进行光学测量。请到系统设置里允许本应用使用相机。</string>
+    <string name="ppg_error_no_back_camera_msg">没有后置摄像头</string>
+    <string name="ppg_error_config_failed_msg">相机会话配置失败</string>
+    <string name="ppg_error_session_failed_msg">会话创建失败：%s</string>
+    <string name="ppg_error_camera_code_msg">相机错误(code=%d)</string>
+    <string name="ppg_error_open_failed_msg">相机打开失败：%s</string>
+    <string name="ppg_result_insufficient_msg">信号不足，无法给出结果。请确认指尖完全盖住镜头（不要漏光）、手不要抖，然后重试。</string>
+    <string name="ppg_result_low_confidence_msg">本次置信度只有 %d%%（检出 %d 拍），不足以采信，请重测一次并保持全程静止。</string>
+    <string name="ppg_result_format_detail">实测心率 %d 次/分 · 检出 %d 拍 · 置信度 %d%% · HRV(RMSSD) %d ms · 压力估算 %d 分（%s）</string>
+    <string name="ppg_result_saved_msg">已自动保存到心率与压力记录，首页风险评估随之更新</string>
 </resources>

@@ -25,7 +25,10 @@ interface VitalRecordDao {
      * 查询指定类型、指定时间范围内是否存在记录（用于去重判断）。
      */
     @Query(
-        "SELECT COUNT(*) FROM vital_records WHERE typeId = :typeId AND timestampMillis BETWEEN :fromMillis AND :toMillis",
+        """
+        SELECT COUNT(*) FROM vital_records
+        WHERE typeId = :typeId AND timestampMillis BETWEEN :fromMillis AND :toMillis
+        """,
     )
     suspend fun countInRange(
         typeId: String,

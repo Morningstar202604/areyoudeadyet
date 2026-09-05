@@ -16,7 +16,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Sos
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -33,6 +35,7 @@ import androidx.wear.compose.material.ButtonDefaults
 import androidx.wear.compose.material.Icon
 import androidx.wear.compose.material.MaterialTheme
 import androidx.wear.compose.material.Text
+import kotlinx.coroutines.delay
 
 /**
  * 手表端 SOS 紧急呼救屏幕 V3。
@@ -44,9 +47,22 @@ import androidx.wear.compose.material.Text
 fun WearSosScreenV3(
     onSosTriggered: () -> Unit = {},
     onCancel: () -> Unit = {},
+    onBack: () -> Unit = {},
 ) {
-    var countdown by remember { mutableStateOf(3) }
+    var countdown by remember { mutableIntStateOf(3) }
     var isCounting by remember { mutableStateOf(false) }
+
+    LaunchedEffect(isCounting) {
+        if (isCounting) {
+            countdown = 3
+            delay(1000L)
+            countdown = 2
+            delay(1000L)
+            countdown = 1
+            delay(1000L)
+            onSosTriggered()
+        }
+    }
 
     Box(
         modifier =
@@ -119,7 +135,6 @@ fun WearSosScreenV3(
                         onSosTriggered()
                     } else {
                         isCounting = true
-                        // 简单的倒计时逻辑
                     }
                 },
                 modifier =
@@ -159,7 +174,7 @@ fun WearSosScreenV3(
                     modifier =
                         Modifier
                             .fillMaxWidth()
-                            .height(40.dp),
+                            .height(48.dp),
                     colors =
                         ButtonDefaults.buttonColors(
                             backgroundColor = Color.White.copy(alpha = 0.2f),

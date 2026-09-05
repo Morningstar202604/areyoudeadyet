@@ -33,8 +33,10 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import com.silema.app.R
 import com.silema.app.data.Contact
 import com.silema.app.store.rememberAppRepository
 import com.silema.app.ui.components.GlassCard
@@ -43,10 +45,11 @@ import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandWarm
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
-import com.silema.app.ui.theme.CardGradientPurple
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
+import com.silema.app.ui.theme.cardGradientPurple
 
 /**
  * 家人屏幕 V3 — 现代健康活力风。
@@ -55,6 +58,7 @@ import com.silema.app.ui.theme.CardGradientPurple
  */
 @Composable
 fun FamilyScreenV3(onClose: () -> Unit = {}) {
+    val themeColors = LocalSilemaThemeColors.current
     val repository = rememberAppRepository()
     val contacts by repository.contacts.collectAsState(initial = emptyList())
 
@@ -63,9 +67,7 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -81,20 +83,24 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
             ) {
                 Column {
                     Text(
-                        text = "家人",
+                        text = stringResource(R.string.family_title_family),
                         style = MaterialTheme.typography.headlineMedium,
                         fontWeight = FontWeight.Bold,
                         color = MaterialTheme.colorScheme.onBackground,
                     )
                     Text(
-                        text = "联系家人，共享健康数据",
+                        text = stringResource(R.string.family_subtitle),
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
                 OutlinedButton(onClick = { /* 添加家人 */ }) {
                     Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(16.dp))
-                    Text("添加", style = MaterialTheme.typography.labelMedium, modifier = Modifier.padding(start = 4.dp))
+                    Text(
+                        stringResource(R.string.family_button_add),
+                        style = MaterialTheme.typography.labelMedium,
+                        modifier = Modifier.padding(start = 4.dp),
+                    )
                 }
             }
         }
@@ -121,19 +127,19 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
                         icon = Icons.Default.Phone,
                         label = "语音通话",
                         color = BrandGreen,
-                        gradient = CardGradientGreen,
+                        gradient = cardGradientGreen(),
                     )
                     QuickContactItem(
                         icon = Icons.Default.VideoCall,
                         label = "视频通话",
                         color = BrandBlue,
-                        gradient = CardGradientBlue,
+                        gradient = cardGradientBlue(),
                     )
                     QuickContactItem(
                         icon = Icons.Default.Message,
                         label = "发送消息",
                         color = BrandWarm,
-                        gradient = CardGradientOrange,
+                        gradient = cardGradientOrange(),
                     )
                 }
             }
@@ -192,7 +198,7 @@ fun FamilyScreenV3(onClose: () -> Unit = {}) {
             GradientBanner(
                 title = "家庭健康共享",
                 subtitle = "邀请家人加入，共享健康数据，一起守护老人健康",
-                gradientColors = CardGradientPurple,
+                gradientColors = cardGradientPurple(),
                 icon = Icons.Default.Favorite,
             )
         }
@@ -237,7 +243,7 @@ private fun QuickContactItem(
  */
 @Composable
 private fun FamilyMemberCard(contact: Contact) {
-    val gradients = listOf(CardGradientBlue, CardGradientGreen, CardGradientOrange, CardGradientPurple)
+    val gradients = listOf(cardGradientBlue(), cardGradientGreen(), cardGradientOrange(), cardGradientPurple())
     val gradient = gradients[contact.name.length % gradients.size]
 
     GlassCard {
@@ -258,7 +264,7 @@ private fun FamilyMemberCard(contact: Contact) {
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = contact.name.first().toString(),
+                    text = contact.name.firstOrNull()?.toString() ?: "?",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,

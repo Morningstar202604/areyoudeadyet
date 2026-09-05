@@ -46,11 +46,12 @@ import com.silema.app.ui.components.GlassCard
 import com.silema.app.ui.components.GradientBanner
 import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.theme.AppSpacing
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
-import com.silema.app.ui.theme.CardGradientPurple
-import com.silema.app.ui.theme.CardGradientRed
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
+import com.silema.app.ui.theme.cardGradientPurple
+import com.silema.app.ui.theme.cardGradientRed
 
 /**
  * 更多功能屏幕 V3 — 现代健康活力风。
@@ -59,6 +60,7 @@ import com.silema.app.ui.theme.CardGradientRed
  */
 @Composable
 fun MoreScreenV3(onClose: () -> Unit = {}) {
+    val themeColors = LocalSilemaThemeColors.current
     var darkMode by remember { mutableStateOf(false) }
     var notifications by remember { mutableStateOf(true) }
 
@@ -67,9 +69,7 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -103,8 +103,8 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
 
             val dataItems =
                 listOf(
-                    GradientItem("导出数据", "导出健康数据为 JSON/PDF", Icons.Default.CloudDownload, CardGradientGreen),
-                    GradientItem("导入数据", "从备份文件导入健康数据", Icons.Default.CloudUpload, CardGradientBlue),
+                    GradientItem("导出数据", "导出健康数据为 JSON/PDF", Icons.Default.CloudDownload, cardGradientGreen()),
+                    GradientItem("导入数据", "从备份文件导入健康数据", Icons.Default.CloudUpload, cardGradientBlue()),
                 )
 
             dataItems.forEach { (name, desc, icon, gradient) ->
@@ -134,7 +134,7 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
                         name = "深色模式",
                         description = "切换深色/浅色主题",
                         icon = Icons.Default.DarkMode,
-                        gradient = CardGradientPurple,
+                        gradient = cardGradientPurple(),
                         checked = darkMode,
                         onCheckedChange = { darkMode = it },
                     )
@@ -142,7 +142,7 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
                         name = "消息通知",
                         description = "接收健康提醒和通知",
                         icon = Icons.Default.Notifications,
-                        gradient = CardGradientOrange,
+                        gradient = cardGradientOrange(),
                         checked = notifications,
                         onCheckedChange = { notifications = it },
                     )
@@ -150,13 +150,13 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
                         name = "主题配色",
                         description = "选择喜欢的主题配色方案",
                         icon = Icons.Default.Palette,
-                        gradient = CardGradientGreen,
+                        gradient = cardGradientGreen(),
                     )
                     SettingItem(
                         name = "语言设置",
                         description = "选择应用显示语言",
                         icon = Icons.Default.Language,
-                        gradient = CardGradientBlue,
+                        gradient = cardGradientBlue(),
                     )
                 }
             }
@@ -174,8 +174,8 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
 
             val securityItems =
                 listOf(
-                    GradientItem("隐私设置", "管理数据收集和使用权限", Icons.Default.Security, CardGradientRed),
-                    GradientItem("应用锁", "设置应用启动密码保护", Icons.Default.Lock, CardGradientOrange),
+                    GradientItem("隐私设置", "管理数据收集和使用权限", Icons.Default.Security, cardGradientRed()),
+                    GradientItem("应用锁", "设置应用启动密码保护", Icons.Default.Lock, cardGradientOrange()),
                 )
 
             securityItems.forEach { (name, desc, icon, gradient) ->
@@ -201,8 +201,8 @@ fun MoreScreenV3(onClose: () -> Unit = {}) {
 
             val aboutItems =
                 listOf(
-                    GradientItem("关于应用", "Silema · Are You Dead Yet? v3.0", Icons.Default.Info, CardGradientBlue),
-                    GradientItem("给我们评分", "在应用商店评价我们", Icons.Default.Star, CardGradientOrange),
+                    GradientItem("关于应用", "Silema · Are You Dead Yet? v3.0", Icons.Default.Info, cardGradientBlue()),
+                    GradientItem("给我们评分", "在应用商店评价我们", Icons.Default.Star, cardGradientOrange()),
                 )
 
             aboutItems.forEach { (name, desc, icon, gradient) ->

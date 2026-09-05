@@ -11,17 +11,16 @@ import java.util.Locale
  * For full PDF generation, companies can integrate iText or Android PdfDocument.
  */
 object PdfReportGenerator {
-    
     fun generateWeeklyReport(
         records: List<VitalRecord>,
         patientName: String = "老人",
-        reportTitle: String = "周度健康报告"
+        reportTitle: String = "周度健康报告",
     ): String {
         val sb = StringBuilder()
         val now = System.currentTimeMillis()
         val weekAgo = now - 7 * 86400000L
         val weekRecords = records.filter { it.timestampMillis >= weekAgo }
-        
+
         sb.appendLine("╔══════════════════════════════════════╗")
         sb.appendLine("║         $reportTitle              ║")
         sb.appendLine("╠══════════════════════════════════════╣")
@@ -30,7 +29,7 @@ object PdfReportGenerator {
         sb.appendLine("║ 记录总数: ${weekRecords.size} 条")
         sb.appendLine("╚══════════════════════════════════════╝")
         sb.appendLine()
-        
+
         VitalType.entries.filter { it != VitalType.STRESS }.forEach { type ->
             val typeRecords = weekRecords.filter { it.typeId == type.id }.sortedByDescending { it.timestampMillis }
             if (typeRecords.isNotEmpty()) {
@@ -46,17 +45,18 @@ object PdfReportGenerator {
                 if (typeRecords.size >= 3) {
                     val recent = values.take(3).average()
                     val older = values.takeLast(3).average()
-                    val trend = when {
-                        recent > older * 1.1 -> "↑ 上升趋势"
-                        recent < older * 0.9 -> "↓ 下降趋势"
-                        else -> "→ 稳定"
-                    }
+                    val trend =
+                        when {
+                            recent > older * 1.1 -> "↑ 上升趋势"
+                            recent < older * 0.9 -> "↓ 下降趋势"
+                            else -> "→ 稳定"
+                        }
                     sb.appendLine("  趋势: $trend")
                 }
                 sb.appendLine()
             }
         }
-        
+
         sb.appendLine("───────────────────────────────────────")
         sb.appendLine("⚠️ 免责声明：本报告基于采集数据自动生成，")
         sb.appendLine("   仅供参考，不构成医疗诊断或治疗建议。")
@@ -64,11 +64,9 @@ object PdfReportGenerator {
         sb.appendLine("───────────────────────────────────────")
         sb.appendLine("报告生成时间: ${formatDate(now)}")
         sb.appendLine("导出工具: 家庭健康监测（数据仅供参考）")
-        
+
         return sb.toString()
     }
-    
-    private fun formatDate(millis: Long): String {
-        return SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(millis))
-    }
+
+    private fun formatDate(millis: Long): String = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date(millis))
 }

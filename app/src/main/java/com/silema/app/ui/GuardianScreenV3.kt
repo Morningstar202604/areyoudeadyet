@@ -46,10 +46,11 @@ import com.silema.app.ui.theme.BrandBlue
 import com.silema.app.ui.theme.BrandGreen
 import com.silema.app.ui.theme.BrandPurple
 import com.silema.app.ui.theme.BrandWarm
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientRed
-import com.silema.app.ui.theme.SosGradient
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientRed
+import com.silema.app.ui.theme.sosGradient
 
 /**
  * 守护屏幕 V3 — 现代健康活力风。
@@ -62,6 +63,7 @@ fun GuardianScreenV3(
     onAddContact: () -> Unit = {},
     onClose: () -> Unit = {},
 ) {
+    val themeColors = LocalSilemaThemeColors.current
     val repository = rememberAppRepository()
     val savedContacts by repository.contacts.collectAsState(initial = emptyList())
     val allContacts = contacts.ifEmpty { savedContacts }
@@ -71,9 +73,7 @@ fun GuardianScreenV3(
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -100,7 +100,7 @@ fun GuardianScreenV3(
             GradientBanner(
                 title = "SOS 紧急呼救",
                 subtitle = "一键呼叫紧急联系人，同时发送位置信息",
-                gradientColors = SosGradient,
+                gradientColors = sosGradient(),
                 icon = Icons.Default.Phone,
             )
         }
@@ -203,9 +203,9 @@ fun GuardianScreenV3(
 
             val notifyMethods =
                 listOf(
-                    GradientItem("电话通知", "紧急情况直接拨打电话", Icons.Default.Phone, CardGradientRed),
-                    GradientItem("短信通知", "发送短信通知紧急联系人", Icons.Default.Sms, CardGradientBlue),
-                    GradientItem("APP 推送", "通过 APP 推送通知", Icons.Default.Notifications, CardGradientGreen),
+                    GradientItem("电话通知", "紧急情况直接拨打电话", Icons.Default.Phone, cardGradientRed()),
+                    GradientItem("短信通知", "发送短信通知紧急联系人", Icons.Default.Sms, cardGradientBlue()),
+                    GradientItem("APP 推送", "通过 APP 推送通知", Icons.Default.Notifications, cardGradientGreen()),
                 )
 
             notifyMethods.forEach { (name, desc, icon, gradient) ->
@@ -292,11 +292,11 @@ private fun ContactCard(contact: Contact) {
                     Modifier
                         .size(48.dp)
                         .clip(CircleShape)
-                        .background(Brush.horizontalGradient(CardGradientBlue)),
+                        .background(Brush.horizontalGradient(cardGradientBlue())),
                 contentAlignment = Alignment.Center,
             ) {
                 Text(
-                    text = contact.name.first().toString(),
+                    text = contact.name.firstOrNull()?.toString() ?: "?",
                     style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White,

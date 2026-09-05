@@ -13,8 +13,6 @@ import com.silema.app.db.entity.WorkoutEntity
  * 单独放一个文件，避免 Repository 里散落转换逻辑。
  */
 
-// ---------- VitalRecord ----------
-
 fun VitalRecordEntity.toDomain(): VitalRecord =
     VitalRecord(
         typeId = typeId,

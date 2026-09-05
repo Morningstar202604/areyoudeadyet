@@ -41,10 +41,11 @@ import com.silema.app.ui.components.GradientItem
 import com.silema.app.ui.components.MedicationItem
 import com.silema.app.ui.theme.AppSpacing
 import com.silema.app.ui.theme.BrandGreen
-import com.silema.app.ui.theme.CardGradientBlue
-import com.silema.app.ui.theme.CardGradientGreen
-import com.silema.app.ui.theme.CardGradientOrange
-import com.silema.app.ui.theme.CardGradientPurple
+import com.silema.app.ui.theme.LocalSilemaThemeColors
+import com.silema.app.ui.theme.cardGradientBlue
+import com.silema.app.ui.theme.cardGradientGreen
+import com.silema.app.ui.theme.cardGradientOrange
+import com.silema.app.ui.theme.cardGradientPurple
 
 /**
  * 医疗/用药屏幕 V3 — 现代健康活力风。
@@ -53,6 +54,7 @@ import com.silema.app.ui.theme.CardGradientPurple
  */
 @Composable
 fun MedicalScreenV3(onClose: () -> Unit = {}) {
+    val themeColors = LocalSilemaThemeColors.current
     // 示例用药数据
     val medications =
         listOf(
@@ -66,9 +68,7 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
             Modifier
                 .fillMaxSize()
                 .background(
-                    Brush.verticalGradient(
-                        listOf(Color(0xFFF1F8E9), Color(0xFFE8F5E9), Color(0xFFFFFFFF)),
-                    ),
+                    Brush.verticalGradient(themeColors.backgroundGradient),
                 ).padding(horizontal = AppSpacing.screenPad),
         verticalArrangement = Arrangement.spacedBy(AppSpacing.lg),
         contentPadding =
@@ -141,7 +141,7 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
                                     .fillMaxWidth(0.67f)
                                     .height(8.dp)
                                     .clip(CircleShape)
-                                    .background(Brush.horizontalGradient(CardGradientGreen)),
+                                    .background(Brush.horizontalGradient(cardGradientGreen())),
                         )
                     }
                 }
@@ -191,10 +191,10 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
 
             val features =
                 listOf(
-                    GradientItem("就诊记录", "查看历史就诊记录", Icons.Default.LocalHospital, CardGradientBlue),
-                    GradientItem("医疗档案", "管理个人医疗档案", Icons.Default.MedicalServices, CardGradientPurple),
-                    GradientItem("健康知识", "学习健康养生知识", Icons.Default.LocalPharmacy, CardGradientGreen),
-                    GradientItem("复诊提醒", "设置复诊提醒", Icons.Default.Schedule, CardGradientOrange),
+                    GradientItem("就诊记录", "查看历史就诊记录", Icons.Default.LocalHospital, cardGradientBlue()),
+                    GradientItem("医疗档案", "管理个人医疗档案", Icons.Default.MedicalServices, cardGradientPurple()),
+                    GradientItem("健康知识", "学习健康养生知识", Icons.Default.LocalPharmacy, cardGradientGreen()),
+                    GradientItem("复诊提醒", "设置复诊提醒", Icons.Default.Schedule, cardGradientOrange()),
                 )
 
             features.forEach { (name, desc, icon, gradient) ->
@@ -213,7 +213,7 @@ fun MedicalScreenV3(onClose: () -> Unit = {}) {
             GradientBanner(
                 title = "用药安全提示",
                 subtitle = "请遵医嘱按时服药，如有不适请及时就医",
-                gradientColors = CardGradientOrange,
+                gradientColors = cardGradientOrange(),
                 icon = Icons.Default.Notifications,
             )
         }
@@ -246,9 +246,9 @@ private fun MedicationCard(
                         .clip(CircleShape)
                         .background(
                             if (isTaken) {
-                                Brush.horizontalGradient(CardGradientGreen)
+                                Brush.horizontalGradient(cardGradientGreen())
                             } else {
-                                Brush.horizontalGradient(CardGradientOrange)
+                                Brush.horizontalGradient(cardGradientOrange())
                             },
                         ),
                 contentAlignment = Alignment.Center,
