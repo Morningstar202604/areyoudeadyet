@@ -11,7 +11,7 @@
 [![Release](https://img.shields.io/github/v/release/Morningstar202604/areyoudeadyet?color=B71C1C&label=Release)](https://github.com/Morningstar202604/areyoudeadyet/releases)
 [![Platform](https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android&logoColor=white)](https://developer.android.com)
 [![Wear OS](https://img.shields.io/badge/Wear%20OS-4.0%2B-4285F4?logo=wearos&logoColor=white)](https://developer.android.com/wear)
-[![Kotlin](https://img.shields.io/badge/Kotlin-2.0.21-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
+[![Kotlin](https://img.shields.io/badge/Kotlin-2.1.20-7F52FF?logo=kotlin&logoColor=white)](https://kotlinlang.org)
 [![Jetpack Compose](https://img.shields.io/badge/Jetpack%20Compose-Material%203-4285F4?logo=android&logoColor=white)](https://developer.android.com/jetpack/compose)
 [![License](https://img.shields.io/github/license/Morningstar202604/areyoudeadyet?color=blue)](LICENSE)
 [![Stars](https://img.shields.io/github/stars/Morningstar202604/areyoudeadyet?style=social)](https://github.com/Morningstar202604/areyoudeadyet/stargazers)
@@ -19,7 +19,7 @@
 *No more vague "drink water, sleep early" advice — we warn you when it's dangerous and tell you exactly what to do.*  
 *拒绝「多喝水早睡觉」式空泛建议 —— 有危险就大声警告，并告诉你现在该做什么。*
 
-**[Download Latest APK](https://github.com/Morningstar202604/areyoudeadyet/releases/latest)** · [中文文档](#chinese) · [日本語](#japanese) · [Algorithm Details](#algorithms--models) · [Remote Setup](docs/remote-setup.md) · [Contribute](#contributing)
+**[Download Latest APK](https://github.com/Morningstar202604/areyoudeadyet/releases/latest)** · [中文文档](#chinese) · [日本語](#japanese) · [Algorithm Details](#algorithms--models--算法与模型) · [Remote Setup](docs/remote-setup.md) · [Contribute](#contributing)
 
 <img src="docs/images/banner.png" width="720" alt="Silema Banner"/>
 
@@ -303,7 +303,7 @@ This app provides health-management reference based on publicly available medica
 
 ---
 
-## 🏗️ 工程化改进（v3.0）
+## 工程化改进
 
 ### 架构升级
 - **Room 数据库** — 替代 JSON 文件存储，类型安全、查询高效
@@ -361,37 +361,9 @@ This app provides health-management reference based on publicly available medica
 
 ---
 
-## 📋 更新日志
-
-### v3.0.0（2026-09-01）
-**全新 UI 设计系统 v3**
-- 薄荷绿+活力橙+深邃蓝全新配色
-- 玻璃拟态卡片、渐变背景、进度环数据展示
-- 全部 10 个手机端屏幕重构
-- 4 个手表端屏幕重构（首页/SOS/运动/设置）
-- 华为手表适配工具类
-- 数据可视化图表组件（趋势图/柱状图）
-
-**工程化全面升级**
-- Room 数据库替代 JSON 存储
-- Hilt 依赖注入重构
-- ViewModel 架构（5 个 ViewModel）
-- JUnit 4 测试体系（27+ 测试用例）
-- R8 混淆、Timber 日志、ktlint 检查
-- CI 流水线完善、Gradle 缓存优化
-- 数据导出/导入功能
-
-### v2.0.0（历史版本）
-- 初始版本发布
-- 基础健康监测功能
-- Wear OS 手表端支持
-- PPG 相机心率测量
-
----
-
 <div align="center">
 
-**Made with ❤️ for elderly care** · [GitHub](https://github.com/Morningstar202604/areyoudeadyet) · [Gitee](https://gitee.com/badhope/areyoudeadyet) · [GitCode](https://gitcode.com/badhope/areyoudeadyet) · [Issues](https://github.com/Morningstar202604/areyoudeadyet/issues) · [Releases](https://github.com/Morningstar202604/areyoudeadyet/releases)
+**Made with ❤️ for elderly care** · [GitHub](https://github.com/Morningstar202604/areyoudeadyet) · [Issues](https://github.com/Morningstar202604/areyoudeadyet/issues) · [Releases](https://github.com/Morningstar202604/areyoudeadyet/releases)
 
 **Keywords:** elderly health monitor, senior care app, wearable health tracker, blood pressure warning, heart rate monitoring, SOS emergency button, FHIR R4 export, Bluetooth medical devices, PPG heart rate, Health Connect sync, offline health app, pluggable backend, Android Wear OS, Jetpack Compose, Kotlin multiplatform, medical alert system, caregiver dashboard, vital signs tracker, health risk assessment, senior safety app, Chinese health app, 老人健康监测, 血压预警, 心率监测, SOS求救, FHIR导出, 蓝牙医疗设备, 可穿戴健康, 离线健康应用
 
